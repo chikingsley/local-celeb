@@ -20,7 +20,9 @@
       "Bash(poetry install:*)",
       "Bash(ffprobe:*)",
       "WebFetch(domain:huggingface.co)",
-      "Bash(whisperkit-cli:*)"
+      "Bash(whisperkit-cli:*)",
+      "Bash(uv run:*)",
+      "Bash(uv add:*)"
     ],
     "deny": []
   }
