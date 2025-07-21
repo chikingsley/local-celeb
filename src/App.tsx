@@ -3,6 +3,7 @@ import { Button } from "./components/ui/button";
 import { Upload, Download, Play, Pause } from 'lucide-react';
 import { readTextFile } from '@tauri-apps/plugin-fs';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import { convertFileSrc } from '@tauri-apps/api/core';
 import { TranscriptionData } from './types/transcription';
 import "./App.css";
 
@@ -44,8 +45,11 @@ function App() {
       const filePath = selected as string;
       
       if (filePath.endsWith('.mp3') || filePath.endsWith('.wav')) {
-        // Audio file - create file:// URL for local playback
-        setAudioUrl(`file://${filePath}`);
+        // Audio file - use convertFileSrc for proper asset URL
+        const assetUrl = convertFileSrc(filePath);
+        console.log('Original path:', filePath);
+        console.log('Converted URL:', assetUrl);
+        setAudioUrl(assetUrl);
         // Clear transcription if loading just audio
         setTranscription(null);
       } else if (filePath.endsWith('.json')) {
