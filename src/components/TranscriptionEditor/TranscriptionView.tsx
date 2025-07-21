@@ -7,6 +7,8 @@ import { useTranscriptionStore } from '../../hooks/useTranscription';
 import { TranscriptionData } from '../../types/transcription';
 import { Button } from '../ui/button';
 import { Upload, Download, PanelRightOpen, PanelRightClose } from 'lucide-react';
+import { open } from '@tauri-apps/plugin-opener';
+import { readTextFile, readFile } from '@tauri-apps/plugin-fs';
 
 interface TranscriptionViewProps {
   className?: string;
@@ -23,30 +25,45 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
   const [isLoading, setIsLoading] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    setIsLoading(true);
-    
+  const handleFileUpload = async () => {
     try {
-      // Handle audio file
-      const audioFile = Array.from(files).find(file => 
-        file.type.startsWith('audio/') || file.name.endsWith('.mp3') || file.name.endsWith('.wav')
-      );
+      setIsLoading(true);
       
-      // Handle JSON file
-      const jsonFile = Array.from(files).find(file => 
-        file.type === 'application/json' || file.name.endsWith('.json')
-      );
+      const { open: openDialog } = await import('@tauri-apps/plugin-dialog');
+      
+      // Open file dialog for multiple files
+      const selected = await openDialog({
+        multiple: true,
+        filters: [{
+          name: 'Audio and JSON files',
+          extensions: ['mp3', 'wav', 'json']
+        }]
+      });
 
-      if (audioFile) {
-        const audioObjectUrl = URL.createObjectURL(audioFile);
-        setAudioUrl(audioObjectUrl);
+      if (!selected || selected.length === 0) {
+        setIsLoading(false);
+        return;
       }
 
-      if (jsonFile) {
-        const text = await jsonFile.text();
+      // Process selected files
+      const filePaths = Array.isArray(selected) ? selected : [selected];
+      
+      // Find audio and JSON files
+      const audioPath = filePaths.find(path => 
+        path.endsWith('.mp3') || path.endsWith('.wav')
+      );
+      
+      const jsonPath = filePaths.find(path => 
+        path.endsWith('.json')
+      );
+
+      if (audioPath) {
+        // For audio files, we'll create a file:// URL for local playback
+        setAudioUrl(`file://${audioPath}`);
+      }
+
+      if (jsonPath) {
+        const text = await readTextFile(jsonPath);
         const data = JSON.parse(text) as TranscriptionData;
         
         // Convert the data to our format if needed
@@ -57,7 +74,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
             id: segment.id || `segment-${index}`,
           })),
           speakers: data.speakers || [],
-          audio_file: audioFile?.name,
+          audio_file: audioPath ? audioPath.split('/').pop() : undefined,
         };
         
         setTranscription(convertedData);
@@ -127,18 +144,9 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
         <h1 className="text-2xl font-bold text-gray-900">Transcription Editor</h1>
         
         <div className="flex items-center space-x-3">
-          <input
-            type="file"
-            id="file-upload"
-            multiple
-            accept=".mp3,.wav,.json,audio/*,application/json"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
-          
           <Button
             variant="outline"
-            onClick={() => document.getElementById('file-upload')?.click()}
+            onClick={handleFileUpload}
             disabled={isLoading}
           >
             <Upload className="h-4 w-4 mr-2" />

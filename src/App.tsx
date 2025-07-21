@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "./components/ui/button";
 import { Upload, Download, Play, Pause } from 'lucide-react';
+import { readTextFile } from '@tauri-apps/plugin-fs';
 import "./App.css";
 
 function App() {
@@ -13,8 +14,46 @@ function App() {
   const [currentTime, setCurrentTime] = useState(0);
   const [highlightedWord, setHighlightedWord] = useState(null); // {segmentIndex, wordIndex}
 
-  const testAlert = () => {
-    alert("Button works!");
+  const loadFiles = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { open: openDialog } = await import('@tauri-apps/plugin-dialog');
+      
+      // Open file dialog for single file
+      const selected = await openDialog({
+        multiple: false,
+        filters: [{
+          name: 'Audio and JSON files',
+          extensions: ['mp3', 'wav', 'json']
+        }]
+      });
+
+      if (!selected) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Process selected file
+      const filePath = selected;
+      
+      if (filePath.endsWith('.mp3') || filePath.endsWith('.wav')) {
+        // Audio file - create file:// URL for local playback
+        setAudioUrl(`file://${filePath}`);
+        // Clear transcription if loading just audio
+        setTranscription(null);
+      } else if (filePath.endsWith('.json')) {
+        // JSON file - load transcription
+        const text = await readTextFile(filePath);
+        const data = JSON.parse(text);
+        setTranscription(data);
+      }
+    } catch (error) {
+      console.error('Error loading files:', error);
+      alert('Error loading files. Please check the file format.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loadSample = async () => {
@@ -144,16 +183,28 @@ function App() {
         <h1 className="text-2xl font-bold text-gray-900">Transcription Editor</h1>
         
         <div className="flex items-center space-x-3">
-          <Button variant="outline" onClick={testAlert}>
+          <Button variant="outline" onClick={loadFiles} disabled={isLoading}>
             <Upload className="h-4 w-4 mr-2" />
             Load Files
           </Button>
 
           <Button variant="outline" onClick={loadSample} disabled={isLoading}>
-            {isLoading ? "Loading..." : "Load Sample"}
+            Load Sample
           </Button>
 
-          <Button variant="outline" onClick={testAlert}>
+          <Button variant="outline" onClick={() => {
+            if (!transcription) {
+              alert('No transcription to export');
+              return;
+            }
+            const dataStr = JSON.stringify(transcription, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', 'transcription-edited.json');
+            linkElement.click();
+          }} disabled={!transcription}>
             <Download className="h-4 w-4 mr-2" />
             Export JSON
           </Button>
@@ -162,8 +213,12 @@ function App() {
 
       {/* Content */}
       <div className="p-8">
-        <p className="text-lg">Can you see the header with 3 buttons above?</p>
-        <p className="text-sm text-gray-600 mt-2">Try clicking "Load Sample" - it should load the Scar transcription data.</p>
+        {!audioUrl && !transcription && (
+          <>
+            <p className="text-lg">Can you see the header with 3 buttons above?</p>
+            <p className="text-sm text-gray-600 mt-2">Try clicking "Load Sample" - it should load the Scar transcription data.</p>
+          </>
+        )}
         
         {audioUrl && (
           <div className="mt-6 p-4 bg-white rounded-lg border">

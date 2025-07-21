@@ -22,7 +22,10 @@
       "WebFetch(domain:huggingface.co)",
       "Bash(whisperkit-cli:*)",
       "Bash(uv run:*)",
-      "Bash(uv add:*)"
+      "Bash(uv add:*)",
+      "Bash(swift build:*)",
+      "Bash(cargo build:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

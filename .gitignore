@@ -27,3 +27,13 @@ secret_models
 stt_eval/secret_models
 stt_eval
 public
+# Ignore audio files
+*.wav
+*.mp3
+*.flac
+*.WAV
+*.MP3
+data_prep_voice_clone/output/audio/
+# docs/scar-audio/
+*.build*
+.build

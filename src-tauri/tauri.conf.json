@@ -9,6 +9,11 @@
     "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
+  "protocol": {
+    "all": true,
+    "asset": true,
+    "assetScope": ["**"]
+  },
   "app": {
     "windows": [
       {
