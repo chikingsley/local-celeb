@@ -2,23 +2,29 @@ import { useState, useEffect } from "react";
 import { Button } from "./components/ui/button";
 import { Upload, Download, Play, Pause } from 'lucide-react';
 import { readTextFile } from '@tauri-apps/plugin-fs';
+import { open as openDialog } from '@tauri-apps/plugin-dialog';
+import { TranscriptionData } from './types/transcription';
 import "./App.css";
 
+interface WordPosition {
+  segmentIndex: number;
+  wordIndex: number;
+}
+
 function App() {
-  const [transcription, setTranscription] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [audioUrl, setAudioUrl] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [editingWord, setEditingWord] = useState(null); // {segmentIndex, wordIndex}
-  const [editText, setEditText] = useState('');
-  const [currentTime, setCurrentTime] = useState(0);
-  const [highlightedWord, setHighlightedWord] = useState(null); // {segmentIndex, wordIndex}
+  const [transcription, setTranscription] = useState<TranscriptionData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [editingWord, setEditingWord] = useState<WordPosition | null>(null);
+  const [editText, setEditText] = useState<string>('');
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [highlightedWord, setHighlightedWord] = useState<WordPosition | null>(null);
 
   const loadFiles = async () => {
     try {
       setIsLoading(true);
       
-      const { open: openDialog } = await import('@tauri-apps/plugin-dialog');
       
       // Open file dialog for single file
       const selected = await openDialog({
@@ -35,7 +41,7 @@ function App() {
       }
 
       // Process selected file
-      const filePath = selected;
+      const filePath = selected as string;
       
       if (filePath.endsWith('.mp3') || filePath.endsWith('.wav')) {
         // Audio file - create file:// URL for local playback
@@ -83,7 +89,7 @@ function App() {
   };
 
   const toggleAudio = () => {
-    const audio = document.getElementById('audio-player');
+    const audio = document.getElementById('audio-player') as HTMLAudioElement | null;
     if (audio) {
       if (isPlaying) {
         audio.pause();
@@ -98,7 +104,7 @@ function App() {
   useEffect(() => {
     if (!audioUrl) return;
 
-    const audio = document.getElementById('audio-player');
+    const audio = document.getElementById('audio-player') as HTMLAudioElement | null;
     if (!audio) return;
 
     const updateTime = () => {
@@ -106,7 +112,7 @@ function App() {
       
       // Find the current word based on audio time
       if (transcription && transcription.segments) {
-        let foundWord = null;
+        let foundWord: WordPosition | null = null;
         
         for (let segmentIndex = 0; segmentIndex < transcription.segments.length; segmentIndex++) {
           const segment = transcription.segments[segmentIndex];
@@ -142,7 +148,7 @@ function App() {
     };
   }, [audioUrl, transcription]);
 
-  const startEditingWord = (segmentIndex, wordIndex, currentText) => {
+  const startEditingWord = (segmentIndex: number, wordIndex: number, currentText: string) => {
     setEditingWord({ segmentIndex, wordIndex });
     setEditText(currentText);
   };
@@ -169,8 +175,8 @@ function App() {
     setEditText('');
   };
 
-  const seekToWord = (startTime) => {
-    const audio = document.getElementById('audio-player');
+  const seekToWord = (startTime: number) => {
+    const audio = document.getElementById('audio-player') as HTMLAudioElement | null;
     if (audio) {
       audio.currentTime = startTime;
     }
