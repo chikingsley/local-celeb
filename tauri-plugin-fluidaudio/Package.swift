@@ -4,25 +4,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "tauri-plugin-whisperkit",
+    name: "tauri-plugin-fluidaudio",
     platforms: [
         .macOS(.v14),
     ],
     products: [
         .library(
-            name: "tauri-plugin-whisperkit",
+            name: "tauri-plugin-fluidaudio",
             type: .static,
-            targets: ["tauri-plugin-whisperkit"]
+            targets: ["tauri-plugin-fluidaudio"]
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/argmaxinc/WhisperKit.git", from: "0.9.4"),
+        .package(url: "https://github.com/FluidInference/FluidAudio.git", from: "0.7.9"),
     ],
     targets: [
         .target(
-            name: "tauri-plugin-whisperkit",
+            name: "tauri-plugin-fluidaudio",
             dependencies: [
-                .product(name: "WhisperKit", package: "WhisperKit"),
+                .product(name: "FluidAudio", package: "FluidAudio"),
             ],
             path: "ios/Sources"
         ),

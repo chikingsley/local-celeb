@@ -1,8 +1,8 @@
 {
-  "name": "tauri-plugin-whisperkit-api",
+  "name": "tauri-plugin-fluidaudio-api",
   "version": "0.1.0",
   "author": "You",
-  "description": "",
+  "description": "TypeScript bindings for tauri-plugin-fluidaudio",
   "type": "module",
   "types": "./dist-js/index.d.ts",
   "main": "./dist-js/index.cjs",

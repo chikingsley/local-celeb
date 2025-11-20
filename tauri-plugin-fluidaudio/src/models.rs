@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LoadModelRequest {
-    pub model_name: String,
-    pub download_if_needed: Option<bool>,
+    pub model_version: Option<String>, // "v2" or "v3"
+    pub load_diarizer: Option<bool>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
@@ -13,6 +13,7 @@ pub struct LoadModelRequest {
 pub struct LoadModelResponse {
     pub success: bool,
     pub model: String,
+    pub diarization_loaded: bool,
 }
 
 // Transcribe File
@@ -20,19 +21,26 @@ pub struct LoadModelResponse {
 #[serde(rename_all = "camelCase")]
 pub struct TranscribeFileRequest {
     pub path: String,
-    pub model_name: Option<String>,
-    pub language: Option<String>,
-    pub task: Option<String>,
+    pub model_version: Option<String>, // "v2" or "v3"
+    pub with_diarization: Option<bool>,
+    pub clustering_threshold: Option<f64>,
 }
 
-// Transcribe Audio
+// Transcribe Audio (for future base64 support)
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TranscribeAudioRequest {
     pub audio_data: String, // Base64 encoded
-    pub model_name: Option<String>,
-    pub language: Option<String>,
-    pub task: Option<String>,
+    pub model_version: Option<String>,
+    pub with_diarization: Option<bool>,
+}
+
+// Diarize File
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DiarizeFileRequest {
+    pub path: String,
+    pub clustering_threshold: Option<f64>,
 }
 
 // Transcription Response
@@ -40,33 +48,35 @@ pub struct TranscribeAudioRequest {
 #[serde(rename_all = "camelCase")]
 pub struct TranscriptionResponse {
     pub text: String,
+    pub confidence: Option<f64>,
     pub segments: Option<Vec<TranscriptionSegment>>,
     pub language: Option<String>,
-    pub timings: Option<TranscriptionTimings>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TranscriptionSegment {
-    pub id: i32,
-    pub seek: i32,
-    pub start: f32,
-    pub end: f32,
     pub text: String,
-    pub tokens: Vec<i32>,
-    pub temperature: f32,
-    pub avg_logprob: f32,
-    pub compression_ratio: f32,
-    pub no_speech_prob: f32,
+    pub start_time: f64,
+    pub end_time: f64,
+    pub speaker_id: Option<String>,
+    pub confidence: Option<f64>,
+}
+
+// Diarization Response
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DiarizationResponse {
+    pub segments: Vec<DiarizationSegment>,
+    pub speaker_count: i32,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TranscriptionTimings {
-    pub full_pipeline: f64,
-    pub tokens_per_second: f64,
-    pub real_time_factor: f64,
-    pub first_token_time: f64,
+pub struct DiarizationSegment {
+    pub speaker_id: String,
+    pub start_time: f64,
+    pub end_time: f64,
 }
 
 // Available Models
@@ -88,6 +98,7 @@ pub struct CurrentModelResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ReadyResponse {
     pub ready: bool,
+    pub diarization_ready: bool,
 }
 
 // Generic Success Response
