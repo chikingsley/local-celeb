@@ -23,7 +23,7 @@ Build a local-first application that enables users to extract, clean, and clone 
 
 ```text
 Local Stack:
-- Transcription: WhisperX (with speaker diarization)
+- Transcription: FluidAudio (Parakeet TDT v3 + speaker diarization) ✅ WORKING
 - TTS: Orpheus 3B (Unsloth 4-bit quantized)
 - LLM: DeepSeek-R1-0528-Qwen3-8B (Unsloth 4-bit quantized)
 - Voice Pipeline: PipedCat
@@ -37,6 +37,22 @@ API Options:
 - Audio Enhancement: ElevenLabs Voice Isolator
 - TTS Cloning: Replicate (Kokoro 82M, MiniMax Speech-02-HD)
 - LLM: User's choice with API key management
+```
+
+### Model Storage & Distribution
+
+```text
+Current Implementation:
+- Models: Download on first use (~480MB total)
+- Storage: ~/Library/Application Support/FluidAudio/Models/
+- ASR Model: parakeet-tdt-0.6b-v3-coreml (~460MB)
+- Diarization: speaker-diarization-coreml (~20MB)
+- Acceleration: Apple Neural Engine (ANE)
+
+Future Considerations:
+- Custom model path via manual loading (FluidAudio supports OfflineDiarizerModels.initialize())
+- App-specific storage: ~/Library/Application Support/com.local-celeb.app/
+- Optional model bundling for offline-first distribution
 ```
 
 ### Memory Architecture
@@ -56,6 +72,14 @@ Character Memory Stack:
 - [x] Bun package manager configured
 - [x] Hot reload working
 - [x] Cursor rules for Convex/Supabase (if needed)
+- [x] **FluidAudio transcription integration (macOS)** ✅ NEW
+  - [x] Swift-to-Rust FFI bridge via swift-rs
+  - [x] Parakeet TDT v3 ASR (25 languages)
+  - [x] Offline speaker diarization (3+ speakers)
+  - [x] Apple Neural Engine acceleration
+  - [x] Auto model download on first use
+- [x] Basic transcription UI working
+- [x] Audio file loading and playback
 
 ## Core Features
 
@@ -95,9 +119,13 @@ Character Memory Stack:
 
 #### Transcription Pipeline
 
-- [ ] **Primary**: WhisperX for local transcription + diarization
+- [x] **Primary (macOS)**: FluidAudio for local transcription + diarization ✅
+  - [x] Parakeet TDT v3 ASR model
+  - [x] Offline speaker diarization
+  - [x] Neural Engine acceleration
+- [ ] **Primary (Windows/Linux)**: WhisperX for local transcription + diarization
 - [ ] **Alternative**: ElevenLabs Scribe API integration
-- [ ] Automatic speaker diarization using PyAnnote
+- [ ] Word-level timestamp alignment (FluidAudio API limitation - future)
 - [ ] Character name detection from transcript/script
 - [ ] Manual speaker labeling interface
 
@@ -309,7 +337,16 @@ Character Memory Stack:
 - Optimized for retrieval tasks
 - Commercial use allowed
 
-#### WhisperX Configuration
+#### FluidAudio (macOS - Current) ✅
+
+- Parakeet TDT v3: 25-language multilingual ASR
+- Offline speaker diarization with VBx clustering
+- Apple Neural Engine (ANE) acceleration
+- ~460MB ASR model + ~20MB diarization models
+- Download on first use, cached locally
+- Note: Word-level timing not yet exposed in API
+
+#### WhisperX Configuration (Windows/Linux - Future)
 
 - Uses PyAnnote for speaker diarization
 - Word-level timestamps for precise alignment
@@ -395,10 +432,13 @@ Character Memory Stack:
 5. **Unsloth models**: Optimized for consumer hardware
 6. **ElevenLabs**: Best-in-class audio enhancement
 7. **No model tiers**: Single optimized local stack
-8. **NEW**: **NV-Embed-v2**: Best open-source embedding model
-9. **NEW**: **Mem0**: Easy intelligent memory management
-10. **NEW**: **Milvus**: High-performance vector database
-11. **NEW**: **Chroma chunking**: Research-backed chunking strategies
+8. **NV-Embed-v2**: Best open-source embedding model
+9. **Mem0**: Easy intelligent memory management
+10. **Milvus**: High-performance vector database
+11. **Chroma chunking**: Research-backed chunking strategies
+12. **FluidAudio over WhisperX (macOS)**: Native Swift SDK with ANE acceleration ✅
+13. **swift-rs for FFI**: Rust-Swift bridge for Tauri plugin architecture ✅
+14. **Download on first use**: Smaller initial app, models cached locally ✅
 
 ---
 
