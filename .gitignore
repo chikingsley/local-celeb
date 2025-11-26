@@ -35,7 +35,23 @@ public
 *.MP3
 data_prep_voice_clone/output/audio/
 # docs/scar-audio/
+
+# Swift build artifacts
 *.build*
 .build
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+
+# Deprecated plugins
 WhisperKit/
 tauri-plugin-whisperkit/
+
+# Environment files
+.env
+.env.local
+*.pem
+credentials.json
+
+# OS files
+Thumbs.db

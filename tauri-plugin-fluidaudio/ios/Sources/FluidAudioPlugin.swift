@@ -1,8 +1,13 @@
-import SwiftRs
-import Tauri
+import Foundation
 import FluidAudio
 import AVFoundation
 import CoreML
+
+// Tauri imports only available on iOS
+#if canImport(Tauri)
+import SwiftRs
+import Tauri
+#endif
 
 // MARK: - Request/Response Models
 
@@ -120,7 +125,10 @@ class FluidAudioManager {
         }
 
         // Transcribe audio using samples
+        print("[FluidAudio.Transcription] Starting ASR transcription for \(samples.count) samples...")
         let asrResult = try await asrManager.transcribe(samples)
+        print("[FluidAudio.Transcription] ASR result text: \(asrResult.text.prefix(200))...")
+        print("[FluidAudio.Transcription] ASR result text length: \(asrResult.text.count) characters")
 
         // Extract word timing if available from FluidAudio result
         // FluidAudio's TranscriptionResult may have .words property
@@ -180,8 +188,8 @@ class FluidAudioManager {
         let segments = result.segments.map { segment in
             DiarizationSegment(
                 speakerId: segment.speakerId,
-                startTime: segment.startTimeSeconds,
-                endTime: segment.endTimeSeconds
+                startTime: Double(segment.startTimeSeconds),
+                endTime: Double(segment.endTimeSeconds)
             )
         }
 
@@ -239,8 +247,8 @@ class FluidAudioManager {
             for diarizationSegment in diarization.segments {
                 // Find words that fall within this speaker segment
                 let segmentWords = words.filter { word in
-                    word.start >= diarizationSegment.startTimeSeconds &&
-                    word.end <= diarizationSegment.endTimeSeconds
+                    word.start >= Double(diarizationSegment.startTimeSeconds) &&
+                    word.end <= Double(diarizationSegment.endTimeSeconds)
                 }
 
                 if !segmentWords.isEmpty {
@@ -248,8 +256,8 @@ class FluidAudioManager {
                     segments.append(
                         TranscriptionSegment(
                             text: segmentText,
-                            startTime: diarizationSegment.startTimeSeconds,
-                            endTime: diarizationSegment.endTimeSeconds,
+                            startTime: Double(diarizationSegment.startTimeSeconds),
+                            endTime: Double(diarizationSegment.endTimeSeconds),
                             speakerId: diarizationSegment.speakerId,
                             confidence: nil
                         )
@@ -263,8 +271,8 @@ class FluidAudioManager {
                 segments.append(
                     TranscriptionSegment(
                         text: "", // Cannot accurately split text without word timing
-                        startTime: diarizationSegment.startTimeSeconds,
-                        endTime: diarizationSegment.endTimeSeconds,
+                        startTime: Double(diarizationSegment.startTimeSeconds),
+                        endTime: Double(diarizationSegment.endTimeSeconds),
                         speakerId: diarizationSegment.speakerId,
                         confidence: nil
                     )
@@ -272,18 +280,25 @@ class FluidAudioManager {
             }
         }
 
-        // If no segments were created but we have text, add full text as single segment
-        if segments.isEmpty && !text.isEmpty {
+        // If segments have empty text (no word-level timing), distribute the full text
+        // as a single segment with the first speaker, or assign text to first segment
+        let hasTextInSegments = segments.contains { !$0.text.isEmpty }
+        if !hasTextInSegments && !text.isEmpty {
+            // Clear empty segments and create one with the full text
             let firstSpeaker = diarization.segments.first?.speakerId
-            segments.append(
+            let startTime = diarization.segments.first.map { Double($0.startTimeSeconds) } ?? 0.0
+            let endTime = diarization.segments.last.map { Double($0.endTimeSeconds) } ?? 0.0
+
+            // Return a single segment with all the text
+            return [
                 TranscriptionSegment(
                     text: text,
-                    startTime: diarization.segments.first?.startTimeSeconds ?? 0.0,
-                    endTime: diarization.segments.last?.endTimeSeconds ?? 0.0,
+                    startTime: startTime,
+                    endTime: endTime,
                     speakerId: firstSpeaker,
                     confidence: nil
                 )
-            )
+            ]
         }
 
         return segments
@@ -344,8 +359,9 @@ enum FluidAudioError: Error, LocalizedError {
     }
 }
 
-// MARK: - Plugin Implementation
+// MARK: - Plugin Implementation (iOS only)
 
+#if canImport(Tauri)
 class FluidAudioPlugin: Plugin {
     private let manager = FluidAudioManager.shared
 
@@ -467,3 +483,4 @@ class FluidAudioPlugin: Plugin {
 func initPlugin() -> Plugin {
     return FluidAudioPlugin()
 }
+#endif

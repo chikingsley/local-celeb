@@ -7,6 +7,7 @@ let package = Package(
     name: "tauri-plugin-fluidaudio",
     platforms: [
         .macOS(.v14),
+        .iOS(.v17),
     ],
     products: [
         .library(
@@ -17,12 +18,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/FluidInference/FluidAudio.git", from: "0.7.9"),
+        .package(url: "https://github.com/Brendonovich/swift-rs", from: "1.0.5"),
     ],
     targets: [
         .target(
             name: "tauri-plugin-fluidaudio",
             dependencies: [
                 .product(name: "FluidAudio", package: "FluidAudio"),
+                .product(name: "SwiftRs", package: "swift-rs"),
             ],
             path: "ios/Sources"
         ),

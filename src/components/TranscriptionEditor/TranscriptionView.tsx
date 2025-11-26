@@ -10,6 +10,7 @@ import { TranscriptionData } from '../../types/transcription';
 import { Button } from '../ui/button';
 import { Upload, Download, PanelRightOpen, PanelRightClose, Mic, Sparkles } from 'lucide-react';
 import { readTextFile } from '@tauri-apps/plugin-fs';
+import { convertFileSrc } from '@tauri-apps/api/core';
 
 interface TranscriptionViewProps {
   className?: string;
@@ -73,9 +74,17 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
       );
 
       if (audioFilePath) {
-        // For audio files, we'll create a file:// URL for local playback
-        setAudioUrl(`file://${audioFilePath}`);
+        // Convert to Tauri's asset protocol for local playback
+        const assetUrl = convertFileSrc(audioFilePath);
+        console.log('Loading audio:', audioFilePath, '→', assetUrl);
+        setAudioUrl(assetUrl);
         setAudioPath(audioFilePath); // Store for transcription
+
+        // If only audio is loaded (no JSON), clear existing transcription
+        // to show the "Ready to Transcribe" screen
+        if (!jsonPath) {
+          setTranscription(null);
+        }
       }
 
       if (jsonPath) {
@@ -114,7 +123,8 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
       const result = await transcribe(audioPath);
 
       if (!result) {
-        setShowProgressDialog(false);
+        // Transcription was cancelled or failed - keep dialog open to show error
+        // User will close via the dialog's "Close" button
         return;
       }
 
@@ -124,7 +134,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
         if (seg.speakerId) speakers.add(seg.speakerId);
 
         // Create words array from segment text (simplified - FluidAudio doesn't provide word-level timing yet)
-        const words = seg.text.split(/\s+/).map((word) => ({
+        const words = seg.text.split(/\s+/).filter(w => w.length > 0).map((word) => ({
           text: word,
           start_time: seg.startTime,
           end_time: seg.endTime,
@@ -157,9 +167,15 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
         speakers: speakers.size,
         confidence: result.confidence,
       });
+
+      // Auto-close dialog after a brief delay to show completion
+      setTimeout(() => {
+        setShowProgressDialog(false);
+      }, 1500);
     } catch (error) {
       console.error('Transcription error:', error);
       alert(`Transcription failed: ${error instanceof Error ? error.message : String(error)}`);
+      setShowProgressDialog(false);
     }
   };
 
@@ -214,7 +230,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
   };
 
   return (
-    <div className={`flex flex-col h-full ${className}`}>
+    <div className={`flex flex-col h-full relative ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
         <h1 className="text-2xl font-bold text-gray-900">Transcription Editor</h1>
@@ -338,7 +354,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
 
       {/* Help Text */}
       {!transcription && !audioPath && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+        <div className="absolute inset-0 top-16 flex items-center justify-center bg-white bg-opacity-95">
           <div className="text-center p-8 max-w-md">
             <div className="mb-6">
               <Mic className="h-16 w-16 mx-auto text-blue-500 mb-4" />
@@ -349,24 +365,41 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
             <p className="text-gray-600 mb-6">
               Upload an audio file to transcribe with AI, or load an existing transcription to edit.
             </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col gap-3 mb-6">
+              <Button
+                onClick={handleFileUpload}
+                disabled={isLoading}
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Upload className="h-5 w-5 mr-2" />
+                Load Audio File
+              </Button>
+              <Button
+                variant="outline"
+                onClick={loadSampleData}
+                disabled={isLoading}
+                size="lg"
+              >
+                Load Sample Data
+              </Button>
+            </div>
+
             <div className="space-y-3 text-sm text-left bg-gray-50 p-4 rounded-lg">
-              <p className="font-semibold text-gray-900">✨ Powered by FluidAudio</p>
+              <p className="font-semibold text-gray-900">Powered by FluidAudio</p>
               <p className="text-gray-600">• Parakeet TDT v3 (25 languages)</p>
               <p className="text-gray-600">• Automatic speaker diarization</p>
               <p className="text-gray-600">• Apple Neural Engine optimization</p>
               <p className="text-gray-600">• 100% local, no internet required</p>
-            </div>
-            <div className="mt-6 space-y-2 text-sm text-gray-500">
-              <p>📝 Double-click words to edit</p>
-              <p>🎯 Click words to seek audio</p>
-              <p>👥 Manage speakers in sidebar</p>
             </div>
           </div>
         </div>
       )}
 
       {audioPath && !transcription && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+        <div className="absolute inset-0 top-16 flex items-center justify-center bg-white bg-opacity-95">
           <div className="text-center p-8 max-w-md">
             <Sparkles className="h-16 w-16 mx-auto text-blue-500 mb-4 animate-pulse" />
             <h2 className="text-xl font-semibold text-gray-900 mb-4">

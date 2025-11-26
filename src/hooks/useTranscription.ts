@@ -8,9 +8,10 @@ interface TranscriptionStore {
   selectedWordIndex: number | null;
   editHistory: EditAction[];
   speakers: Speaker[];
-  
+
   // Actions
-  setTranscription: (transcription: TranscriptionData) => void;
+  setTranscription: (transcription: TranscriptionData | null) => void;
+  clearTranscription: () => void;
   setCurrentTime: (time: number) => void;
   selectSegment: (segmentId: string | null) => void;
   selectWord: (segmentId: string, wordIndex: number) => void;
@@ -39,6 +40,10 @@ export const useTranscriptionStore = create<TranscriptionStore>((set, get) => ({
 
   setTranscription: (transcription) => {
     set({ transcription });
+  },
+
+  clearTranscription: () => {
+    set({ transcription: null, selectedSegmentId: null, selectedWordIndex: null });
   },
 
   setCurrentTime: (time) => {
