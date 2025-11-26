@@ -1,12 +1,12 @@
 [package]
-name = "tauri-plugin-whisperkit"
+name = "tauri-plugin-fluidaudio"
 version = "0.1.0"
 authors = [ "You" ]
-description = ""
+description = "Tauri plugin for FluidAudio - local ASR and speaker diarization"
 edition = "2021"
 rust-version = "1.77.2"
 exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules"]
-links = "tauri-plugin-whisperkit"
+links = "tauri-plugin-fluidaudio"
 
 [dependencies]
 tauri = { version = "2.7.0" }

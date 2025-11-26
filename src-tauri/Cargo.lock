@@ -1967,6 +1967,7 @@ dependencies = [
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
+ "tauri-plugin-fluidaudio",
  "tauri-plugin-fs",
  "tauri-plugin-opener",
 ]
@@ -3768,6 +3769,16 @@ dependencies = [
  "tauri-plugin-fs",
  "thiserror 2.0.12",
  "url",
+]
+
+[[package]]
+name = "tauri-plugin-fluidaudio"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.12",
 ]
 
 [[package]]

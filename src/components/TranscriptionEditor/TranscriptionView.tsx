@@ -3,12 +3,13 @@ import { AudioPlayer } from './AudioPlayer';
 import { WordLevelEditor } from './WordLevelEditor';
 import { SpeakerManager } from './SpeakerManager';
 import { ExportService } from '../TranscriptionTools/ExportService';
+import { TranscriptionProgressDialog } from '../TranscriptionProgressDialog';
 import { useTranscriptionStore } from '../../hooks/useTranscription';
+import { useFluidAudio } from '../../hooks/useFluidAudio';
 import { TranscriptionData } from '../../types/transcription';
 import { Button } from '../ui/button';
-import { Upload, Download, PanelRightOpen, PanelRightClose } from 'lucide-react';
-import { open } from '@tauri-apps/plugin-opener';
-import { readTextFile, readFile } from '@tauri-apps/plugin-fs';
+import { Upload, Download, PanelRightOpen, PanelRightClose, Mic, Sparkles } from 'lucide-react';
+import { readTextFile } from '@tauri-apps/plugin-fs';
 
 interface TranscriptionViewProps {
   className?: string;
@@ -22,15 +23,29 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
   } = useTranscriptionStore();
 
   const [audioUrl, setAudioUrl] = useState<string | undefined>();
+  const [audioPath, setAudioPath] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showProgressDialog, setShowProgressDialog] = useState(false);
+
+  // FluidAudio integration
+  const {
+    isLoading: isTranscribing,
+    progress,
+    transcribe,
+    cancel,
+  } = useFluidAudio({
+    modelVersion: 'v3', // Multilingual
+    withDiarization: true, // Enable speaker identification
+    clusteringThreshold: 0.7,
+  });
 
   const handleFileUpload = async () => {
     try {
       setIsLoading(true);
-      
+
       const { open: openDialog } = await import('@tauri-apps/plugin-dialog');
-      
+
       // Open file dialog for multiple files
       const selected = await openDialog({
         multiple: true,
@@ -47,25 +62,26 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
 
       // Process selected files
       const filePaths = Array.isArray(selected) ? selected : [selected];
-      
+
       // Find audio and JSON files
-      const audioPath = filePaths.find(path => 
+      const audioFilePath = filePaths.find(path =>
         path.endsWith('.mp3') || path.endsWith('.wav')
       );
-      
-      const jsonPath = filePaths.find(path => 
+
+      const jsonPath = filePaths.find(path =>
         path.endsWith('.json')
       );
 
-      if (audioPath) {
+      if (audioFilePath) {
         // For audio files, we'll create a file:// URL for local playback
-        setAudioUrl(`file://${audioPath}`);
+        setAudioUrl(`file://${audioFilePath}`);
+        setAudioPath(audioFilePath); // Store for transcription
       }
 
       if (jsonPath) {
         const text = await readTextFile(jsonPath);
         const data = JSON.parse(text) as TranscriptionData;
-        
+
         // Convert the data to our format if needed
         const convertedData: TranscriptionData = {
           language_code: data.language_code || 'en',
@@ -74,9 +90,9 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
             id: segment.id || `segment-${index}`,
           })),
           speakers: data.speakers || [],
-          audio_file: audioPath ? audioPath.split('/').pop() : undefined,
+          audio_file: audioFilePath ? audioFilePath.split('/').pop() : undefined,
         };
-        
+
         setTranscription(convertedData);
       }
     } catch (error) {
@@ -84,6 +100,66 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
       alert('Error loading files. Please check the file format.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!audioPath) {
+      alert('Please load an audio file first');
+      return;
+    }
+
+    try {
+      setShowProgressDialog(true);
+      const result = await transcribe(audioPath);
+
+      if (!result) {
+        setShowProgressDialog(false);
+        return;
+      }
+
+      // Convert FluidAudio result to TranscriptionData format
+      const speakers = new Set<string>();
+      const segments = result.segments?.map((seg, index) => {
+        if (seg.speakerId) speakers.add(seg.speakerId);
+
+        // Create words array from segment text (simplified - FluidAudio doesn't provide word-level timing yet)
+        const words = seg.text.split(/\s+/).map((word) => ({
+          text: word,
+          start_time: seg.startTime,
+          end_time: seg.endTime,
+        }));
+
+        return {
+          id: `segment-${index}`,
+          start_time: seg.startTime,
+          end_time: seg.endTime,
+          text: seg.text,
+          speaker: seg.speakerId || 'Unknown',
+          words,
+        };
+      }) || [];
+
+      const transcriptionData: TranscriptionData = {
+        language_code: result.language || 'en',
+        segments,
+        speakers: Array.from(speakers).map((id, index) => ({
+          id,
+          name: `Speaker ${index + 1}`,
+          color: getRandomColor(index),
+        })),
+        audio_file: audioPath.split('/').pop(),
+      };
+
+      setTranscription(transcriptionData);
+      console.log('Transcription complete:', {
+        segments: segments.length,
+        speakers: speakers.size,
+        confidence: result.confidence,
+      });
+    } catch (error) {
+      console.error('Transcription error:', error);
+      alert(`Transcription failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -96,9 +172,9 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
 
     const dataStr = JSON.stringify(transcription, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
+
     const exportFileDefaultName = 'transcription-edited.json';
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -108,14 +184,14 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
   const loadSampleData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Load the existing sample data
       const response = await fetch('./scar_isolated.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      
+
       const convertedData: TranscriptionData = {
         language_code: data.language_code || 'eng',
         segments: data.segments.map((segment: any, index: number) => ({
@@ -125,7 +201,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
         speakers: [],
         audio_file: 'scar_isolated.mp3',
       };
-      
+
       setTranscription(convertedData);
       setAudioUrl('./scar_isolated.mp3');
       console.log('Sample data loaded successfully');
@@ -142,7 +218,7 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
         <h1 className="text-2xl font-bold text-gray-900">Transcription Editor</h1>
-        
+
         <div className="flex items-center space-x-3">
           <Button
             variant="outline"
@@ -152,6 +228,17 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
             <Upload className="h-4 w-4 mr-2" />
             Load Files
           </Button>
+
+          {audioPath && !transcription && (
+            <Button
+              onClick={handleTranscribe}
+              disabled={isTranscribing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Transcribe Audio
+            </Button>
+          )}
 
           <Button
             variant="outline"
@@ -217,44 +304,104 @@ export const TranscriptionView: React.FC<TranscriptionViewProps> = ({ className 
                 {transcription.segments.length} segments • {
                   transcription.segments.reduce((acc, seg) => acc + seg.words.length, 0)
                 } words
+                {transcription.speakers && transcription.speakers.length > 0 && (
+                  <> • {transcription.speakers.length} speakers</>
+                )}
               </span>
             ) : (
               <span>No transcription loaded</span>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <span>Language: {transcription?.language_code || 'N/A'}</span>
-            {isLoading && (
+            {(isLoading || isTranscribing) && (
               <div className="flex items-center space-x-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
-                <span>Loading...</span>
+                <span>{isTranscribing ? 'Transcribing...' : 'Loading...'}</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
+      {/* Progress Dialog */}
+      <TranscriptionProgressDialog
+        open={showProgressDialog}
+        progress={progress}
+        onCancel={() => {
+          cancel();
+          setShowProgressDialog(false);
+        }}
+        onClose={() => setShowProgressDialog(false)}
+      />
+
       {/* Help Text */}
-      {!transcription && (
+      {!transcription && !audioPath && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
           <div className="text-center p-8 max-w-md">
+            <div className="mb-6">
+              <Mic className="h-16 w-16 mx-auto text-blue-500 mb-4" />
+            </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Welcome to Transcription Editor
+              Welcome to Local-Celeb
             </h2>
             <p className="text-gray-600 mb-6">
-              Upload an audio file (.mp3, .wav) and a transcription JSON file to get started, 
-              or load the sample data to try out the editor.
+              Upload an audio file to transcribe with AI, or load an existing transcription to edit.
             </p>
-            <div className="space-y-2 text-sm text-gray-500">
-              <p>• Double-click words to edit them</p>
-              <p>• Click words to select and navigate</p>
-              <p>• Use speaker dropdowns to assign speakers</p>
-              <p>• Audio playback syncs with word highlighting</p>
+            <div className="space-y-3 text-sm text-left bg-gray-50 p-4 rounded-lg">
+              <p className="font-semibold text-gray-900">✨ Powered by FluidAudio</p>
+              <p className="text-gray-600">• Parakeet TDT v3 (25 languages)</p>
+              <p className="text-gray-600">• Automatic speaker diarization</p>
+              <p className="text-gray-600">• Apple Neural Engine optimization</p>
+              <p className="text-gray-600">• 100% local, no internet required</p>
             </div>
+            <div className="mt-6 space-y-2 text-sm text-gray-500">
+              <p>📝 Double-click words to edit</p>
+              <p>🎯 Click words to seek audio</p>
+              <p>👥 Manage speakers in sidebar</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {audioPath && !transcription && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
+          <div className="text-center p-8 max-w-md">
+            <Sparkles className="h-16 w-16 mx-auto text-blue-500 mb-4 animate-pulse" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Ready to Transcribe
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Audio file loaded! Click the "Transcribe Audio" button to generate a transcription with speaker identification.
+            </p>
+            <Button
+              onClick={handleTranscribe}
+              disabled={isTranscribing}
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Sparkles className="h-5 w-5 mr-2" />
+              Start Transcription
+            </Button>
           </div>
         </div>
       )}
     </div>
   );
 };
+
+// Helper function to generate colors for speakers
+function getRandomColor(index: number): string {
+  const colors = [
+    '#3B82F6', // blue
+    '#10B981', // green
+    '#F59E0B', // amber
+    '#EF4444', // red
+    '#8B5CF6', // purple
+    '#EC4899', // pink
+    '#06B6D4', // cyan
+    '#F97316', // orange
+  ];
+  return colors[index % colors.length];
+}

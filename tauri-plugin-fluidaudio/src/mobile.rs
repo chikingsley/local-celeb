@@ -7,24 +7,24 @@ use tauri::{
 use crate::models::*;
 
 #[cfg(target_os = "ios")]
-tauri::ios_plugin_binding!(init_plugin_whisperkit);
+tauri::ios_plugin_binding!(init_plugin_fluidaudio);
 
 // initializes the Kotlin or Swift plugin classes
 pub fn init<R: Runtime, C: DeserializeOwned>(
   _app: &AppHandle<R>,
   api: PluginApi<R, C>,
-) -> crate::Result<Whisperkit<R>> {
+) -> crate::Result<Fluidaudio<R>> {
   #[cfg(target_os = "android")]
-  let handle = api.register_android_plugin("", "ExamplePlugin")?;
+  let handle = api.register_android_plugin("", "FluidAudioPlugin")?;
   #[cfg(target_os = "ios")]
-  let handle = api.register_ios_plugin(init_plugin_whisperkit)?;
-  Ok(Whisperkit(handle))
+  let handle = api.register_ios_plugin(init_plugin_fluidaudio)?;
+  Ok(Fluidaudio(handle))
 }
 
-/// Access to the whisperkit APIs.
-pub struct Whisperkit<R: Runtime>(PluginHandle<R>);
+/// Access to the fluidaudio APIs.
+pub struct Fluidaudio<R: Runtime>(PluginHandle<R>);
 
-impl<R: Runtime> Whisperkit<R> {
+impl<R: Runtime> Fluidaudio<R> {
   pub fn load_model(&self, payload: LoadModelRequest) -> crate::Result<LoadModelResponse> {
     self
       .0
@@ -50,6 +50,13 @@ impl<R: Runtime> Whisperkit<R> {
     self
       .0
       .run_mobile_plugin("transcribeAudio", payload)
+      .map_err(Into::into)
+  }
+
+  pub fn diarize_file(&self, payload: DiarizeFileRequest) -> crate::Result<DiarizationResponse> {
+    self
+      .0
+      .run_mobile_plugin("diarizeFile", payload)
       .map_err(Into::into)
   }
 
