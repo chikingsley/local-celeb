@@ -59,12 +59,15 @@ class FluidAudioManager {
     private var asrManager: AsrManager?
     private var asrModels: AsrModels?
     private var diarizerManager: OfflineDiarizerManager?
-    private var diarizerModels: OfflineDiarizerModels?
+    private var audioConverter: AudioConverter?
     private var currentModelVersion: AsrModelVersion?
     private var isAsrReady = false
     private var isDiarizerReady = false
 
-    private init() {}
+    private init() {
+        // Initialize audio converter once
+        audioConverter = AudioConverter()
+    }
 
     // MARK: - Model Management
 
@@ -82,8 +85,8 @@ class FluidAudioManager {
         if withDiarization && !isDiarizerReady {
             let config = OfflineDiarizerConfig()
             diarizerManager = OfflineDiarizerManager(config: config)
-            diarizerModels = try await OfflineDiarizerModels.downloadAndLoad()
-            try await diarizerManager?.initialize(models: diarizerModels!)
+            // prepareModels() downloads and initializes models internally
+            try await diarizerManager?.prepareModels()
             isDiarizerReady = true
         }
     }
@@ -92,7 +95,6 @@ class FluidAudioManager {
         asrManager = nil
         asrModels = nil
         diarizerManager = nil
-        diarizerModels = nil
         currentModelVersion = nil
         isAsrReady = false
         isDiarizerReady = false
@@ -105,19 +107,28 @@ class FluidAudioManager {
             throw FluidAudioError.modelsNotLoaded
         }
 
-        // Convert audio file to URL
-        let audioURL = URL(fileURLWithPath: path)
+        guard let audioConverter = audioConverter else {
+            throw FluidAudioError.audioProcessingFailed("Audio converter not initialized")
+        }
 
         // Load and convert audio to 16kHz mono Float32
         let samples: [Float]
         do {
-            samples = try AudioConverter.resampleAudioFile(path: path)
+            samples = try audioConverter.resampleAudioFile(path: path)
         } catch {
             throw FluidAudioError.audioProcessingFailed("Failed to convert audio: \(error.localizedDescription)")
         }
 
-        // Transcribe audio
-        let asrResult = try await asrManager.transcribe(audioURL, source: .system)
+        // Transcribe audio using samples
+        let asrResult = try await asrManager.transcribe(samples)
+
+        // Extract word timing if available from FluidAudio result
+        // FluidAudio's TranscriptionResult may have .words property
+        var wordTimings: [WordTiming]? = nil
+        // Note: Uncomment and adjust if FluidAudio provides word-level timing
+        // if let words = asrResult.words {
+        //     wordTimings = words.map { WordTiming(word: $0.word, start: $0.start, end: $0.end) }
+        // }
 
         var segments: [TranscriptionSegment]?
 
@@ -131,17 +142,18 @@ class FluidAudioManager {
 
             // Combine transcription with diarization
             segments = buildSegmentsWithSpeakers(
-                transcription: asrResult,
+                text: asrResult.text,
+                words: wordTimings,
                 diarization: diarizationResult
             )
         } else {
             // Basic segments without speaker info
-            segments = buildBasicSegments(from: asrResult)
+            segments = buildBasicSegments(text: asrResult.text, words: wordTimings)
         }
 
         return TranscriptionResponse(
             text: asrResult.text,
-            confidence: asrResult.confidence,
+            confidence: nil, // FluidAudio may not provide overall confidence
             segments: segments,
             language: currentModelVersion == .v2 ? "en" : nil
         )
@@ -154,8 +166,12 @@ class FluidAudioManager {
             throw FluidAudioError.diarizationNotAvailable
         }
 
+        guard let audioConverter = audioConverter else {
+            throw FluidAudioError.audioProcessingFailed("Audio converter not initialized")
+        }
+
         // Load and convert audio
-        let samples = try AudioConverter.resampleAudioFile(path: path)
+        let samples = try audioConverter.resampleAudioFile(path: path)
 
         // Perform diarization
         let result = try await diarizerManager.process(audio: samples)
@@ -180,43 +196,104 @@ class FluidAudioManager {
 
     // MARK: - Helper Methods
 
-    private func buildBasicSegments(from asrResult: ASRResult) -> [TranscriptionSegment]? {
-        // FluidAudio ASRResult structure may vary - adapt as needed
-        // For now, return a single segment for the full transcription
-        guard !asrResult.text.isEmpty else { return nil }
+    /// Build basic segments from ASR result (no diarization)
+    /// Uses FluidAudio's TranscriptionResult which has .text and optionally .words
+    private func buildBasicSegments(text: String, words: [WordTiming]?) -> [TranscriptionSegment]? {
+        guard !text.isEmpty else { return nil }
 
+        // If we have word-level timing, create segments from words
+        if let words = words, !words.isEmpty {
+            return words.map { word in
+                TranscriptionSegment(
+                    text: word.word,
+                    startTime: word.start,
+                    endTime: word.end,
+                    speakerId: nil,
+                    confidence: nil
+                )
+            }
+        }
+
+        // Otherwise return a single segment with the full text
         return [
             TranscriptionSegment(
-                text: asrResult.text,
+                text: text,
                 startTime: 0.0,
-                endTime: 0.0, // Would need audio duration
+                endTime: 0.0,
                 speakerId: nil,
-                confidence: asrResult.confidence
+                confidence: nil
             )
         ]
     }
 
+    /// Build segments with speaker attribution by aligning words with diarization
     private func buildSegmentsWithSpeakers(
-        transcription: ASRResult,
+        text: String,
+        words: [WordTiming]?,
         diarization: DiarizationResult
     ) -> [TranscriptionSegment] {
-        // This is a simplified approach - in production, you'd want
-        // more sophisticated alignment between words and speaker segments
         var segments: [TranscriptionSegment] = []
 
-        for diarizationSegment in diarization.segments {
+        // If we have word-level timing, align words with speaker segments
+        if let words = words, !words.isEmpty {
+            for diarizationSegment in diarization.segments {
+                // Find words that fall within this speaker segment
+                let segmentWords = words.filter { word in
+                    word.start >= diarizationSegment.startTimeSeconds &&
+                    word.end <= diarizationSegment.endTimeSeconds
+                }
+
+                if !segmentWords.isEmpty {
+                    let segmentText = segmentWords.map { $0.word }.joined(separator: " ")
+                    segments.append(
+                        TranscriptionSegment(
+                            text: segmentText,
+                            startTime: diarizationSegment.startTimeSeconds,
+                            endTime: diarizationSegment.endTimeSeconds,
+                            speakerId: diarizationSegment.speakerId,
+                            confidence: nil
+                        )
+                    )
+                }
+            }
+        } else {
+            // No word-level timing - create segments with speaker/timing only
+            // Text alignment not possible without word timestamps
+            for diarizationSegment in diarization.segments {
+                segments.append(
+                    TranscriptionSegment(
+                        text: "", // Cannot accurately split text without word timing
+                        startTime: diarizationSegment.startTimeSeconds,
+                        endTime: diarizationSegment.endTimeSeconds,
+                        speakerId: diarizationSegment.speakerId,
+                        confidence: nil
+                    )
+                )
+            }
+        }
+
+        // If no segments were created but we have text, add full text as single segment
+        if segments.isEmpty && !text.isEmpty {
+            let firstSpeaker = diarization.segments.first?.speakerId
             segments.append(
                 TranscriptionSegment(
-                    text: transcription.text, // Simplified - would need proper word alignment
-                    startTime: diarizationSegment.startTimeSeconds,
-                    endTime: diarizationSegment.endTimeSeconds,
-                    speakerId: diarizationSegment.speakerId,
-                    confidence: transcription.confidence
+                    text: text,
+                    startTime: diarization.segments.first?.startTimeSeconds ?? 0.0,
+                    endTime: diarization.segments.last?.endTimeSeconds ?? 0.0,
+                    speakerId: firstSpeaker,
+                    confidence: nil
                 )
             )
         }
 
         return segments
+    }
+
+    /// Helper struct for word timing (matches FluidAudio's word structure)
+    struct WordTiming {
+        let word: String
+        let start: Double
+        let end: Double
     }
 
     // MARK: - Utility Methods
