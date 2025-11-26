@@ -38,3 +38,4 @@ data_prep_voice_clone/output/audio/
 *.build*
 .build
 WhisperKit/
+tauri-plugin-whisperkit/

@@ -1,3 +1,3 @@
-# Tauri Plugin whisperkit
+# Tauri Plugin FluidAudio iOS
 
-A description of this package.
+iOS implementation of the FluidAudio Tauri plugin for on-device speech recognition.
