@@ -1,0 +1,346 @@
+{
+  "segments": [
+    {
+      "id": "seg-1",
+      "speakerId": "speaker_1",
+      "startTime": "00:00",
+      "endTime": "00:02",
+      "text": "Life's not fair, is it?",
+      "words": [
+        { "word": "Life's", "start": 0.26, "end": 0.92 },
+        { "word": "not", "start": 0.92, "end": 1.28 },
+        { "word": "fair,", "start": 1.28, "end": 2.24 },
+        { "word": "is", "start": 2.24, "end": 2.34 },
+        { "word": "it?", "start": 2.34, "end": 2.60 }
+      ]
+    },
+    {
+      "id": "seg-2",
+      "speakerId": "speaker_1",
+      "startTime": "00:03",
+      "endTime": "00:06",
+      "text": "You see, I, well, I shall never be king.",
+      "words": [
+        { "word": "You", "start": 3.32, "end": 3.56 },
+        { "word": "see,", "start": 3.56, "end": 3.88 },
+        { "word": "I,", "start": 3.88, "end": 4.12 },
+        { "word": "well,", "start": 4.12, "end": 4.48 },
+        { "word": "I", "start": 4.48, "end": 4.64 },
+        { "word": "shall", "start": 4.64, "end": 5.04 },
+        { "word": "never", "start": 5.04, "end": 5.44 },
+        { "word": "be", "start": 5.44, "end": 5.68 },
+        { "word": "king.", "start": 5.68, "end": 6.78 }
+      ]
+    },
+    {
+      "id": "seg-3",
+      "speakerId": "speaker_1",
+      "startTime": "00:08",
+      "endTime": "00:12",
+      "text": "And you shall never see the light of another day.",
+      "words": [
+        { "word": "And", "start": 8.40, "end": 8.72 },
+        { "word": "you", "start": 8.72, "end": 8.96 },
+        { "word": "shall", "start": 8.96, "end": 9.28 },
+        { "word": "never", "start": 9.28, "end": 9.68 },
+        { "word": "see", "start": 9.68, "end": 10.00 },
+        { "word": "the", "start": 10.00, "end": 10.16 },
+        { "word": "light", "start": 10.16, "end": 10.56 },
+        { "word": "of", "start": 10.56, "end": 10.72 },
+        { "word": "another", "start": 10.72, "end": 11.20 },
+        { "word": "day.", "start": 11.20, "end": 12.68 }
+      ]
+    },
+    {
+      "id": "seg-4",
+      "speakerId": "speaker_1",
+      "startTime": "00:14",
+      "endTime": "00:17",
+      "text": "Adieu.",
+      "words": [
+        { "word": "Adieu.", "start": 14.00, "end": 17.00 }
+      ]
+    },
+    {
+      "id": "seg-5",
+      "speakerId": "speaker_1",
+      "startTime": "00:20",
+      "endTime": "00:23",
+      "text": "Ooh, I quiver with fear.",
+      "words": [
+        { "word": "Ooh,", "start": 20.04, "end": 20.72 },
+        { "word": "I", "start": 20.72, "end": 21.04 },
+        { "word": "quiver", "start": 21.04, "end": 21.84 },
+        { "word": "with", "start": 21.84, "end": 22.24 },
+        { "word": "fear.", "start": 22.24, "end": 23.48 }
+      ]
+    },
+    {
+      "id": "seg-6",
+      "speakerId": "speaker_1",
+      "startTime": "00:41",
+      "endTime": "00:43",
+      "text": "Until the little hairball was born.",
+      "words": [
+        { "word": "Until", "start": 41.00, "end": 41.40 },
+        { "word": "the", "start": 41.40, "end": 41.56 },
+        { "word": "little", "start": 41.56, "end": 41.96 },
+        { "word": "hairball", "start": 41.96, "end": 42.56 },
+        { "word": "was", "start": 42.56, "end": 42.76 },
+        { "word": "born.", "start": 42.76, "end": 43.00 }
+      ]
+    },
+    {
+      "id": "seg-7",
+      "speakerId": "speaker_1",
+      "startTime": "00:43",
+      "endTime": "00:45",
+      "text": "Oh, I shall practice my curtsy.",
+      "words": [
+        { "word": "Oh,", "start": 43.00, "end": 43.28 },
+        { "word": "I", "start": 43.28, "end": 43.44 },
+        { "word": "shall", "start": 43.44, "end": 43.80 },
+        { "word": "practice", "start": 43.80, "end": 44.28 },
+        { "word": "my", "start": 44.28, "end": 44.52 },
+        { "word": "curtsy.", "start": 44.52, "end": 45.00 }
+      ]
+    },
+    {
+      "id": "seg-8",
+      "speakerId": "speaker_1",
+      "startTime": "00:47",
+      "endTime": "00:49",
+      "text": "Perhaps you shouldn't turn your back on me.",
+      "words": [
+        { "word": "Perhaps", "start": 47.00, "end": 47.40 },
+        { "word": "you", "start": 47.40, "end": 47.56 },
+        { "word": "shouldn't", "start": 47.56, "end": 47.92 },
+        { "word": "turn", "start": 47.92, "end": 48.16 },
+        { "word": "your", "start": 48.16, "end": 48.36 },
+        { "word": "back", "start": 48.36, "end": 48.64 },
+        { "word": "on", "start": 48.64, "end": 48.80 },
+        { "word": "me.", "start": 48.80, "end": 49.00 }
+      ]
+    },
+    {
+      "id": "seg-9",
+      "speakerId": "speaker_1",
+      "startTime": "00:49",
+      "endTime": "00:51",
+      "text": "Temper, temper.",
+      "words": [
+        { "word": "Temper,", "start": 49.00, "end": 49.72 },
+        { "word": "temper.", "start": 49.72, "end": 51.00 }
+      ]
+    },
+    {
+      "id": "seg-10",
+      "speakerId": "speaker_1",
+      "startTime": "00:51",
+      "endTime": "00:54",
+      "text": "I wouldn't dream of challenging you.",
+      "words": [
+        { "word": "I", "start": 51.00, "end": 51.16 },
+        { "word": "wouldn't", "start": 51.16, "end": 51.56 },
+        { "word": "dream", "start": 51.56, "end": 51.96 },
+        { "word": "of", "start": 51.96, "end": 52.12 },
+        { "word": "challenging", "start": 52.12, "end": 52.80 },
+        { "word": "you.", "start": 52.80, "end": 54.00 }
+      ]
+    },
+    {
+      "id": "seg-11",
+      "speakerId": "speaker_1",
+      "startTime": "00:58",
+      "endTime": "01:12",
+      "text": "When it comes to brute strength, I'm afraid I'm at the shallow end of the gene pool.",
+      "words": [
+        { "word": "When", "start": 58.00, "end": 58.28 },
+        { "word": "it", "start": 58.28, "end": 58.44 },
+        { "word": "comes", "start": 58.44, "end": 58.80 },
+        { "word": "to", "start": 58.80, "end": 58.96 },
+        { "word": "brute", "start": 58.96, "end": 59.40 },
+        { "word": "strength,", "start": 59.40, "end": 60.00 },
+        { "word": "I'm", "start": 60.00, "end": 60.24 },
+        { "word": "afraid", "start": 60.24, "end": 60.72 },
+        { "word": "I'm", "start": 60.72, "end": 60.96 },
+        { "word": "at", "start": 60.96, "end": 61.12 },
+        { "word": "the", "start": 61.12, "end": 61.28 },
+        { "word": "shallow", "start": 61.28, "end": 61.76 },
+        { "word": "end", "start": 61.76, "end": 62.00 },
+        { "word": "of", "start": 62.00, "end": 62.16 },
+        { "word": "the", "start": 62.16, "end": 62.32 },
+        { "word": "gene", "start": 62.32, "end": 62.72 },
+        { "word": "pool.", "start": 62.72, "end": 72.75 }
+      ]
+    },
+    {
+      "id": "seg-12",
+      "speakerId": "speaker_1",
+      "startTime": "01:17",
+      "endTime": "01:21",
+      "text": "So, your father showed you the whole kingdom, did he?",
+      "words": [
+        { "word": "So,", "start": 77.39, "end": 77.72 },
+        { "word": "your", "start": 77.72, "end": 77.96 },
+        { "word": "father", "start": 77.96, "end": 78.44 },
+        { "word": "showed", "start": 78.44, "end": 78.84 },
+        { "word": "you", "start": 78.84, "end": 79.04 },
+        { "word": "the", "start": 79.04, "end": 79.20 },
+        { "word": "whole", "start": 79.20, "end": 79.56 },
+        { "word": "kingdom,", "start": 79.56, "end": 80.20 },
+        { "word": "did", "start": 80.20, "end": 80.44 },
+        { "word": "he?", "start": 80.44, "end": 81.23 }
+      ]
+    },
+    {
+      "id": "seg-13",
+      "speakerId": "speaker_1",
+      "startTime": "01:21",
+      "endTime": "01:24",
+      "text": "He didn't show you what's beyond that rise at the northern border.",
+      "words": [
+        { "word": "He", "start": 81.23, "end": 81.44 },
+        { "word": "didn't", "start": 81.44, "end": 81.84 },
+        { "word": "show", "start": 81.84, "end": 82.12 },
+        { "word": "you", "start": 82.12, "end": 82.32 },
+        { "word": "what's", "start": 82.32, "end": 82.64 },
+        { "word": "beyond", "start": 82.64, "end": 83.08 },
+        { "word": "that", "start": 83.08, "end": 83.32 },
+        { "word": "rise", "start": 83.32, "end": 83.68 },
+        { "word": "at", "start": 83.68, "end": 83.84 },
+        { "word": "the", "start": 83.84, "end": 84.00 },
+        { "word": "northern", "start": 84.00, "end": 84.08 },
+        { "word": "border.", "start": 84.08, "end": 84.43 }
+      ]
+    },
+    {
+      "id": "seg-14",
+      "speakerId": "speaker_1",
+      "startTime": "01:26",
+      "endTime": "01:28",
+      "text": "Far too dangerous.",
+      "words": [
+        { "word": "Far", "start": 86.91, "end": 87.28 },
+        { "word": "too", "start": 87.28, "end": 87.60 },
+        { "word": "dangerous.", "start": 87.60, "end": 88.43 }
+      ]
+    },
+    {
+      "id": "seg-15",
+      "speakerId": "speaker_1",
+      "startTime": "01:28",
+      "endTime": "01:30",
+      "text": "Only the bravest lions go there.",
+      "words": [
+        { "word": "Only", "start": 88.43, "end": 88.84 },
+        { "word": "the", "start": 88.84, "end": 89.00 },
+        { "word": "bravest", "start": 89.00, "end": 89.60 },
+        { "word": "lions", "start": 89.60, "end": 90.12 },
+        { "word": "go", "start": 90.12, "end": 90.36 },
+        { "word": "there.", "start": 90.36, "end": 90.67 }
+      ]
+    },
+    {
+      "id": "seg-16",
+      "speakerId": "speaker_1",
+      "startTime": "01:33",
+      "endTime": "01:37",
+      "text": "Simba, Simba, I'm only looking out for the well-being of my favorite nephew.",
+      "words": [
+        { "word": "Simba,", "start": 93.51, "end": 94.00 },
+        { "word": "Simba,", "start": 94.00, "end": 94.56 },
+        { "word": "I'm", "start": 94.56, "end": 94.80 },
+        { "word": "only", "start": 94.80, "end": 95.12 },
+        { "word": "looking", "start": 95.12, "end": 95.52 },
+        { "word": "out", "start": 95.52, "end": 95.76 },
+        { "word": "for", "start": 95.76, "end": 95.96 },
+        { "word": "the", "start": 95.96, "end": 96.12 },
+        { "word": "well-being", "start": 96.12, "end": 96.80 },
+        { "word": "of", "start": 96.80, "end": 96.96 },
+        { "word": "my", "start": 96.96, "end": 97.20 },
+        { "word": "favorite", "start": 97.20, "end": 97.68 },
+        { "word": "nephew.", "start": 97.68, "end": 97.99 }
+      ]
+    },
+    {
+      "id": "seg-17",
+      "speakerId": "speaker_1",
+      "startTime": "01:41",
+      "endTime": "01:44",
+      "text": "An elephant graveyard is no place for a young prince.",
+      "words": [
+        { "word": "An", "start": 101.21, "end": 101.40 },
+        { "word": "elephant", "start": 101.40, "end": 101.96 },
+        { "word": "graveyard", "start": 101.96, "end": 102.60 },
+        { "word": "is", "start": 102.60, "end": 102.80 },
+        { "word": "no", "start": 102.80, "end": 103.04 },
+        { "word": "place", "start": 103.04, "end": 103.40 },
+        { "word": "for", "start": 103.40, "end": 103.56 },
+        { "word": "a", "start": 103.56, "end": 103.68 },
+        { "word": "young", "start": 103.68, "end": 103.96 },
+        { "word": "prince.", "start": 103.96, "end": 104.01 }
+      ]
+    },
+    {
+      "id": "seg-18",
+      "speakerId": "speaker_1",
+      "startTime": "03:27",
+      "endTime": "03:31",
+      "text": "And if it weren't for you, he'd still be alive.",
+      "words": [
+        { "word": "And", "start": 207.54, "end": 207.80 },
+        { "word": "if", "start": 207.80, "end": 208.00 },
+        { "word": "it", "start": 208.00, "end": 208.16 },
+        { "word": "weren't", "start": 208.16, "end": 208.56 },
+        { "word": "for", "start": 208.56, "end": 208.76 },
+        { "word": "you,", "start": 208.76, "end": 209.04 },
+        { "word": "he'd", "start": 209.04, "end": 209.36 },
+        { "word": "still", "start": 209.36, "end": 209.72 },
+        { "word": "be", "start": 209.72, "end": 209.92 },
+        { "word": "alive.", "start": 209.92, "end": 211.54 }
+      ]
+    },
+    {
+      "id": "seg-19",
+      "speakerId": "speaker_1",
+      "startTime": "03:37",
+      "endTime": "03:42",
+      "text": "Run. Run away and never return.",
+      "words": [
+        { "word": "Run.", "start": 217.54, "end": 218.20 },
+        { "word": "Run", "start": 218.20, "end": 218.80 },
+        { "word": "away", "start": 218.80, "end": 219.28 },
+        { "word": "and", "start": 219.28, "end": 219.52 },
+        { "word": "never", "start": 219.52, "end": 220.08 },
+        { "word": "return.", "start": 220.08, "end": 222.54 }
+      ]
+    },
+    {
+      "id": "seg-20",
+      "speakerId": "speaker_1",
+      "startTime": "04:05",
+      "endTime": "04:09",
+      "text": "We shall rise to greet the dawning of a new era.",
+      "words": [
+        { "word": "We", "start": 245.20, "end": 245.48 },
+        { "word": "shall", "start": 245.48, "end": 245.88 },
+        { "word": "rise", "start": 245.88, "end": 246.32 },
+        { "word": "to", "start": 246.32, "end": 246.52 },
+        { "word": "greet", "start": 246.52, "end": 246.96 },
+        { "word": "the", "start": 246.96, "end": 247.16 },
+        { "word": "dawning", "start": 247.16, "end": 247.76 },
+        { "word": "of", "start": 247.76, "end": 247.96 },
+        { "word": "a", "start": 247.96, "end": 248.12 },
+        { "word": "new", "start": 248.12, "end": 248.48 },
+        { "word": "era.", "start": 248.48, "end": 249.76 }
+      ]
+    }
+  ],
+  "meta": {
+    "name": "Scar Monologue - The Lion King",
+    "duration": 270,
+    "language": "English",
+    "date": "2024-01-01T00:00:00.000Z"
+  }
+}

@@ -1,3 +1,27 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+dist
+dist-ssr
+build
+.next
+out
+target
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+
+# Cache
+.cache
+*.tsbuildinfo
+
 # Logs
 logs
 *.log
@@ -6,52 +30,42 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+bun.lockb
 
-node_modules
-dist
-dist-ssr
-*.local
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Testing
+coverage
+.nyc_output
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-secret_models
-stt_eval/secret_models
-stt_eval
-public
-# Ignore audio files
-*.wav
-*.mp3
-*.flac
-*.WAV
-*.MP3
-data_prep_voice_clone/output/audio/
-# docs/scar-audio/
-
-# Swift build artifacts
-*.build*
-.build
-DerivedData/
-*.xcodeproj
-*.xcworkspace
-
-# Deprecated plugins
-WhisperKit/
-tauri-plugin-whisperkit/
-
-# Environment files
-.env
-.env.local
-*.pem
-credentials.json
-
-# OS files
+# OS
+.DS_Store
 Thumbs.db
+
+# Misc
+*.local
+
+# Rust/Tauri build artifacts
+**/src-tauri/target/
+**/tauri-plugin-*/target/
+
+# Example/reference projects (keep structure, ignore artifacts)
+docs/tauri-example-project/node_modules/
+docs/tauri-example-project/dist/
+docs/tauri-example-project/src-tauri/target/
+docs/tauri-example-project/tauri-plugin-fluidaudio/target/
+docs/tauri-example-project/data_prep_voice_clone/.venv/
