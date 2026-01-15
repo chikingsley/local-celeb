@@ -17,7 +17,8 @@ audapolis/
 ├── app/          # TypeScript/Electron frontend
 ├── server/       # Python transcription backend
 └── Uses PyQt5 for some components
-```
+
+```text
 
 ### What It Does Well
 
@@ -57,19 +58,19 @@ audapolis/
 
 ### Option A: Fork & Modernize Audapolis
 
-**Pros:**
+* *Pros:**
 
 - Immediate working transcript editor
 - Proven sync algorithm
 - Cross-platform ready
 
-**Cons:**  
+* *Cons:**  
 
 - Technical debt from outdated dependencies
 - Need to understand someone else's architecture
 - AGPL license (viral for commercial use)
 
-**Work Required:**
+* *Work Required:**
 
 - Update Electron & dependencies
 - Replace transcription with Whisper
@@ -78,19 +79,19 @@ audapolis/
 
 ### Option B: Build Custom (Recommended)
 
-**Pros:**
+* *Pros:**
 
 - Exact features for our use case
 - Modern tech stack from day 1
 - Choose our own license
 - Optimized for character extraction
 
-**Cons:**
+* *Cons:**
 
 - More initial work
 - Need to solve sync algorithms
 
-**Tech Stack:**
+* *Tech Stack:**
 
 ```javascript
 // Core Components
@@ -101,7 +102,8 @@ audapolis/
   framework: "Electron or Tauri",  
   backend: "Python FastAPI"
 }
-```
+
+```text
 
 ### Option C: Hybrid Approach
 
@@ -134,7 +136,8 @@ interface WordTiming {
 // Click word → seek audio
 // Select text → select audio region
 // Edit text → mark for re-sync
-```
+
+```text
 
 ### 2. Character Extraction UI
 
@@ -148,7 +151,8 @@ interface CharacterSegment {
   videoFile?: string;
   enhanced?: boolean;
 }
-```
+
+```text
 
 ### 3. Performance with Long Media
 

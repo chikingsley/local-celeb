@@ -8,13 +8,13 @@ Your instinct about fine-tuning the LLM (not just TTS) on character dialogue is 
 
 ### Beyond Just Voice - Getting the Mind
 
-**Current approach (TTS only):**
+* *Current approach (TTS only):**
 
 - Character sounds like Scar
 - But speaks with generic AI patterns
 - Disconnect between voice and personality
 
-**With LLM fine-tuning:**
+* *With LLM fine-tuning:**
 
 - Character sounds AND thinks like Scar
 - Uses their vocabulary, speech patterns, catchphrases
@@ -22,16 +22,16 @@ Your instinct about fine-tuning the LLM (not just TTS) on character dialogue is 
 
 ### Examples of What Changes
 
-**Generic Assistant:**
+* *Generic Assistant:**
 > "I'd be happy to help you with that request."
 
-**Scar-tuned Assistant:**
+* *Scar-tuned Assistant:**
 > "Oh, how delightfully... tedious. But I suppose I could spare a moment for such matters."
 
-**Generic on power:**
+* *Generic on power:**
 > "Power can be used for good or bad purposes."
 
-**Scar on power:**
+* *Scar on power:**
 > "Power, my dear friend, is the only truth in this savage world. The rest is merely... sentiment."
 
 ## Technical Implementation
@@ -40,6 +40,7 @@ Your instinct about fine-tuning the LLM (not just TTS) on character dialogue is 
 
 ```python
 # Extract character dialogue from transcripts
+
 character_dataset = []
 
 for scene in movie_transcript:
@@ -51,13 +52,15 @@ for scene in movie_transcript:
         })
 
 # Add character description
+
 system_prompt = """
-You are Scar from The Lion King. You are intelligent, theatrical, 
-sardonic, and speak with Shakespearean eloquence. You often use 
-metaphors and have a dry, calculating wit. You see the world as a 
+You are Scar from The Lion King. You are intelligent, theatrical,
+sardonic, and speak with Shakespearean eloquence. You often use
+metaphors and have a dry, calculating wit. You see the world as a
 chess game where only the clever survive.
 """
-```
+
+```text
 
 ### Fine-Tuning Strategy
 
@@ -70,6 +73,7 @@ Option 1: LoRA/QLoRA (Recommended)
 
 ```python
 # Pseudo-code for LoRA fine-tuning
+
 model = load_base_model("llama-3.2-3b")
 lora_config = LoRAConfig(
     r=16,  # rank
@@ -78,13 +82,15 @@ lora_config = LoRAConfig(
 )
 
 # Fine-tune on character dialogue
+
 trainer = SFTTrainer(
     model=model,
     train_dataset=character_dataset,
     peft_config=lora_config,
     max_seq_length=512,
 )
-```
+
+```text
 
 Option 2: Full Fine-Tuning
 
@@ -116,16 +122,16 @@ Option 2: Full Fine-Tuning
    ```
 
 2. **Paraphrasing**
-   - Generate variations of existing dialogue
-   - Maintain character voice
+    - Generate variations of existing dialogue
+    - Maintain character voice
 
 3. **Cross-Media Dataset**
-   - Include dialogue from sequels, series, books
-   - Fan-fiction that captures voice well (controversial)
+    - Include dialogue from sequels, series, books
+    - Fan-fiction that captures voice well (controversial)
 
 4. **Synthetic Expansion**
-   - Use base model to generate "in-character" responses
-   - Human-curate the best ones
+    - Use base model to generate "in-character" responses
+    - Human-curate the best ones
 
 ## Expected Results
 
@@ -156,7 +162,8 @@ You are {character_name}. Key traits:
 - Worldview: {character_philosophy}
 Always maintain character while being helpful.
 """
-```
+
+```text
 
 ### Phase 2: LoRA Fine-Tuning
 
@@ -198,7 +205,7 @@ Character stays true to their arc:
 
 ### Challenge 1: Limited Dialogue
 
-**Solution:** Combine approaches:
+* *Solution:** Combine approaches:
 
 - System prompt for personality
 - LoRA for speech patterns
@@ -206,7 +213,7 @@ Character stays true to their arc:
 
 ### Challenge 2: Balancing Character vs Utility
 
-**Solution:** Dual-mode responses:
+* *Solution:** Dual-mode responses:
 
 ```python
 if task_focused:
@@ -215,11 +222,12 @@ if task_focused:
 else:
     # Full character mode
     "Cooking? How dreadfully domestic. In the Pride Lands..."
-```
+
+```text
 
 ### Challenge 3: Preventing Harmful Content
 
-**Solution:** Safety layers:
+* *Solution:** Safety layers:
 
 - Base model safety training remains
 - Additional filters for character-specific issues
@@ -230,21 +238,21 @@ else:
 Before committing to full implementation:
 
 1. **Week 1 Test:**
-   - Take 50 lines of character dialogue
-   - Create 200 training examples
-   - Fine-tune small model (Phi-3 or similar)
-   - Compare to prompt-only approach
+    - Take 50 lines of character dialogue
+    - Create 200 training examples
+    - Fine-tune small model (Phi-3 or similar)
+    - Compare to prompt-only approach
 
 2. **Evaluation Metrics:**
-   - Vocabulary overlap with original
-   - Blind user preference test
-   - Catchphrase usage frequency
-   - Sentiment consistency
+    - Vocabulary overlap with original
+    - Blind user preference test
+    - Catchphrase usage frequency
+    - Sentiment consistency
 
 3. **Decision Point:**
-   - If 2x better than prompting → implement
-   - If marginal improvement → stick to prompts
-   - If worse → investigate why
+    - If 2x better than prompting → implement
+    - If marginal improvement → stick to prompts
+    - If worse → investigate why
 
 ## Conclusion
 

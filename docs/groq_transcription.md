@@ -1,8 +1,8 @@
----
+- --
 description: Integrate Groq&#x27;s fast speech-to-text API for instant audio transcription and translation in your applications.
-title: Speech to Text - GroqDocs 
-image: https://console.groq.com/og_cloudv5.jpg
----
+title: Speech to Text - GroqDocs
+image: [console.groq.com/og_cloudv5.jpg](https://console.groq.com/og_cloudv5.jpg)
+- --
 
 Groq API is designed to provide fast speech-to-text solution available, offering OpenAI-compatible endpoints that enable near-instant transcriptions and translations. With Groq API, you can integrate high-quality audio processing into your applications at speeds that rival human interaction.
 
@@ -54,7 +54,7 @@ Max Attachment File Size
 
 Minimum File Length
 
-0.01 seconds
+0. 01 seconds
 
 Minimum Billed Length
 
@@ -84,13 +84,14 @@ The following `ffmpeg` command can be used to reduce file size:
 
 ```bash
 ffmpeg \
-  -i <your file> \
-  -ar 16000 \
-  -ac 1 \
-  -map 0:a \
-  -c:a flac \
+  - i <your file> \
+  - ar 16000 \
+  - ac 1 \
+  - map 0:a \
+  - c:a flac \
   <output file name>.flac
-```
+
+```text
 
 ### [Working with Larger Audio Files](#working-with-larger-audio-files)
 
@@ -127,7 +128,8 @@ The Groq SDK package can be installed using the following command:
 
 ```bash
 pip install groq
-```
+
+```text
 
 The following code snippet demonstrates how to use Groq API to transcribe an audio file in Python:
 
@@ -137,12 +139,15 @@ import json
 from groq import Groq
 
 # Initialize the Groq client
+
 client = Groq()
 
 # Specify the path to the audio file
+
 filename = os.path.dirname(__file__) + "/YOUR_AUDIO.wav" # Replace with your audio file!
 
 # Open the audio file
+
 with open(filename, "rb") as file:
     # Create a transcription of the audio file
     transcription = client.audio.transcriptions.create(
@@ -156,7 +161,8 @@ with open(filename, "rb") as file:
     )
     # To print only the transcription text, you'd use print(transcription.text) (here we're printing the entire transcription object to access timestamps)
     print(json.dumps(transcription, indent=2, default=str))
-```
+
+```text
 
 ### [Example Usage of Translation Endpoint](#example-usage-of-translation-endpoint)
 
@@ -168,7 +174,8 @@ The Groq SDK package can be installed using the following command:
 
 ```bash
 pip install groq
-```
+
+```text
 
 The following code snippet demonstrates how to use Groq API to translate an audio file in Python:
 
@@ -177,12 +184,15 @@ import os
 from groq import Groq
 
 # Initialize the Groq client
+
 client = Groq()
 
 # Specify the path to the audio file
+
 filename = os.path.dirname(__file__) + "/sample_audio.m4a" # Replace with your audio file!
 
 # Open the audio file
+
 with open(filename, "rb") as file:
     # Create a translation of the audio file
     translation = client.audio.translations.create(
@@ -195,7 +205,8 @@ with open(filename, "rb") as file:
     )
     # Print the translation text
     print(translation.text)
-```
+
+```text
 
 ## [Understanding Metadata Fields](#understanding-metadata-fields)
 
@@ -216,7 +227,8 @@ This information can help us with debugging any transcription issues. Let's exam
   "compression_ratio": 1.6637554,
   "no_speech_prob": 0.012814695
 }
-```
+
+```text
 
 As shown in the above example, we receive timing information as well as quality indicators. Let's gain a better understanding of what each field means:
 

@@ -14,7 +14,6 @@ The GitHub repository containing 2,500 TXT-formatted scripts demonstrates a func
 
 Comparison of script sources reveals critical limitations:
 
-
 | Source | Script Count | Metadata Depth | Update Frequency |
 | :-- | :-- | :-- | :-- |
 | SimplyScripts | ~1,800 | Basic (title/year) | Manual updates |
@@ -29,19 +28,19 @@ A modernized pipeline would require automated ingestion from subtitle trackers (
 
 Testing reveals significant performance variations across vocal isolation tools:
 
-**ElevenLabs API**
+* *ElevenLabs API**
 
 - 93% vocal clarity in mixed tracks
 - 87ms latency per minute processed
 - \$0.18/min pricing
 
-**Demucs v4 (Local)**
+* *Demucs v4 (Local)**
 
 - 89% clarity with RTX 3090
 - 210ms processing time
 - Open-source (MIT License)
 
-**Adobe Enhanced Speech**
+* *Adobe Enhanced Speech**
 
 - 95% clarity
 - Requires Premiere Pro integration
@@ -54,7 +53,6 @@ For batch processing entire filmographies, Demucs provides cost efficiency at sc
 ### Architecture Tradeoffs: Single vs Multi-Speaker Models
 
 Testing Unsloth's Orpheus 3B across different configurations:
-
 
 | Configuration | VRAM Usage | WER (%) | RTF |
 | :-- | :-- | :-- | :-- |
@@ -69,7 +67,6 @@ The 4-bit quantized single-speaker model achieves practical performance on consu
 ### Latency Comparisons Across LLM Backends
 
 Testing response times with 16K context window:
-
 
 | Model | Hardware | First Token (ms) | Total Time (s) |
 | :-- | :-- | :-- | :-- |
@@ -96,9 +93,10 @@ def watermark_audio(audio):
     # Add inaudible 18kHz-22kHz tone pattern  
     sr = 44100  
     t = np.linspace(0, len(audio)/sr, num=len(audio))  
-    watermark = 0.01 * np.sin(2 * np.pi * 19000 * t)  
+    watermark = 0.01 *np.sin(2* np.pi *19000* t)  
     return audio + watermark  
-```
+
+```text
 
 This implements steganographic tracking while maintaining perceptual transparency[^1].
 
@@ -107,7 +105,6 @@ This implements steganographic tracking while maintaining perceptual transparenc
 ### Consumer-Grade Build Specifications
 
 For end-users requiring local processing:
-
 
 | Component | Minimum Spec | Recommended |
 | :-- | :-- | :-- |
@@ -123,7 +120,6 @@ This configuration sustains 4 concurrent voice clones at 16-bit/44.1kHz quality 
 ### Alignment Accuracy Across Languages
 
 Testing MFA v2.0.6 alignment:
-
 
 | Language | Script Accuracy | Alignment Error (ms) |
 | :-- | :-- | :-- |
@@ -153,7 +149,8 @@ contract VoiceLicense {
         return whitelist[_user];  
     }  
 }  
-```
+
+```text
 
 This creates immutable consent records while allowing revocation[^1]. Combined with on-chain royalty payments, it establishes ethical usage frameworks for potential commercialization.
 
@@ -162,7 +159,6 @@ This creates immutable consent records while allowing revocation[^1]. Combined w
 ### Quantization-Aware Training Results
 
 Testing Orpheus 3B with different precision modes:
-
 
 | Precision | Model Size | RTF | WER (%) |
 | :-- | :-- | :-- | :-- |
@@ -181,123 +177,122 @@ This architecture achieves 94% character voice isolation accuracy from raw film 
 
 [^1]: paste.txt
 
-[^2]: https://github.com/Aveek-Saha/Movie-Script-Database?search=1
+[^2]: [github.com/Aveek-Saha](https://github.com/Aveek-Saha/Movie-Script-Database?search=1)
 
-[^3]: https://gitee.com/slurmchina/slurm?skip_mobile=true
+[^3]: [gitee.com/slurmchina](https://gitee.com/slurmchina/slurm?skip_mobile=true)
 
-[^4]: https://www.npmjs.com/package/@paysimple/simple
+[^4]: [npmjs.com/package](https://www.npmjs.com/package/@paysimple/simple)
 
-[^5]: https://json2video.com/docs/tutorial/getting-started/
+[^5]: [json2video.com/docs](https://json2video.com/docs/tutorial/getting-started/)
 
-[^6]: https://blog.behroozbc.ir/betterwhisperx-enhancing-speech-recognition-with-speed-and-precision-introduction
+[^6]: [blog.behroozbc.ir](https://blog.behroozbc.ir/betterwhisperx-enhancing-speech-recognition-with-speed-and-precision-introduction)
 
-[^7]: https://blog.salad.com/distil-whisper-large-v2/
+[^7]: [blog.salad.com/distil-whisper-large-v2](https://blog.salad.com/distil-whisper-large-v2/)
 
-[^8]: https://github.com/WyattBlue/auto-editor
+[^8]: [github.com/WyattBlue](https://github.com/WyattBlue/auto-editor)
 
-[^9]: https://medevel.com/audapolis/
+[^9]: [medevel.com/audapolis](https://medevel.com/audapolis/)
 
-[^10]: https://iditect.com/programming/python-example/introduction-to-moviepy.html
+[^10]: [iditect.com/programming](https://iditect.com/programming/python-example/introduction-to-moviepy.html)
 
-[^11]: https://gen-ai.cloud/elevenlabs-voice-isolator/
+[^11]: [gen-ai.cloud/elevenlabs-voice-isolator](https://gen-ai.cloud/elevenlabs-voice-isolator/)
 
-[^12]: https://play.ht/blog/how-to-remove-background-hum-from-audio/
+[^12]: [play.ht/blog](https://play.ht/blog/how-to-remove-background-hum-from-audio/)
 
-[^13]: https://www.architjn.com/blog/orpheus-3b-text-to-speach-ai-open-source
+[^13]: [architjn.com/blog](https://www.architjn.com/blog/orpheus-3b-text-to-speach-ai-open-source)
 
-[^14]: https://github.com/SesameAILabs/csm
+[^14]: [github.com/SesameAILabs](https://github.com/SesameAILabs/csm)
 
-[^15]: https://github.com/Aveek-Saha/Movie-Script-Database/blob/master/LICENSE
+[^15]: [github.com/Aveek-Saha](https://github.com/Aveek-Saha/Movie-Script-Database/blob/master/LICENSE)
 
-[^16]: https://www.infoq.com/news/2024/11/hugging-face-smoltools/
+[^16]: [infoq.com/news](https://www.infoq.com/news/2024/11/hugging-face-smoltools/)
 
-[^17]: https://dataloop.ai/library/model/centralogic_whisperx/
+[^17]: [dataloop.ai/library](https://dataloop.ai/library/model/centralogic_whisperx/)
 
-[^18]: https://elevenlabs.io/docs/capabilities/voice-isolator
+[^18]: [elevenlabs.io/docs](https://elevenlabs.io/docs/capabilities/voice-isolator)
 
-[^19]: https://play.ht/blog/best-ai-audio-cleaners/
+[^19]: [play.ht/blog](https://play.ht/blog/best-ai-audio-cleaners/)
 
-[^20]: https://artificialanalysis.ai/speech-to-text/models/whisper
+[^20]: [artificialanalysis.ai/speech-to-text](https://artificialanalysis.ai/speech-to-text/models/whisper)
 
-[^21]: https://play.ht/blog/best-ai-audio-cleanup-apis/
+[^21]: [play.ht/blog](https://play.ht/blog/best-ai-audio-cleanup-apis/)
 
-[^22]: https://github.com/Aveek-Saha/Movie-Script-Database
+[^22]: [github.com/Aveek-Saha](https://github.com/Aveek-Saha/Movie-Script-Database)
 
-[^23]: https://github.com/Aveek-Saha/Movie-Script-Database/blob/master/sources/imsdb.py
+[^23]: [github.com/Aveek-Saha](https://github.com/Aveek-Saha/Movie-Script-Database/blob/master/sources/imsdb.py)
 
-[^24]: https://aveek-saha.github.io
+[^24]: [aveek-saha.github.io](https://aveek-saha.github.io)
 
-[^25]: https://aclanthology.org/2023.emnlp-main.366.pdf
+[^25]: [aclanthology.org/2023.emnlp-main.366.pdf](https://aclanthology.org/2023.emnlp-main.366.pdf)
 
-[^26]: https://github.com/m-bain/whisperX/issues/817
+[^26]: [github.com/m-bain](https://github.com/m-bain/whisperX/issues/817)
 
-[^27]: https://github.com/m-bain/whisperX
+[^27]: [github.com/m-bain](https://github.com/m-bain/whisperX)
 
-[^28]: https://valor-software.com/articles/interview-transcription-using-whisperx-model-part-1
+[^28]: [valor-software.com/articles](https://valor-software.com/articles/interview-transcription-using-whisperx-model-part-1)
 
-[^29]: https://www.capcut.com/tools/auto-video-editor
+[^29]: [capcut.com/tools](https://www.capcut.com/tools/auto-video-editor)
 
-[^30]: https://auto-editor.com
+[^30]: [auto-editor.com](https://auto-editor.com)
 
-[^31]: https://www.plainlyvideos.com/blog/automatic-video-editor
+[^31]: [plainlyvideos.com/blog](https://www.plainlyvideos.com/blog/automatic-video-editor)
 
-[^32]: https://elevenlabs.io/voice-isolator
+[^32]: [elevenlabs.io/voice-isolator](https://elevenlabs.io/voice-isolator)
 
-[^33]: https://elevenlabs.io/blog/voice-isolator-for-accessibility
+[^33]: [elevenlabs.io/blog](https://elevenlabs.io/blog/voice-isolator-for-accessibility)
 
-[^34]: https://elevenlabs.io/docs/api-reference/audio-isolation/convert
+[^34]: [elevenlabs.io/docs](https://elevenlabs.io/docs/api-reference/audio-isolation/convert)
 
-[^35]: https://elevenlabs.io/blog/how-to-remove-background-noise-from-audio
+[^35]: [elevenlabs.io/blog](https://elevenlabs.io/blog/how-to-remove-background-noise-from-audio)
 
-[^36]: https://github.com/canopyai/Orpheus-TTS
+[^36]: [github.com/canopyai](https://github.com/canopyai/Orpheus-TTS)
 
-[^37]: https://huggingface.co/canopylabs/orpheus-3b-0.1-ft
+[^37]: [huggingface.co/canopylabs](https://huggingface.co/canopylabs/orpheus-3b-0.1-ft)
 
-[^38]: https://canopylabs.ai/model-releases
+[^38]: [canopylabs.ai/model-releases](https://canopylabs.ai/model-releases)
 
-[^39]: https://www.reddit.com/r/LocalLLaMA/comments/1jf6igq/apache_tts_orpheus_3b_01_ft/
+[^39]: [reddit.com/r](https://www.reddit.com/r/LocalLLaMA/comments/1jf6igq/apache_tts_orpheus_3b_01_ft/)
 
-[^40]: https://montreal-forced-aligner.readthedocs.io
+[^40]: [montreal-forced-aligner.readthedocs.io](https://montreal-forced-aligner.readthedocs.io)
 
-[^41]: https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner
+[^41]: [github.com/MontrealCorpusTools](https://github.com/MontrealCorpusTools/Montreal-Forced-Aligner)
 
-[^42]: https://huggingface.co/ggerganov/whisper.cpp/discussions/12
+[^42]: [huggingface.co/ggerganov](https://huggingface.co/ggerganov/whisper.cpp/discussions/12)
 
-[^43]: https://www.reddit.com/r/LocalLLaMA/comments/1fvb83n/open_ais_new_whisper_turbo_model_runs_54_times/
+[^43]: [reddit.com/r](https://www.reddit.com/r/LocalLLaMA/comments/1fvb83n/open_ais_new_whisper_turbo_model_runs_54_times/)
 
-[^44]: https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/
+[^44]: [reddit.com/r](https://www.reddit.com/r/MachineLearning/comments/14xxg6i/d_what_is_the_most_efficient_version_of_openai/)
 
-[^45]: https://pypi.org/project/auto-editor/21.11.1/
+[^45]: [pypi.org/project](https://pypi.org/project/auto-editor/21.11.1/)
 
-[^46]: https://aitrendytools.com/tool/auto-editor
+[^46]: [aitrendytools.com/tool](https://aitrendytools.com/tool/auto-editor)
 
-[^47]: https://tools.techteamtactics.com/product/audapolis
+[^47]: [tools.techteamtactics.com/product](https://tools.techteamtactics.com/product/audapolis)
 
-[^48]: https://www.adventuresinmachinelearning.com/moviepy-simplify-your-video-editing-with-python/
+[^48]: [adventuresinmachinelearning.com](https://www.adventuresinmachinelearning.com/moviepy-simplify-your-video-editing-with-python/)
 
-[^49]: https://llelevanlab.com/voice-isolator/
+[^49]: [llelevanlab.com/voice-isolator](https://llelevanlab.com/voice-isolator/)
 
-[^50]: https://arxiv.org/html/2411.01156v1
+[^50]: [arxiv.org/html](https://arxiv.org/html/2411.01156v1)
 
-[^51]: https://aipure.ai/products/f5-tts-1/introduction
+[^51]: [aipure.ai/products](https://aipure.ai/products/f5-tts-1/introduction)
 
-[^52]: https://csm1b.com/orpheus-tts/
+[^52]: [csm1b.com/orpheus-tts](https://csm1b.com/orpheus-tts/)
 
-[^53]: https://github.com/phildougherty/sesame_csm_openai
+[^53]: [github.com/phildougherty](https://github.com/phildougherty/sesame_csm_openai)
 
-[^54]: https://eleanorchodroff.com/tutorial/montreal-forced-aligner.html
+[^54]: [eleanorchodroff.com/tutorial](https://eleanorchodroff.com/tutorial/montreal-forced-aligner.html)
 
-[^55]: https://montrealcorpustools.github.io/Montreal-Forced-Aligner/
+[^55]: [montrealcorpustools.github.io/Montreal-Forced-Aligner](https://montrealcorpustools.github.io/Montreal-Forced-Aligner/)
 
-[^56]: https://www.scott-nelson.net/MFA.html
+[^56]: [scott-nelson.net/MFA.html](https://www.scott-nelson.net/MFA.html)
 
-[^57]: https://hackolade.com/help/PolyglotDataModeling.html
+[^57]: [hackolade.com/help](https://hackolade.com/help/PolyglotDataModeling.html)
 
-[^58]: https://montreal-forced-aligner.readthedocs.io/en/stable/user_guide/index.html
+[^58]: [montreal-forced-aligner.readthedocs.io/en](https://montreal-forced-aligner.readthedocs.io/en/stable/user_guide/index.html)
 
-[^59]: https://polyglotdb.readthedocs.io/en/stable/getting_started.html
+[^59]: [polyglotdb.readthedocs.io/en](https://polyglotdb.readthedocs.io/en/stable/getting_started.html)
 
-[^60]: https://montreal-forced-aligner.readthedocs.io/en/v1.0/introduction.html
+[^60]: [montreal-forced-aligner.readthedocs.io/en](https://montreal-forced-aligner.readthedocs.io/en/v1.0/introduction.html)
 
-[^61]: https://www.vldb.org/pvldb/vol15/p3750-panse.pdf
-
+[^61]: [vldb.org/pvldb](https://www.vldb.org/pvldb/vol15/p3750-panse.pdf)

@@ -31,7 +31,8 @@ API Options:
 - Audio Enhancement: ElevenLabs Voice Isolator
 - TTS Cloning: Replicate (Kokoro 82M, MiniMax Speech-02-HD)
 - LLM: User's choice with API key management
-```
+
+```text
 
 ## Current Setup Status ✅
 
@@ -246,7 +247,7 @@ API Options:
 
 ## MVP Definition
 
-**Minimum Viable Product for v0.1:**
+* *Minimum Viable Product for v0.1:**
 
 1. Import movie + process with WhisperX
 2. View transcript with character labels
@@ -255,7 +256,7 @@ API Options:
 5. Voice chat with character using trained model
 6. Local-first operation with API options
 
-**Core User Flow:**
+* *Core User Flow:**
 
 1. Drag movie file into app
 2. Automatic transcription and diarization
@@ -282,6 +283,6 @@ API Options:
 6. **ElevenLabs**: Best-in-class audio enhancement
 7. **No model tiers**: Single optimized local stack
 
----
+- --
 
-*Everything else is iterative improvement beyond the MVP!*
+* Everything else is iterative improvement beyond the MVP!*

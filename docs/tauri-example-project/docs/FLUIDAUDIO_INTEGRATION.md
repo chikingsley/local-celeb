@@ -10,13 +10,15 @@
 ## 🎯 What Was Done
 
 ### 1. Complete SDK Replacement
+
 ✅ Replaced proprietary WhisperKit with open-source FluidAudio
 ✅ Migrated all Swift, Rust, and TypeScript code
 ✅ Added built-in speaker diarization support
 ✅ Integrated into main Tauri application
 
 ### 2. Plugin Structure
-```
+
+```text
 tauri-plugin-fluidaudio/
 ├── ios/Sources/FluidAudioPlugin.swift  # Swift implementation using FluidAudio API
 ├── src/
@@ -28,7 +30,8 @@ tauri-plugin-fluidaudio/
 ├── guest-js/index.ts    # TypeScript API
 ├── Package.swift        # Swift Package with FluidAudio dependency
 └── Cargo.toml          # Rust package configuration
-```
+
+```text
 
 ## 🚀 Usage Examples
 
@@ -59,7 +62,8 @@ const result2 = await client.transcribe('/path/to/audio.mp3', {
 
 // Cleanup when done
 await client.cleanup();
-```
+
+```text
 
 ### Data Structure
 
@@ -89,7 +93,8 @@ interface DiarizationSegment {
   startTime: number;
   endTime: number;
 }
-```
+
+```text
 
 ## 📊 API Comparison
 
@@ -107,39 +112,50 @@ interface DiarizationSegment {
 ## 🔧 Building & Testing
 
 ### Prerequisites (macOS only)
+
 ```bash
 # Install Xcode Command Line Tools
+
 xcode-select --install
 
 # Install Rust
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+curl --proto '=https' --tlsv1.2 -sSf [sh.rustup.rs](https://sh.rustup.rs) | sh
 
 # Install Bun (package manager)
-curl -fsSL https://bun.sh/install | bash
-```
+
+curl -fsSL [bun.sh/install](https://bun.sh/install) | bash
+
+```text
 
 ### Build Steps
+
 ```bash
 # Install dependencies
+
 bun install
 
 # Build plugin (downloads FluidAudio from GitHub)
+
 cd tauri-plugin-fluidaudio
 swift build  # This will download FluidAudio SDK
 
 # Build main app
+
 cd ..
 bun run tauri build
-```
+
+```text
 
 ### First Run
+
 On first transcription, FluidAudio will automatically:
 1. Download Parakeet model from HuggingFace (~600MB)
 2. Download diarization models if enabled (~1GB)
 3. Compile models for Apple Neural Engine
 4. Cache models locally for future use
 
-**Models cached at**: `~/Library/Application Support/[AppName]/models/`
+* *Models cached at**: `~/Library/Application Support/[AppName]/models/`
 
 ## 🎬 Testing with Sample Audio
 
@@ -176,7 +192,8 @@ async function testTranscription() {
     console.error('Transcription error:', error);
   }
 }
-```
+
+```text
 
 ## 🔄 Migrating Existing Code
 
@@ -200,7 +217,8 @@ interface TranscriptionSegment {
   speakerId?: string;     // NEW! Speaker identification
   confidence?: number;    // NEW! Per-segment confidence
 }
-```
+
+```text
 
 ### Update your existing components:
 
@@ -213,21 +231,26 @@ segments.map(segment => (
     <span className="text">{segment.text}</span>
   </div>
 ))
-```
+
+```text
 
 ## 🐛 Troubleshooting
 
 ### "Platform not supported" error
-**Solution**: FluidAudio only works on macOS 14+ and iOS 17+. Linux/Windows not supported.
+
+* *Solution**: FluidAudio only works on macOS 14+ and iOS 17+. Linux/Windows not supported.
 
 ### Models not downloading
-**Solution**: Check internet connection. Models download from HuggingFace on first use.
+
+* *Solution**: Check internet connection. Models download from HuggingFace on first use.
 
 ### "Failed to initialize ASR" error
-**Solution**: Ensure at least 4GB free RAM and 2GB disk space for models.
+
+* *Solution**: Ensure at least 4GB free RAM and 2GB disk space for models.
 
 ### Poor diarization quality
-**Solution**: Adjust `clusteringThreshold`:
+
+* *Solution**: Adjust `clusteringThreshold`:
 - Lower (0.5-0.6): More speakers detected, may over-segment
 - Higher (0.8-0.9): Fewer speakers, may under-segment
 - Optimal: 0.7 (17.7% DER on AMI dataset)
@@ -249,9 +272,9 @@ segments.map(segment => (
 
 ## 📚 Additional Resources
 
-- FluidAudio GitHub: https://github.com/FluidInference/FluidAudio
-- Parakeet TDT Model: https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3
-- Documentation: https://github.com/FluidInference/FluidAudio/tree/main/Documentation
+- FluidAudio GitHub: [github.com/FluidInference](https://github.com/FluidInference/FluidAudio)
+- Parakeet TDT Model: [huggingface.co/nvidia](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)
+- Documentation: [github.com/FluidInference](https://github.com/FluidInference/FluidAudio/tree/main/Documentation)
 
 ## ✅ Integration Checklist
 
@@ -275,7 +298,7 @@ segments.map(segment => (
 4. **Benchmark**: Measure transcription speed with your audio
 5. **User testing**: Get feedback on accuracy
 
----
+- --
 
-**Status**: ✅ Integration complete, ready for macOS testing
-**Last Updated**: November 20, 2025
+* *Status**: ✅ Integration complete, ready for macOS testing
+* *Last Updated**: November 20, 2025

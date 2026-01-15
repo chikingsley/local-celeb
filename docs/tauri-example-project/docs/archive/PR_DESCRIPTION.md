@@ -7,6 +7,7 @@ This PR completely replaces the proprietary WhisperKit with the open-source **Fl
 ## ✨ Major Changes
 
 ### 1. FluidAudio Integration
+
 - ✅ Replaced WhisperKit with FluidAudio SDK (v0.7.9 - latest)
 - ✅ Parakeet TDT v3 model (600M params, 25 European languages)
 - ✅ Built-in speaker diarization (Pyannote Community-1)
@@ -14,6 +15,7 @@ This PR completely replaces the proprietary WhisperKit with the open-source **Fl
 - ✅ 100% local, open-source (MIT/Apache 2.0)
 
 ### 2. Complete UI/UX Overhaul
+
 - ✅ React upgraded to 19.2.0 (latest stable)
 - ✅ All dependencies updated to latest versions
 - ✅ Professional progress dialog with real-time feedback
@@ -24,6 +26,7 @@ This PR completely replaces the proprietary WhisperKit with the open-source **Fl
 - ✅ Enhanced error handling with helpful messages
 
 ### 3. New Components & Hooks
+
 - ✅ `TranscriptionProgressDialog` - Shows download/transcription progress
 - ✅ `useFluidAudio` hook - Manages FluidAudio state and operations
 - ✅ Dialog & Progress UI components (shadcn/ui + Radix)
@@ -32,18 +35,22 @@ This PR completely replaces the proprietary WhisperKit with the open-source **Fl
 ## 🎨 User Experience
 
 ### Before
-```
+
+```text
 Load files → ??? → Maybe something happens?
-```
+
+```text
 - No feedback during transcription
 - No progress indication
 - Can't cancel operations
 - Unclear error messages
 
 ### After
-```
+
+```text
 Load Audio → Click "Transcribe" → See Progress → Get Results
-```
+
+```text
 - Always know what's happening
 - Real-time progress updates (0-100%)
 - First-time setup explanation
@@ -53,18 +60,21 @@ Load Audio → Click "Transcribe" → See Progress → Get Results
 ## 📊 Key Features
 
 ### Progress Tracking
+
 - **Model Download**: Shows download progress with hints
 - **Transcription**: Real-time updates with stage info
 - **Completion**: Auto-closes with success message
 - **Errors**: Detailed messages with troubleshooting tips
 
 ### Speaker Diarization
+
 - Automatic speaker identification
 - Color-coded speaker segments
 - Speaker count in status bar
 - Named speakers (Speaker 1, Speaker 2, etc.)
 
 ### Smart Workflow
+
 1. Load audio file
 2. "Ready to Transcribe" screen appears
 3. Click "Transcribe Audio" button
@@ -75,6 +85,7 @@ Load Audio → Click "Transcribe" → See Progress → Get Results
 ## 🛠️ Technical Details
 
 ### Dependencies Updated
+
 - React: 18.3.1 → **19.2.0**
 - Vite: 6.3.5 → **7.2.4**
 - TypeScript: 5.6.3 → **5.9.3**
@@ -82,7 +93,8 @@ Load Audio → Click "Transcribe" → See Progress → Get Results
 - +20 other packages to latest
 
 ### Plugin Architecture
-```
+
+```text
 tauri-plugin-fluidaudio/
 ├── ios/Sources/FluidAudioPlugin.swift  # Swift implementation
 ├── src/
@@ -92,10 +104,12 @@ tauri-plugin-fluidaudio/
 │   ├── mobile.rs                       # iOS bindings
 │   └── desktop.rs                      # Platform stubs
 └── guest-js/index.ts                   # TypeScript API
-```
+
+```text
 
 ### New UI Components
-```
+
+```text
 src/components/
 ├── ui/
 │   ├── dialog.tsx                      # Radix Dialog
@@ -103,20 +117,23 @@ src/components/
 ├── TranscriptionProgressDialog.tsx     # Custom progress UI
 └── TranscriptionEditor/
     └── TranscriptionView.tsx           # Updated with FluidAudio
-```
+
+```text
 
 ## 🧪 Testing
 
 ### Build Status
+
 ✅ TypeScript compiles (strict mode)
 ✅ Build succeeds (232 KB gzipped)
 ✅ Zero warnings or errors
 ✅ React 19 compatible
 
 ### Requires macOS Testing
+
 ⚠️ **Note**: FluidAudio requires macOS 14+ or iOS 17+. This PR compiles but needs testing on actual Apple hardware.
 
-**Test Checklist**:
+* *Test Checklist**:
 - [ ] First-time model download works
 - [ ] Progress dialog shows correctly
 - [ ] Transcription completes successfully
@@ -134,6 +151,7 @@ New documentation files:
 ## 🎯 Benefits
 
 ### For Users
+
 - **Transparency**: Always see what's happening
 - **Control**: Cancel long operations
 - **Clarity**: Helpful error messages
@@ -141,6 +159,7 @@ New documentation files:
 - **Privacy**: 100% local processing
 
 ### For Project
+
 - **Open Source**: No vendor lock-in
 - **Modern**: Latest React 19 + Vite 7
 - **Maintainable**: Clean, typed code
@@ -155,24 +174,24 @@ New documentation files:
 
 ## 📝 Files Changed
 
-**Added** (11 files):
+* *Added** (11 files):
 - Plugin: Swift, Rust, TypeScript for FluidAudio
 - UI: Dialog, Progress, TranscriptionProgressDialog
 - Hook: useFluidAudio with state management
 - Docs: 2 comprehensive markdown guides
 
-**Modified** (5 files):
+* *Modified** (5 files):
 - TranscriptionView: Full FluidAudio integration
 - Dependencies: All updated to latest
 - Configs: Cargo.toml, package.json
 
-**Removed** (3 files):
+* *Removed** (3 files):
 - WhisperKit plugin (replaced)
 - Old integration files
 
 ## ⚡ Breaking Changes
 
-**None** - Backward compatible with existing transcription format.
+* *None** - Backward compatible with existing transcription format.
 
 ## 🎊 Ready to Merge
 
@@ -183,7 +202,7 @@ All code is:
 - ✅ Build passing
 - ✅ Ready for macOS testing
 
----
+- --
 
 ## 📋 Commits Included
 
@@ -193,11 +212,11 @@ All code is:
 4. `0710dad` - Add FluidAudio integration documentation and testing guide
 5. `9f6e5f2` - Replace WhisperKit with FluidAudio SDK
 
----
+- --
 
-**Branch**: `claude/review-repo-status-01H9Sz2e1XFk7Cip4rYVYREP`
+* *Branch**: `claude/review-repo-status-01H9Sz2e1XFk7Cip4rYVYREP`
 
-**Replaces**: WhisperKit with open-source FluidAudio
-**Adds**: Professional UI with progress tracking
-**Upgrades**: React 19 + all latest dependencies
-**Status**: ✅ Ready for review and testing
+* *Replaces**: WhisperKit with open-source FluidAudio
+* *Adds**: Professional UI with progress tracking
+* *Upgrades**: React 19 + all latest dependencies
+* *Status**: ✅ Ready for review and testing

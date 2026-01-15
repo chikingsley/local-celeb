@@ -33,7 +33,8 @@ local-celeb-3/
 ├── vite.config.ts      # Vite config
 ├── vitest.config.ts    # Vitest config
 └── tsconfig.json       # TypeScript config
-```
+
+```text
 
 ## Prerequisites
 

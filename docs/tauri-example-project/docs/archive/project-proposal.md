@@ -2,13 +2,13 @@
 
 This document outlines an ambitious idea for an application that allows users to extract, process, and clone character voices from movies for use in local AI conversational agents. It synthesizes a raw "braindump" into a structured proposal, categorizing the various technical components and resources suggested by the user.
 
----
+- --
 
 ## Project Concept: Cinematic Voice Weaver - Local AI Character Cloning
 
-**Overarching Goal:** To create a user-friendly application that enables individuals to extract specific character voices from movies, clean and prepare their audio, train a Text-to-Speech (TTS) model on these voices, and then integrate these custom voice models into a local AI assistant for personalized interaction. The emphasis is on local, personal use, aiming for maximum control and privacy.
+* *Overarching Goal:** To create a user-friendly application that enables individuals to extract specific character voices from movies, clean and prepare their audio, train a Text-to-Speech (TTS) model on these voices, and then integrate these custom voice models into a local AI assistant for personalized interaction. The emphasis is on local, personal use, aiming for maximum control and privacy.
 
----
+- --
 
 ### Core Idea Breakdown (Phases of Development)
 
@@ -77,7 +77,7 @@ The project can be conceptualized in three primary phases, building upon each ot
     * Screenshots/screen recording APIs (native OS APIs or tools like Hammerspoon for macOS scripting).
     * Investigate legal implications of screen recording copyrighted content, even for local personal use.
 
----
+- --
 
 ### Technical Deep Dive & Resource Evaluation
 
@@ -143,7 +143,7 @@ This section evaluates the provided resources and suggests best practices for ea
 * **Native OS APIs:** For cross-platform support, direct use of Windows/macOS/Linux audio/video capture APIs would be necessary. This is more complex than a generic Python solution.
 * **Recommendation:** Start with file-based processing. Explore system audio capture as a Level 2 feature. Video capture from streaming services is significantly more complex and has legal/DRM hurdles.
 
----
+- --
 
 ### Key Questions & Considerations Summary
 
@@ -154,10 +154,10 @@ This section evaluates the provided resources and suggests best practices for ea
   * `whisperX`: Adds VAD and diarization, crucial for accurate segmentation in multi-speaker audio.
   * **Recommended:** Use `WhisperX` for initial processing (VAD/diarization) and `MFA` for precise alignment. For general ASR, `whisper.cpp` or `faster-whisper` are excellent for speed. Unsloth's fine-tuned Whisper models offer optimized performance on quantized hardware.
 * **TTS Model Storage:** Each distinct voice will likely require its own fine-tuned model (or adapter), consuming separate storage space.
-* **Legality:** The user clearly states the intent is for **local, personal, non-commercial use**. This significantly mitigates legal risks compared to public or commercial applications. The application should emphasize and facilitate this local-only usage model.
+* **Legality:**The user clearly states the intent is for**local, personal, non-commercial use**. This significantly mitigates legal risks compared to public or commercial applications. The application should emphasize and facilitate this local-only usage model.
 * **Open-Source vs. API:** Provide options for both. Users can start with robust open-source solutions and upgrade to API-based services (e.g., for audio cleaning or higher-quality TTS) if desired and willing to pay.
 
----
+- --
 
 ### Vision for the Application
 

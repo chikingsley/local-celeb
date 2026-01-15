@@ -21,7 +21,6 @@ Default permissions for the FluidAudio plugin
 <th>Description</th>
 </tr>
 
-
 <tr>
 <td>
 

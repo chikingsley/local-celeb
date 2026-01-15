@@ -37,7 +37,8 @@ API Options:
 - Audio Enhancement: ElevenLabs Voice Isolator
 - TTS Cloning: Replicate (Kokoro 82M, MiniMax Speech-02-HD)
 - LLM: User's choice with API key management
-```
+
+```text
 
 ### Model Storage & Distribution
 
@@ -53,7 +54,8 @@ Future Considerations:
 - Custom model path via manual loading (FluidAudio supports OfflineDiarizerModels.initialize())
 - App-specific storage: ~/Library/Application Support/com.local-celeb.app/
 - Optional model bundling for offline-first distribution
-```
+
+```text
 
 ### Memory Architecture
 
@@ -63,7 +65,8 @@ Character Memory Stack:
 - Vector Memory: Milvus + NV-Embed-v2 (dialogue, personality, context)
 - Smart Memory: Mem0 (dynamic memory organization, retrieval)
 - Memory Types: Working, Episodic, Semantic, Procedural
-```
+
+```text
 
 ## Current Setup Status ✅
 
@@ -393,7 +396,7 @@ Character Memory Stack:
 
 ## MVP Definition
 
-**Minimum Viable Product for v0.1:**
+* *Minimum Viable Product for v0.1:**
 
 1. Import movie + process with WhisperX
 2. View transcript with character labels
@@ -404,7 +407,7 @@ Character Memory Stack:
 7. **NEW**: Character remembers conversations across sessions
 8. Local-first operation with API options
 
-**Core User Flow:**
+* *Core User Flow:**
 
 1. Drag movie file into app
 2. Automatic transcription and diarization
@@ -440,6 +443,6 @@ Character Memory Stack:
 13. **swift-rs for FFI**: Rust-Swift bridge for Tauri plugin architecture ✅
 14. **Download on first use**: Smaller initial app, models cached locally ✅
 
----
+- --
 
-*Everything else is iterative improvement beyond the MVP!*
+* Everything else is iterative improvement beyond the MVP!*

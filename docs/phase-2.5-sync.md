@@ -31,62 +31,63 @@ This document outlines the design decisions and implementation plan for robust s
 4. **Auto-scroll jitter** - Smooth scrolling gets called too frequently
 5. **Word timestamp gaps** - Groq sometimes returns ~90% of words, missing some
 
----
+- --
 
 ## Reference Implementations
 
 ### 1. Hyperaudio Lite
 
-**Source:** <https://github.com/hyperaudio/hyperaudio-lite>
+* *Source:** <https://github.com/hyperaudio/hyperaudio-lite>
 
-**Key Pattern: data-m attributes**
+* *Key Pattern: data-m attributes**
 
 ```html
 <span data-m="5200">Hello</span>
 <span data-m="5800">world</span>
-```
 
-**How it works:**
+```text
+
+* *How it works:**
 
 - Each word has `data-m` (milliseconds) attribute
 - Click listener finds clicked element, reads `data-m`, seeks audio
 - Playback loop: adds `.read` class to words where `data-m < currentTime`
 - Simple, bulletproof - no complex character position math
 
-**Lesson for us:** Store word timestamps directly on DOM elements or use word index lookup.
+* *Lesson for us:** Store word timestamps directly on DOM elements or use word index lookup.
 
 ### 2. BBC React Transcript Editor
 
-**Source:** <https://github.com/bbc/react-transcript-editor>
+* *Source:** <https://github.com/bbc/react-transcript-editor>
 
-**Key Pattern: Draft.js with custom entities**
+* *Key Pattern: Draft.js with custom entities**
 
 - Uses Draft.js editor with word-level entities
 - Each word entity stores start/end timestamps
 - Click on word → get entity → seek audio
 - Playback: iterate entities, find current word by time range
 
-**Lesson for us:** Word-level data should be indexed for O(1) lookup.
+* *Lesson for us:** Word-level data should be indexed for O(1) lookup.
 
 ### 3. Descript
 
-**Pattern: Text-as-timeline**
+* *Pattern: Text-as-timeline**
 
 - Editing text directly edits audio
 - Single source of truth: the script
 - Timeline is derived from script timestamps
 
-**Lesson for us:** One component should own the "position" state.
+* *Lesson for us:** One component should own the "position" state.
 
----
+- --
 
 ## Decisions Made
 
 ### 1. Word Rendering Approach ✅ DECIDED
 
-**Decision: Render word spans always for consistent click behavior.**
+* *Decision: Render word spans always for consistent click behavior.**
 
-**What this means:**
+* *What this means:**
 
 Currently, the Editor uses a `<textarea>` and we calculate character positions to find words. This is fragile.
 
@@ -113,9 +114,10 @@ Instead, we'll render the segment text as individual word `<span>` elements:
     </span>
   )) ?? segment.text}
 </div>
-```
 
-**Trade-offs:**
+```text
+
+* *Trade-offs:**
 
 - More DOM elements, but modern browsers handle this fine
 - Need to handle editing differently (contentEditable or overlay approach)
@@ -123,11 +125,11 @@ Instead, we'll render the segment text as individual word `<span>` elements:
 
 ### 2. Timeline Click Behavior 🔶 NEEDS CLARIFICATION
 
-**Leaning towards:** Descript-style (seek to exact text/time position)
+* *Leaning towards:** Descript-style (seek to exact text/time position)
 
-**Open question:** Does this mean the timeline shows individual words visually?
+* *Open question:** Does this mean the timeline shows individual words visually?
 
-**Options:**
+* *Options:**
 
 A. **Segment-level timeline (current)** - Segments as blocks, click seeks to segment start
 B. **Word-level timeline** - Each word is a mini-block within segment, click seeks to word
@@ -137,13 +139,13 @@ Option C seems like a good middle ground - keep visual simplicity but calculate 
 
 ### 3. Auto-Follow During Playback ✅ DECIDED
 
-**Decision: Option A with visual indicator**
+* *Decision: Option A with visual indicator**
 
 - Auto-follow pauses when user manually scrolls during playback
 - Visual indicator button (red/green) shows auto-follow state
 - Clicking the indicator re-engages auto-follow and snaps back to playhead
 
-**Implementation:**
+* *Implementation:**
 
 ```typescript
 // In player-store
@@ -175,15 +177,16 @@ const handleScroll = (e) => {
 >
   <Target className="w-4 h-4" />
 </button>
-```
+
+```text
 
 ### 4. Find in Timeline ✅ DECIDED
 
-**Decision: Skip for now.** Low value compared to effort.
+* *Decision: Skip for now.** Low value compared to effort.
 
 Find highlights remain in Editor only. May revisit if we implement word-level timeline visualization.
 
----
+- --
 
 ## New Feature: Word-Level Editing Tools
 
@@ -191,16 +194,16 @@ Find highlights remain in Editor only. May revisit if we implement word-level ti
 
 Groq Whisper sometimes returns ~90% of words with timestamps, missing some. This creates gaps in word-level highlighting and click-to-seek.
 
-**Test Results (4:30 audio, Lion King monologue):**
+* *Test Results (4:30 audio, Lion King monologue):**
 
 | Metric | Value |
 |--------|-------|
 | Total segments | 75 |
 | Total words in text | 568 |
 | Words with timestamps | 521 |
-| **Coverage** | **91.7%** |
+| **Coverage**|**91.7%** |
 
-**Common missing word patterns:**
+* *Common missing word patterns:**
 
 - Single-word segments (e.g., "Yes.", "No.") → **0 timestamps**
 - First word of sentences often missing ("Life's" in "Life's not fair")
@@ -221,7 +224,7 @@ When a segment has incomplete word timestamps:
 3. Returns with corrected word-level timestamps
 4. Merges new timestamps back into segment
 
-**Benefits:** Less manual work, leverages AI for correction
+* *Benefits:** Less manual work, leverages AI for correction
 
 #### B. Word-Level UI in Properties Panel
 
@@ -235,7 +238,8 @@ The "Preview Text" area in PropertiesPanel could show word-level timestamps:
 │ [1.23] is [1.45] a [???] missing        │
 │ [2.10] word [2.35] here                 │
 └─────────────────────────────────────────┘
-```
+
+```text
 
 - Words with `[???]` indicate missing timestamps
 - Click word to seek to it
@@ -249,13 +253,14 @@ Double-click a segment in Timeline to "explode" it into individual word blocks:
 Before: [──────── Segment 1 ────────]
 
 After:  [Hello][world][this][is][a][test]
-```
+
+```text
 
 - Can now drag word edges to adjust individual timestamps
 - Can add missing words by splitting gaps
 - Click "Collapse" to return to segment view
 
-**Note:** This is complex. May be Phase 3+.
+* *Note:** This is complex. May be Phase 3+.
 
 #### D. Interpolate Missing Timestamps (Quick Fix)
 
@@ -282,14 +287,15 @@ function interpolateWordTimestamps(text: string, words: WordTimestamp[], segStar
     };
   });
 }
-```
 
-**Pros:** Quick to implement, fills 100% of gaps
-**Cons:** Timestamps are estimates, may be off by ~0.5s
+```text
 
-**Recommendation:** Implement Option D first for immediate improvement, then add Option A (Align button) for precise correction when needed.
+* *Pros:** Quick to implement, fills 100% of gaps
+* *Cons:** Timestamps are estimates, may be off by ~0.5s
 
----
+* *Recommendation:** Implement Option D first for immediate improvement, then add Option A (Align button) for precise correction when needed.
+
+- --
 
 ## Proposed Architecture
 
@@ -312,13 +318,14 @@ function interpolateWordTimestamps(text: string, words: WordTimestamp[], segStar
     ┌──────────┐    ┌──────────┐    ┌──────────┐
     │  Editor  │    │ Timeline │    │ Minimap  │
     └──────────┘    └──────────┘    └──────────┘
-```
 
-**Rule:** Only `<audio>` element and explicit seek calls update `currentTime`. Components ONLY read it.
+```text
+
+* *Rule:** Only `<audio>` element and explicit seek calls update `currentTime`. Components ONLY read it.
 
 ### Word Index Map (Phase A Explained)
 
-**What is it?**
+* *What is it?**
 
 Currently, to find which word is at time 5.2s, we loop through all words in all segments:
 
@@ -331,9 +338,10 @@ for (const segment of segments) {
     }
   }
 }
-```
 
-**Word Index Map** is a pre-built sorted array that enables binary search:
+```text
+
+* *Word Index Map** is a pre-built sorted array that enables binary search:
 
 ```typescript
 // Phase A: Build index once when segments load
@@ -353,8 +361,8 @@ const wordTimeIndex: WordIndex[] = segments.flatMap(seg =>
     wordIndex: i,
     start: w.start,
     end: w.end,
-    charStart: /* calculated */,
-    charEnd: /* calculated */,
+    charStart: /*calculated*/,
+    charEnd: /*calculated*/,
   })) ?? []
 ).sort((a, b) => a.start - b.start);
 
@@ -371,15 +379,16 @@ function findWordAtTime(time: number): WordIndex | null {
   }
   return null;
 }
-```
 
-**Why it matters:**
+```text
+
+* *Why it matters:**
 
 - 10-minute transcript = ~1,500 words
 - Linear search: check up to 1,500 words every frame during playback
 - Binary search: check ~11 words max (log₂1500 ≈ 11)
 
----
+- --
 
 ## Implementation Checklist
 
@@ -427,30 +436,30 @@ function findWordAtTime(time: number): WordIndex | null {
 - [ ] Add tests for auto-follow threshold logic
 - [ ] Manual QA: 10-minute+ audio file
 
----
+- --
 
 ## Decisions Made
 
 ### Timeline Click Behavior ✅ DECIDED
 
-**Decision: Option B** - Seek to proportional time based on click X position within segment.
+* *Decision: Option B** - Seek to proportional time based on click X position within segment.
 
 Click position within segment bar calculates time: `segStart + (clickX / segWidth) * segDuration`
 
 Keep visual simplicity (segment blocks, not word blocks), but get precise seeking.
 
----
+- --
 
 ### Word Editing Approach ✅ DECIDED
 
-**Decision: Option A** - Clear timestamps on edit, mark segment as "needs re-alignment".
+* *Decision: Option A** - Clear timestamps on edit, mark segment as "needs re-alignment".
 
 - Add `wordsDirty?: boolean` flag to segment
 - Show visual indicator when timestamps are stale
 - User clicks "Align" button to re-sync (future feature)
 - Keeps current textarea approach, no contentEditable complexity
 
----
+- --
 
 ## Reference Links
 
@@ -459,7 +468,7 @@ Keep visual simplicity (segment blocks, not word blocks), but get precise seekin
 - [Transcript Tracer JS](https://github.com/samuelbradshaw/transcript-tracer-js) - WebVTT sync
 - [Syncing Transcript with Audio in React](https://www.metaview.ai/resources/blog/syncing-a-transcript-with-audio-in-react) - Tutorial
 
----
+- --
 
 ## Next Steps
 

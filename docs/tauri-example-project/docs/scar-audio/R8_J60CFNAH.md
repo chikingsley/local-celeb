@@ -52,21 +52,23 @@ Use these example outputs to better understand the types of inputs the model acc
 {
   "model": "speech-02-turbo",
   "accuracy": 0.7,
-  "voice_file": "https://replicate.delivery/czjl/21U5IFboRwrhBlKks9pmaz119Hvo1ISryE0LNUKuerpqS9UKA/output.wav",
+  "voice_file": "[replicate.delivery/czjl](https://replicate.delivery/czjl/21U5IFboRwrhBlKks9pmaz119Hvo1ISryE0LNUKuerpqS9UKA/output.wav",)
   "need_noise_reduction": false,
   "need_volume_normalization": false
 }
-```
+
+```text
 
 #### Output
 
 ```json
 {
   "model": "speech-02-turbo",
-  "preview": "https://replicate.delivery/xezq/p80hlWW4YWptBh3YGnNEDmR8ldh9QQDCxZNrICRge2HgT9UKA/tmpuo0ipa91.mp3",
+  "preview": "[replicate.delivery/xezq](https://replicate.delivery/xezq/p80hlWW4YWptBh3YGnNEDmR8ldh9QQDCxZNrICRge2HgT9UKA/tmpuo0ipa91.mp3",)
   "voice_id": "R8_FDU1SV5S"
 }
-```
+
+```text
 
 ## Model readme
 

@@ -10,33 +10,46 @@ Local-Celeb is a local-first desktop application that enables users to extract, 
 
 ```bash
 # Install dependencies (using Bun)
+
 bun install
 
 # Run development server
+
 bun run dev
 
 # Build for production
+
 bun run build
 
 # Preview production build
+
 bun run preview
 
 # Run Tauri CLI commands
+
 bun run tauri [command]
-```
+
+```text
 
 ### Python Voice Cloning Tools
+
 ```bash
 cd data_prep_voice_clone
+
 # Install dependencies with Poetry
+
 poetry install
+
 # Run dataset preparation
+
 poetry run python prepare_dataset.py
-```
+
+```text
 
 ## Architecture Overview
 
 ### Tech Stack
+
 - **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
 - **Desktop Framework**: Tauri v2 (Rust backend)
 - **Package Manager**: Bun
@@ -45,6 +58,7 @@ poetry run python prepare_dataset.py
 - **Audio Processing**: WaveSurfer.js for waveform visualization
 
 ### Key Directories
+
 - `/src/components/TranscriptionEditor/` - Core transcription editing components
 - `/src/hooks/` - Custom React hooks for state management
 - `/src-tauri/` - Rust backend code
@@ -52,6 +66,7 @@ poetry run python prepare_dataset.py
 - `/docs/` - Project documentation and roadmap
 
 ### Core Components
+
 - `TranscriptionView.tsx` - Main editor interface
 - `AudioPlayer.tsx` - Audio playback with waveform visualization
 - `WordLevelEditor.tsx` - Word-level transcription editing
@@ -68,21 +83,25 @@ Based on the roadmap, the application will integrate:
 ## Development Guidelines
 
 ### TypeScript Standards
+
 - Strict mode is enabled - ensure all types are properly defined
 - Use functional components with hooks
 - Define interfaces in `/src/types/transcription.ts` for data models
 
 ### Component Development
+
 - Follow existing patterns in `/src/components/ui/` for consistency
 - Use Tailwind CSS for styling (v4 with CSS-based configuration)
 - Implement keyboard shortcuts using `react-hotkeys-hook`
 
 ### State Management
+
 - Use Zustand stores for global state
 - Keep component-specific state local with useState
 - Audio state is managed via `useAudioPlayer` hook
 
 ### Performance Requirements
+
 - Target < 2s latency for AI conversations
 - Optimize audio processing for real-time playback
 - Implement efficient rendering for large transcripts

@@ -2,17 +2,18 @@
 
 ## Vision
 
-**Voice Cloning Prep Pipeline** - From raw video/audio to clean, isolated voice samples ready for cloning (ElevenLabs, local models).
+* *Voice Cloning Prep Pipeline** - From raw video/audio to clean, isolated voice samples ready for cloning (ElevenLabs, local models).
 
-```
+```text
 Input Sources              Segmentation              Audio Processing           Output
 ─────────────────          ─────────────             ────────────────           ──────
 Video/Audio file    →      Transcription (Whisper)   Silence removal     →      Clean audio per speaker
-  +                   →      or                    →   Speaker isolation    →      → Voice cloning service
+  + →      or                    →   Speaker isolation    →      → Voice cloning service
 SRT/VTT subtitles          SRT/VTT import            Normalization              → Local training
-```
 
----
+```text
+
+- --
 
 ## Phase 1 - Core Improvements ✅ COMPLETED
 
@@ -46,7 +47,7 @@ SRT/VTT subtitles          SRT/VTT import            Normalization              
 
 ## Phase 2.5 - Sync & Navigation ✅ COMPLETED
 
-**See: [docs/phase-2.5-sync.md](docs/phase-2.5-sync.md) for design decisions**
+* *See: [docs/phase-2.5-sync.md](docs/phase-2.5-sync.md) for design decisions**
 
 - [x] Word timestamp interpolation (fills 100% gaps from Whisper's ~92%)
 - [x] Word index with O(log n) binary search for playback highlighting
@@ -130,7 +131,7 @@ Native performance, local processing, offline support.
 - [ ] Project sharing
 - [ ] Version history
 
----
+- --
 
 ## Future Enhancements (Backlog)
 
@@ -148,7 +149,7 @@ Native performance, local processing, offline support.
 - [ ] Find in Timeline (not just Editor)
 - [ ] Batch processing (multiple files)
 
----
+- --
 
 ## Technical Debt
 
@@ -160,7 +161,7 @@ Native performance, local processing, offline support.
 - [ ] Improve accessibility (ARIA labels, keyboard navigation)
 - [ ] Performance optimization for large transcripts
 
----
+- --
 
 ## Notes
 
@@ -197,9 +198,9 @@ The end-to-end dream workflow:
 4. **Optional**: Import official subtitles for timing (skip transcription)
 5. **Segment** by speaker with timeline UI
 6. **Clean** each speaker's audio:
-   - Isolate vocals (remove music/sfx)
-   - Remove silence gaps
-   - Normalize levels
+    - Isolate vocals (remove music/sfx)
+    - Remove silence gaps
+    - Normalize levels
 7. **Export** clean audio per speaker
 8. **Send** to ElevenLabs or local cloning model
 

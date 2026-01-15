@@ -33,7 +33,8 @@ Tier 3 (16GB+ VRAM):
 - Whisper large
 - Orpheus FP16
 - Llama 3 70B
-```
+
+```text
 
 ## Phase 1: Core Infrastructure (Week 1-2)
 
@@ -209,19 +210,19 @@ Tier 3 (16GB+ VRAM):
 ## Key Decisions Needed Now
 
 1. **Audapolis Integration**
-   - Fork and modernize? (Pros: faster start, Cons: technical debt)
-   - Build from scratch? (Pros: exact features, Cons: more work)
-   - Hybrid approach? (Use concepts, not code)
+    - Fork and modernize? (Pros: faster start, Cons: technical debt)
+    - Build from scratch? (Pros: exact features, Cons: more work)
+    - Hybrid approach? (Use concepts, not code)
 
 2. **Distribution Model**
-   - Open source everything?
-   - Open source app, paid model hub?
-   - Freemium with advanced features?
+    - Open source everything?
+    - Open source app, paid model hub?
+    - Freemium with advanced features?
 
 3. **Legal Safeguards**
-   - Terms of service checkbox
-   - Watermarking options
-   - Usage analytics (opt-in)
+    - Terms of service checkbox
+    - Watermarking options
+    - Usage analytics (opt-in)
 
 ## Success Metrics
 

@@ -25,7 +25,8 @@ This directory contains scripts and resources to prepare a custom speech dataset
 │       └── metadata.csv
 ├── scar_isolated.json
 └── scar_isolated.mp3
-```
+
+```text
 
 ## How to Run
 
