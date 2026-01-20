@@ -1,24 +1,24 @@
 {
-  "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": ["main"],
-  "permissions": [
-    "core:default",
-    "opener:default",
-    "dialog:default",
-    "fs:allow-read",
-    "fs:allow-write",
-    "fs:allow-read-file",
-    "fs:allow-write-file",
-    "fs:allow-read-dir",
-    "fs:allow-mkdir",
-    "fs:allow-remove",
-    "fs:allow-exists",
-    {
-      "identifier": "fs:scope",
-      "allow": ["$AUDIO", "$DOWNLOAD", "$DOCUMENT", "$HOME/**"]
-    },
-    "fluidaudio:default"
-  ]
+	"$schema": "../gen/schemas/desktop-schema.json",
+	"identifier": "default",
+	"description": "Capability for the main window",
+	"windows": ["main"],
+	"permissions": [
+		"core:default",
+		"opener:default",
+		"dialog:default",
+		"fs:allow-read",
+		"fs:allow-write",
+		"fs:allow-read-file",
+		"fs:allow-write-file",
+		"fs:allow-read-dir",
+		"fs:allow-mkdir",
+		"fs:allow-remove",
+		"fs:allow-exists",
+		{
+			"identifier": "fs:scope",
+			"allow": ["$AUDIO", "$DOWNLOAD", "$DOCUMENT", "$HOME/**"]
+		},
+		"fluidaudio:default"
+	]
 }

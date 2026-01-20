@@ -17,12 +17,8 @@ export function WelcomeScreen({
 		<div className="flex flex-col items-center justify-center min-h-full p-6 font-sans bg-white">
 			<div className="max-w-2xl w-full text-center">
 				{/* Title */}
-				<h1 className="text-5xl font-semibold text-slate-900 mb-4 tracking-tight">
-					Local Celeb
-				</h1>
-				<p className="text-xl text-slate-500 mb-16">
-					AI-powered transcription editor
-				</p>
+				<h1 className="text-5xl font-semibold text-slate-900 mb-4 tracking-tight">Local Celeb</h1>
+				<p className="text-xl text-slate-500 mb-16">AI-powered transcription editor</p>
 
 				{isProcessing ? (
 					<div className="flex flex-col items-center justify-center py-12">
@@ -45,9 +41,7 @@ export function WelcomeScreen({
 										<p className="text-lg font-medium text-slate-900">
 											Drop your audio or video file here
 										</p>
-										<p className="text-slate-500 mt-1">
-											or click to browse
-										</p>
+										<p className="text-slate-500 mt-1">or click to browse</p>
 									</div>
 								</div>
 							</div>
@@ -74,7 +68,10 @@ export function WelcomeScreen({
 						>
 							<Sparkles size={18} className="text-amber-500" />
 							<span>Try with a sample</span>
-							<ArrowRight size={16} className="text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+							<ArrowRight
+								size={16}
+								className="text-slate-400 group-hover:translate-x-0.5 transition-transform"
+							/>
 						</button>
 
 						{/* Features hint */}

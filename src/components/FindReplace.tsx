@@ -1,4 +1,5 @@
 import {
+	ALargeSmall,
 	CaseSensitive,
 	ChevronDown,
 	ChevronRight,
@@ -8,11 +9,10 @@ import {
 	ReplaceAll,
 	WholeWord,
 	X,
-	ALargeSmall,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import { parseTime } from "@/lib/playback-utils";
+import { cn } from "@/lib/utils";
 import { usePlayerStore } from "@/stores/player-store";
 import type { Segment } from "@/types";
 
@@ -388,11 +388,7 @@ export default function FindReplace({
 
 					{/* Match count */}
 					<span className="text-xs text-slate-500 min-w-[50px] text-center">
-						{matches.length > 0
-							? `${currentMatchIndex + 1}/${matches.length}`
-							: query
-								? "0/0"
-								: ""}
+						{matches.length > 0 ? `${currentMatchIndex + 1}/${matches.length}` : query ? "0/0" : ""}
 					</span>
 
 					{/* Navigation */}

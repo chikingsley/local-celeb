@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { Segment, WordTimestamp } from "@/types";
 import {
-	parseTime,
+	findClosestSegment,
+	findClosestVisibleMatch,
 	findSegmentAtTime,
 	findSegmentIndexAtTime,
-	findWordAtTime,
-	findClosestSegment,
-	findWordCharacterRange,
 	findWordAtCharPosition,
-	findClosestVisibleMatch,
+	findWordAtTime,
+	findWordCharacterRange,
+	parseTime,
 } from "./playback-utils";
 
 describe("parseTime", () => {

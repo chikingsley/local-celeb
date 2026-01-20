@@ -193,9 +193,7 @@ export function PropertiesPanel({
 						<div className="grid grid-cols-2 gap-4">
 							<div>
 								<span className="text-xs text-slate-500 block mb-1.5">Language</span>
-								<div className="text-sm text-slate-800 font-medium">
-									{meta.language}
-								</div>
+								<div className="text-sm text-slate-800 font-medium">{meta.language}</div>
 							</div>
 							<div>
 								<span className="text-xs text-slate-500 block mb-1.5">Duration</span>

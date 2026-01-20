@@ -173,9 +173,7 @@ export default function App() {
 			setAudioUrl("/sample.mp3");
 
 			// Set project data
-			setProjectData(data.segments, [
-				{ id: "speaker_1", name: "Scar", color: "#059669" },
-			]);
+			setProjectData(data.segments, [{ id: "speaker_1", name: "Scar", color: "#059669" }]);
 			setDuration(data.meta.duration);
 			setMeta(data.meta);
 			setView(AppView.EDITOR);

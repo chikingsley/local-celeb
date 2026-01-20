@@ -98,7 +98,10 @@ export function interpolateWordTimestamps(
  * Normalize word for comparison (lowercase, remove punctuation)
  */
 function normalizeWord(word: string): string {
-	return word.toLowerCase().replace(/[.,!?;:'"()\[\]{}]/g, "").trim();
+	return word
+		.toLowerCase()
+		.replace(/[.,!?;:'"()[\]{}]/g, "")
+		.trim();
 }
 
 /**
@@ -184,10 +187,7 @@ export function buildWordIndex(segments: Segment[]): WordIndex[] {
 /**
  * Binary search to find word at given time - O(log n)
  */
-export function findWordAtTimeFast(
-	wordIndex: WordIndex[],
-	timeSeconds: number
-): WordIndex | null {
+export function findWordAtTimeFast(wordIndex: WordIndex[], timeSeconds: number): WordIndex | null {
 	if (wordIndex.length === 0) return null;
 
 	let low = 0;

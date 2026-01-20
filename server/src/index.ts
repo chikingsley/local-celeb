@@ -109,9 +109,14 @@ const app = new Elysia()
 				});
 
 				// Log word coverage (Whisper typically returns ~90% with timestamps)
-				const totalTextWords = groqSegments.reduce((sum, s) => sum + s.text.trim().split(/\s+/).length, 0);
+				const totalTextWords = groqSegments.reduce(
+					(sum, s) => sum + s.text.trim().split(/\s+/).length,
+					0
+				);
 				const totalTimestampedWords = segments.reduce((sum, s) => sum + (s.words?.length || 0), 0);
-				console.log(`Word coverage: ${totalTimestampedWords}/${totalTextWords} (${((totalTimestampedWords / totalTextWords) * 100).toFixed(0)}%)`);
+				console.log(
+					`Word coverage: ${totalTimestampedWords}/${totalTextWords} (${((totalTimestampedWords / totalTextWords) * 100).toFixed(0)}%)`
+				);
 
 				// If no segments but we have text, create a single segment
 				if (segments.length === 0 && transcription.text) {

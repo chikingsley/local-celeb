@@ -1,12 +1,12 @@
-import { describe, it, expect } from "vitest";
-import {
-	interpolateWordTimestamps,
-	buildWordIndex,
-	findWordAtTimeFast,
-	findWordAtCharPositionFast,
-	getSegmentWords,
-} from "./word-index";
+import { describe, expect, it } from "vitest";
 import type { Segment, WordTimestamp } from "@/types";
+import {
+	buildWordIndex,
+	findWordAtCharPositionFast,
+	findWordAtTimeFast,
+	getSegmentWords,
+	interpolateWordTimestamps,
+} from "./word-index";
 
 describe("interpolateWordTimestamps", () => {
 	it("returns empty array for empty text", () => {
@@ -129,7 +129,9 @@ describe("buildWordIndex", () => {
 	it("sorts index by start time across segments", () => {
 		const segments: Segment[] = [
 			createSegment("seg2", "Later", "00:05", "00:07", [{ word: "Later", start: 5.0, end: 6.0 }]),
-			createSegment("seg1", "Earlier", "00:00", "00:02", [{ word: "Earlier", start: 0.0, end: 1.0 }]),
+			createSegment("seg1", "Earlier", "00:00", "00:02", [
+				{ word: "Earlier", start: 0.0, end: 1.0 },
+			]),
 		];
 		const result = buildWordIndex(segments);
 		expect(result[0].word).toBe("Earlier");
@@ -139,10 +141,46 @@ describe("buildWordIndex", () => {
 
 describe("findWordAtTimeFast", () => {
 	const createIndex = (): ReturnType<typeof buildWordIndex> => [
-		{ segmentId: "s1", wordIndex: 0, word: "One", start: 0.0, end: 0.5, charStart: 0, charEnd: 3, interpolated: false },
-		{ segmentId: "s1", wordIndex: 1, word: "two", start: 0.5, end: 1.0, charStart: 4, charEnd: 7, interpolated: false },
-		{ segmentId: "s1", wordIndex: 2, word: "three", start: 1.0, end: 1.5, charStart: 8, charEnd: 13, interpolated: false },
-		{ segmentId: "s2", wordIndex: 0, word: "four", start: 2.0, end: 2.5, charStart: 0, charEnd: 4, interpolated: false },
+		{
+			segmentId: "s1",
+			wordIndex: 0,
+			word: "One",
+			start: 0.0,
+			end: 0.5,
+			charStart: 0,
+			charEnd: 3,
+			interpolated: false,
+		},
+		{
+			segmentId: "s1",
+			wordIndex: 1,
+			word: "two",
+			start: 0.5,
+			end: 1.0,
+			charStart: 4,
+			charEnd: 7,
+			interpolated: false,
+		},
+		{
+			segmentId: "s1",
+			wordIndex: 2,
+			word: "three",
+			start: 1.0,
+			end: 1.5,
+			charStart: 8,
+			charEnd: 13,
+			interpolated: false,
+		},
+		{
+			segmentId: "s2",
+			wordIndex: 0,
+			word: "four",
+			start: 2.0,
+			end: 2.5,
+			charStart: 0,
+			charEnd: 4,
+			interpolated: false,
+		},
 	];
 
 	it("returns null for empty index", () => {
@@ -175,7 +213,16 @@ describe("findWordAtTimeFast", () => {
 
 	it("returns null for time before first word", () => {
 		const index = [
-			{ segmentId: "s1", wordIndex: 0, word: "test", start: 1.0, end: 2.0, charStart: 0, charEnd: 4, interpolated: false },
+			{
+				segmentId: "s1",
+				wordIndex: 0,
+				word: "test",
+				start: 1.0,
+				end: 2.0,
+				charStart: 0,
+				charEnd: 4,
+				interpolated: false,
+			},
 		];
 		expect(findWordAtTimeFast(index, 0.5)).toBeNull();
 	});
@@ -183,9 +230,36 @@ describe("findWordAtTimeFast", () => {
 
 describe("findWordAtCharPositionFast", () => {
 	const createIndex = (): ReturnType<typeof buildWordIndex> => [
-		{ segmentId: "s1", wordIndex: 0, word: "Hello", start: 0.0, end: 0.5, charStart: 0, charEnd: 5, interpolated: false },
-		{ segmentId: "s1", wordIndex: 1, word: "world", start: 0.5, end: 1.0, charStart: 6, charEnd: 11, interpolated: false },
-		{ segmentId: "s2", wordIndex: 0, word: "Test", start: 2.0, end: 2.5, charStart: 0, charEnd: 4, interpolated: false },
+		{
+			segmentId: "s1",
+			wordIndex: 0,
+			word: "Hello",
+			start: 0.0,
+			end: 0.5,
+			charStart: 0,
+			charEnd: 5,
+			interpolated: false,
+		},
+		{
+			segmentId: "s1",
+			wordIndex: 1,
+			word: "world",
+			start: 0.5,
+			end: 1.0,
+			charStart: 6,
+			charEnd: 11,
+			interpolated: false,
+		},
+		{
+			segmentId: "s2",
+			wordIndex: 0,
+			word: "Test",
+			start: 2.0,
+			end: 2.5,
+			charStart: 0,
+			charEnd: 4,
+			interpolated: false,
+		},
 	];
 
 	it("finds word at character position", () => {
@@ -216,9 +290,36 @@ describe("findWordAtCharPositionFast", () => {
 describe("getSegmentWords", () => {
 	it("returns only words for specified segment", () => {
 		const index = [
-			{ segmentId: "s1", wordIndex: 0, word: "One", start: 0, end: 0.5, charStart: 0, charEnd: 3, interpolated: false },
-			{ segmentId: "s2", wordIndex: 0, word: "Two", start: 1, end: 1.5, charStart: 0, charEnd: 3, interpolated: false },
-			{ segmentId: "s1", wordIndex: 1, word: "Three", start: 0.5, end: 1, charStart: 4, charEnd: 9, interpolated: false },
+			{
+				segmentId: "s1",
+				wordIndex: 0,
+				word: "One",
+				start: 0,
+				end: 0.5,
+				charStart: 0,
+				charEnd: 3,
+				interpolated: false,
+			},
+			{
+				segmentId: "s2",
+				wordIndex: 0,
+				word: "Two",
+				start: 1,
+				end: 1.5,
+				charStart: 0,
+				charEnd: 3,
+				interpolated: false,
+			},
+			{
+				segmentId: "s1",
+				wordIndex: 1,
+				word: "Three",
+				start: 0.5,
+				end: 1,
+				charStart: 4,
+				charEnd: 9,
+				interpolated: false,
+			},
 		];
 		const result = getSegmentWords(index, "s1");
 		expect(result).toHaveLength(2);
@@ -227,7 +328,16 @@ describe("getSegmentWords", () => {
 
 	it("returns empty array for unknown segment", () => {
 		const index = [
-			{ segmentId: "s1", wordIndex: 0, word: "One", start: 0, end: 0.5, charStart: 0, charEnd: 3, interpolated: false },
+			{
+				segmentId: "s1",
+				wordIndex: 0,
+				word: "One",
+				start: 0,
+				end: 0.5,
+				charStart: 0,
+				charEnd: 3,
+				interpolated: false,
+			},
 		];
 		const result = getSegmentWords(index, "unknown");
 		expect(result).toEqual([]);
