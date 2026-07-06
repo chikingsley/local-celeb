@@ -1,69 +1,75 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.5.2/schema.json",
-	"vcs": {
-		"enabled": true,
-		"clientKind": "git",
-		"useIgnoreFile": true
-	},
-	"files": {
-		"ignoreUnknown": false,
-		"includes": [
-			"**",
-			"!**/node_modules",
-			"!**/dist",
-			"!**/.next",
-			"!**/coverage",
-			"!improve-side-panel"
-		]
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"indentWidth": 2,
-		"lineWidth": 100
-	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"preset": "recommended",
-			"complexity": {
-				"noForEach": "off"
-			},
-			"correctness": {
-				"useExhaustiveDependencies": "warn",
-				"noUnusedFunctionParameters": "warn",
-				"noInvalidUseBeforeDeclaration": "warn"
-			},
-			"style": {
-				"noNonNullAssertion": "warn",
-				"useConst": "error",
-				"useImportType": "error"
-			},
-			"suspicious": {
-				"noExplicitAny": "warn",
-				"noArrayIndexKey": "warn",
-				"noAssignInExpressions": "warn"
-			},
-			"a11y": {
-				"useKeyWithClickEvents": "warn",
-				"useMediaCaption": "off",
-				"noStaticElementInteractions": "warn",
-				"useButtonType": "warn"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"semicolons": "always",
-			"trailingCommas": "es5"
-		}
-	},
-	"css": {
-		"parser": {
-			"cssModules": true,
-			"tailwindDirectives": true
-		}
-	}
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.next",
+      "!**/coverage",
+      "!improve-side-panel"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "complexity": {
+        "noForEach": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "warn",
+        "noUnusedFunctionParameters": "warn",
+        "noInvalidUseBeforeDeclaration": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn",
+        "useConst": "error",
+        "useImportType": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noArrayIndexKey": "warn",
+        "noAssignInExpressions": "warn"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "warn",
+        "useMediaCaption": "off",
+        "noStaticElementInteractions": "warn",
+        "useButtonType": "warn"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "es5"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    }
+  },
+  "extends": ["ultracite/biome/core", "ultracite/biome/react"]
 }

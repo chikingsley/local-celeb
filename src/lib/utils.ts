@@ -27,12 +27,16 @@ export function formatTime(seconds: number): string {
  */
 export function parseTime(timeStr: string): number {
 	const parts = timeStr.split(":");
-	if (parts.length !== 2) return 0;
+	if (parts.length !== 2) {
+		return 0;
+	}
 
 	const mins = Number.parseInt(parts[0], 10);
 	const secs = Number.parseFloat(parts[1]);
 
-	if (Number.isNaN(mins) || Number.isNaN(secs)) return 0;
+	if (Number.isNaN(mins) || Number.isNaN(secs)) {
+		return 0;
+	}
 	return mins * 60 + secs;
 }
 
@@ -40,5 +44,5 @@ export function parseTime(timeStr: string): number {
  * Generate a unique ID
  */
 export function generateId(prefix = "id"): string {
-	return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+	return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }

@@ -7,16 +7,16 @@ Local Celeb is a local transcript review and editing workbench. The current repo
 - **Review mode** renders the transcript as speaker turns. A turn is one speaker's continuous speech until another speaker starts.
 - **Editor mode** keeps the turn, segment, word, and timeline surfaces for diarization, segment boundaries, timing, and word-alignment work.
 - The canonical direction is `Transcript -> Turn -> Segment -> Word`; turns are derived from the segment stream instead of stored as duplicate transcript text.
-- Transcript files can be imported directly without the proxy: JSON, JSONL, SRT, and VTT.
-- Audio/video transcription is still available through the optional Groq proxy when `GROQ_API_KEY` is configured.
+- Transcript files can be imported directly: JSON, JSONL, SRT, and VTT.
+- Audio/video files can be opened together with an SRT/VTT sidecar transcript. Live transcription is intentionally out of scope for this UI workbench.
 
 ## Tech Stack
 
 - React 19, TypeScript, Vite
 - Tailwind CSS v4
+- shadcn/Base UI components
 - Zustand
 - Bun
-- Optional Elysia/Groq transcription proxy
 - Biome
 
 ## Setup
@@ -25,29 +25,19 @@ Local Celeb is a local transcript review and editing workbench. The current repo
 bun install
 ```
 
-For transcript-only UI work, run just the client:
+Run the Vite app:
 
 ```bash
-bun run dev:client -- --host 0.0.0.0
-```
-
-For audio/video transcription through Groq, configure the API key and run both client and server:
-
-```bash
-cp .env.example .env.local
-# edit .env.local and set GROQ_API_KEY
 bun run dev
 ```
 
-The Vite client defaults to <http://localhost:3000>. The proxy server defaults to port `3001`.
+The Vite dev server binds to `0.0.0.0` on port `3000` so it can be reached from another machine on the same network.
 
 ## Scripts
 
 | Command | Description |
 | ------- | ----------- |
-| `bun run dev` | Start client and optional Groq proxy |
-| `bun run dev:client` | Start the Vite client |
-| `bun run dev:server` | Start the Elysia/Groq proxy |
+| `bun run dev` | Start the Vite client on `0.0.0.0:3000` |
 | `bun run build` | Build the client |
 | `bun run preview` | Preview the production build |
 | `bun run typecheck` | Run TypeScript without emit |
@@ -56,10 +46,11 @@ The Vite client defaults to <http://localhost:3000>. The proxy server defaults t
 
 ## Useful Paths
 
-- `src/lib/transcript-import.ts`: transcript import adapters.
-- `src/lib/transcript-turns.ts`: derived turn model and segment/turn mappings.
-- `src/components/ReviewEditor.tsx`: turn-level review surface.
-- `src/components/Editor.tsx`: segment-level editor.
+- `src/app/`: app shell, sidebar, view state, and layout constants.
+- `src/features/`: feature surfaces for editor, timeline, export, find/replace, settings, and welcome.
+- `src/components/ui/`: generated shadcn/Base UI primitives.
+- `src/domain/transcript/`: transcript types, import/export adapters, turn derivation, and word alignment.
+- `src/domain/timeline/`: timeline math and gap repair helpers.
 - `public/fixtures/`: local sample media/transcript fixtures, including the multi-speaker Scribe fixture.
 - `docs/TODO.md`: active product and editor backlog.
 - `docs/research/`: evidence notes for transcript shapes and UI/editor references.

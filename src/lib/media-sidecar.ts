@@ -66,8 +66,8 @@ export function pickMediaAndSubtitleFiles<T extends FileLike>(
 	const mediaStem = fileStem(mediaFile);
 	const ranked = subtitleFiles
 		.map((subtitleFile) => ({
-			subtitleFile,
 			score: subtitleMatchScore(mediaStem, fileStem(subtitleFile), subtitleFiles.length),
+			subtitleFile,
 		}))
 		.sort((a, b) => b.score - a.score);
 
@@ -82,7 +82,9 @@ function subtitleMatchScore(
 	subtitleStem: string,
 	subtitleCount: number
 ): number {
-	if (subtitleStem === mediaStem) return 4;
+	if (subtitleStem === mediaStem) {
+		return 4;
+	}
 	if (
 		subtitleStem.startsWith(`${mediaStem}.`) ||
 		subtitleStem.startsWith(`${mediaStem}-`) ||

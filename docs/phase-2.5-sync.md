@@ -19,9 +19,9 @@ This document outlines the design decisions and implementation plan for robust s
 ### Current Code References
 
 - `src/stores/player-store.ts:117-125` - scrollToTime/scrollToSegment callbacks
-- `src/components/Editor.tsx:246-270` - handleTextareaClick (word-level seek)
-- `src/components/Timeline.tsx:141-169` - Auto-scroll during playback
-- `src/lib/playback-utils.ts` - parseTime, findWordAtTime, findWordAtCharPosition
+- `src/features/editor/segment-editor.tsx` - handleTextareaClick (word-level seek)
+- `src/features/timeline/timeline.tsx` - auto-scroll during playback
+- `src/domain/playback/playback-utils.ts` - parseTime, findWordAtTime, findWordAtCharPosition
 
 ### Problems to Solve
 

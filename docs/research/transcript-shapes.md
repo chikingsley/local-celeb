@@ -4,16 +4,18 @@ Date: 2026-07-04
 
 This note records the evidence checked before locking the transcript model. The goal is to keep the app model tied to actual transcript artifacts instead of guessing from a preferred UI.
 
+Status note, 2026-07-06: the local Elysia/Groq proxy referenced in this evidence pass has been removed from the app. This document remains useful for provider result-shape research and import-adapter context, not as a description of the current runtime architecture.
+
 ## Sources Checked
 
 ### Local Celeb Groq Shape
 
-Files:
+Files checked at the time:
 
 - `public/sample-transcript.json`
 - `dist/sample-transcript.json`
 - `server/src/index.ts`
-- `src/types/index.ts`
+- `src/domain/transcript/types.ts`
 - `docs/phase-2.5-sync.md`
 
 Observed shape:
@@ -36,7 +38,7 @@ Observed shape:
 }
 ```
 
-The current Groq proxy requests `response_format: "verbose_json"` and `timestamp_granularities: ["word", "segment"]`. It maps provider segments into the app's `Segment` shape, assigns every segment to `speaker_1`, and filters provider words into each segment by timestamp.
+The removed Groq proxy requested `response_format: "verbose_json"` and `timestamp_granularities: ["word", "segment"]`. It mapped provider segments into the app's `Segment` shape, assigned every segment to `speaker_1`, and filtered provider words into each segment by timestamp.
 
 Implications:
 

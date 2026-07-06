@@ -13,16 +13,17 @@ Sources:
 Findings:
 
 - The current shadcn Vite path is Tailwind v4 and React 19.
-- Current component output uses the aggregate `radix-ui` package.
+- Current Base UI component output uses the `@base-ui/react` package and the `render` API.
 - Current component output uses `data-slot` attributes and no `forwardRef` wrapper.
 - `toast` is deprecated in favor of `sonner`; this app does not currently use shadcn toast.
 - The CLI supports `info`, `add --dry-run`, and `--diff`, which is the right way to audit local component drift.
 
 Applied here:
 
-- Ran `shadcn info`; the main app is recognized as Vite, Tailwind v4, React, TypeScript, `new-york`, `radix`, and lucide.
-- Updated the installed shadcn UI files: `button`, `select`, `slider`, and `tooltip`.
-- Switched from direct `@radix-ui/react-*` dependencies to the current `radix-ui` aggregate dependency.
+- Ran `shadcn info`; the main app is recognized as Vite, Tailwind v4, React, TypeScript, and lucide.
+- Switched `components.json` to `base-nova`.
+- Updated the installed shadcn UI files: `button`, `select`, `slider`, `tooltip`, `dropdown-menu`, `input`, `separator`, `sheet`, `skeleton`, and `sidebar`.
+- Switched from the aggregate `radix-ui` dependency to `@base-ui/react`.
 - Wrapped the app in `TooltipProvider`.
 
 ## Transcript Editor Patterns
@@ -43,8 +44,8 @@ Findings:
 
 Applied here:
 
-- Added `src/lib/transcript-import.ts` as the local adapter boundary.
+- Added `src/domain/transcript/import.ts` as the local adapter boundary.
 - Implemented adapters for current Local Celeb JSON/Groq segments, Scribe/Superwhisper word-first JSON/JSONL shapes, provider turns, and SRT/VTT cues.
-- Added `src/lib/transcript-turns.ts` as the derived turn boundary over the segment store.
+- Added `src/domain/transcript/turns.ts` as the derived turn boundary over the segment store.
 - Review mode now renders speaker-change turns; Cleanup mode keeps the segment editor/timeline surface.
 - Kept persisted editor state segment-based while deriving `Transcript -> Turn -> Segment -> Word` views from the evidence-backed model.

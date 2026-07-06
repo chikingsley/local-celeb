@@ -56,16 +56,8 @@ coverage
 .DS_Store
 Thumbs.db
 
+# Local screenshots
+/Screenshot*.png
+
 # Misc
 *.local
-
-# Rust/Tauri build artifacts
-**/src-tauri/target/
-**/tauri-plugin-*/target/
-
-# Example/reference projects (keep structure, ignore artifacts)
-docs/tauri-example-project/node_modules/
-docs/tauri-example-project/dist/
-docs/tauri-example-project/src-tauri/target/
-docs/tauri-example-project/tauri-plugin-fluidaudio/target/
-docs/tauri-example-project/data_prep_voice_clone/.venv/

@@ -17,20 +17,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a retained multi-speaker Scribe fixture and matching MP3 sample for speaker-repair UI testing.
 - Added waveform rendering, per-segment waveform thumbnails, silence-gap visualization, close-gaps timing repair, local word re-alignment, and browser-generated audio export by speaker or turn.
 - Added mode-aware right panels for review metadata/actions and editor view/assisted cleanup details.
+- Added sidebar migration notes grounded in current shadcn/Base UI docs and the local project/file state gap.
+- Added a shadcn/Base UI sidebar shell with app identity, workspace navigation, current-file actions, sample loaders, import actions, and a fake local user/settings footer.
 
 ### Changed
 
 - Renamed the visible cleanup workflow to `Editor` and moved the `Turns | Segments | Words` view selector into the right panel.
 - Moved manual speaker management toward the timeline speaker rail, including inline rename, color cycling, speaker deletion, and hover-based move-segments submenu.
 - Simplified timeline controls by making drag-near-edge scrolling automatic and removing the non-action waveform status badge.
-- Made the Groq transcription proxy optional/configurable and updated environment/server docs away from the older Gemini wording.
-- Updated dependencies and shadcn/Tailwind-related component setup for the current app direction.
+- Simplified local development to a single Vite client bound to `0.0.0.0:3000`.
+- Switched shadcn generation to the Base UI `base-nova` style and migrated generated primitives to `@base-ui/react`.
+- Reorganized app code into `src/app`, `src/features`, and `src/domain`, with generated shadcn primitives isolated under `src/components/ui`.
 - Refreshed `docs/TODO.md` to be active-work only instead of a completed phase checklist.
 
 ### Removed
 
 - Deleted the archived Tauri example project from `docs/tauri-example-project`.
 - Deleted the low-value Vitest/unit-test layer and old test setup.
+- Deleted the Elysia/Groq transcription proxy, server scripts, proxy config, and Groq documentation.
+- Deleted the unused command palette and its `cmdk` dependency.
+- Deleted the old custom left sidebar after replacing it with the shadcn sidebar shell.
+- Removed the app-component barrel export in favor of direct feature imports.
+- Removed generated `dist` and `.cache` directories from the working tree.
 - Removed `package-lock.json` in favor of the Bun lockfile.
 
 ### Fixed
