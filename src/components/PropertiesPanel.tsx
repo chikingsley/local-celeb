@@ -1,36 +1,58 @@
 import {
 	AlertTriangle,
 	AlignLeft,
+	ArrowRightLeft,
+	Bot,
 	ChevronDown,
 	ChevronRight,
 	Clock,
+	Info,
+	SearchCheck,
+	Sparkles,
 	Timer,
 	Type,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { deriveTranscriptTurns } from "@/lib/transcript-turns";
 import { cn, formatTime, parseTime } from "@/lib/utils";
-import type { FileMetaData, Segment, WordTimestamp } from "@/types";
+import {
+	estimateSegmentWordTiming,
+	getDisplayWords,
+	getWordTimingDisplay,
+	getWordTimingStatus,
+} from "@/lib/word-alignment";
+import { CleanupGranularity, type FileMetaData, type Segment, type Speaker } from "@/types";
 
 interface PropertiesPanelProps {
 	meta: FileMetaData;
 	selectedSegment: Segment | null;
+	segments?: Segment[];
+	speakers?: Speaker[];
 	currentTime: number;
 	onUpdateSegment: (id: string, updates: Partial<Segment>) => void;
 	onDeleteSegment: (id: string) => void;
 	onUpdateMeta?: (updates: Partial<FileMetaData>) => void;
 	onSeek?: (time: number) => void;
+	editorGranularity?: CleanupGranularity;
+	onEditorGranularityChange?: (granularity: CleanupGranularity) => void;
 }
 
 export function PropertiesPanel({
 	meta,
 	selectedSegment,
+	segments = [],
+	speakers = [],
 	currentTime,
 	onUpdateSegment,
 	onDeleteSegment,
 	onUpdateMeta,
 	onSeek,
+	editorGranularity,
+	onEditorGranularityChange,
 }: PropertiesPanelProps) {
 	const [globalCollapsed, setGlobalCollapsed] = useState(false);
+	const [editorPropertiesCollapsed, setEditorPropertiesCollapsed] = useState(false);
+	const [speakerRepairCollapsed, setSpeakerRepairCollapsed] = useState(false);
 	const [segmentCollapsed, setSegmentCollapsed] = useState(false);
 	const [wordsCollapsed, setWordsCollapsed] = useState(false);
 	const [isEditingName, setIsEditingName] = useState(false);
@@ -65,24 +87,86 @@ export function PropertiesPanel({
 		onUpdateSegment(selectedSegment.id, { endTime: formatTime(newEndSeconds) });
 	};
 
-	// Get words to display - either from segment.words or split from text
-	const getDisplayWords = useCallback((segment: Segment): WordTimestamp[] => {
-		if (segment.words && segment.words.length > 0 && !segment.wordsDirty) {
-			return segment.words;
+	const segmentStatsBySpeaker = useMemo(() => {
+		const stats = new Map<string, { count: number; duration: number }>();
+		for (const segment of segments) {
+			const current = stats.get(segment.speakerId) ?? { count: 0, duration: 0 };
+			stats.set(segment.speakerId, {
+				count: current.count + 1,
+				duration:
+					current.duration + Math.max(0, parseTime(segment.endTime) - parseTime(segment.startTime)),
+			});
 		}
-		// If dirty or no words, split text into words with no timestamps
-		const textWords = segment.text.split(/\s+/).filter((w) => w.length > 0);
-		const segStart = parseTime(segment.startTime);
-		const segEnd = parseTime(segment.endTime);
-		const duration = segEnd - segStart;
-		// Distribute time evenly as placeholder
-		return textWords.map((word, i) => ({
-			word,
-			start: segStart + (duration * i) / textWords.length,
-			end: segStart + (duration * (i + 1)) / textWords.length,
-			interpolated: true,
-		}));
-	}, []);
+		return stats;
+	}, [segments]);
+
+	const turns = useMemo(() => deriveTranscriptTurns(segments), [segments]);
+	const editorGranularityOptions = useMemo(
+		() => [
+			{
+				label: "Turns",
+				value: CleanupGranularity.TURNS,
+			},
+			{
+				label: "Segments",
+				value: CleanupGranularity.SEGMENTS,
+			},
+			{
+				label: "Words",
+				value: CleanupGranularity.WORDS,
+			},
+		],
+		[]
+	);
+
+	const speakerWarnings = useMemo(() => {
+		const warnings: { id: string; text: string }[] = [];
+		const normalizedNames = new Map<string, Speaker[]>();
+
+		for (const speaker of speakers) {
+			const normalized = speaker.name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+			if (!normalized) continue;
+			const matches = normalizedNames.get(normalized) ?? [];
+			matches.push(speaker);
+			normalizedNames.set(normalized, matches);
+
+			if (/unknown|unnamed|unidentified/i.test(`${speaker.id} ${speaker.name}`)) {
+				const count = segmentStatsBySpeaker.get(speaker.id)?.count ?? 0;
+				warnings.push({
+					id: `unknown-${speaker.id}`,
+					text: `${speaker.name} has ${count} segment${count === 1 ? "" : "s"} that still need a real speaker name.`,
+				});
+			}
+		}
+
+		for (const matches of normalizedNames.values()) {
+			if (matches.length > 1) {
+				warnings.push({
+					id: `duplicate-${matches.map((speaker) => speaker.id).join("-")}`,
+					text: `Possible duplicate speakers: ${matches.map((speaker) => speaker.name).join(", ")}.`,
+				});
+			}
+		}
+
+		for (let index = 1; index < turns.length - 1; index += 1) {
+			const previous = turns[index - 1];
+			const turn = turns[index];
+			const next = turns[index + 1];
+			const duration = Math.max(0, parseTime(turn.endTime) - parseTime(turn.startTime));
+			if (duration <= 1.5 && previous.speakerId === next.speakerId) {
+				const speaker = speakers.find((candidate) => candidate.id === turn.speakerId);
+				const surroundingSpeaker = speakers.find(
+					(candidate) => candidate.id === previous.speakerId
+				);
+				warnings.push({
+					id: `short-${turn.id}`,
+					text: `Short ${formatTime(duration)} ${speaker?.name ?? turn.speakerId} turn is between two ${surroundingSpeaker?.name ?? previous.speakerId} turns.`,
+				});
+			}
+		}
+
+		return warnings;
+	}, [segmentStatsBySpeaker, speakers, turns]);
 
 	// Update a single word's timestamp with linked adjacent boundaries
 	const handleWordUpdate = useCallback(
@@ -116,11 +200,26 @@ export function PropertiesPanel({
 					};
 				}
 
-				onUpdateSegment(segment.id, { words, wordsDirty: false });
+				onUpdateSegment(segment.id, {
+					words,
+					wordsDirty: false,
+					wordTimingStatus: "manual",
+				});
 			}
 		},
-		[getDisplayWords, onUpdateSegment]
+		[onUpdateSegment]
 	);
+
+	const handleRealignSegment = useCallback(() => {
+		if (!selectedSegment) return;
+		const words = estimateSegmentWordTiming(selectedSegment);
+		if (words.length === 0) return;
+		onUpdateSegment(selectedSegment.id, {
+			words,
+			wordsDirty: false,
+			wordTimingStatus: "estimated",
+		});
+	}, [onUpdateSegment, selectedSegment]);
 
 	// Find current word based on playback time
 	const getCurrentWordIndex = useCallback(
@@ -134,6 +233,15 @@ export function PropertiesPanel({
 			return -1;
 		},
 		[currentTime]
+	);
+
+	const selectedWordTimingStatus = selectedSegment ? getWordTimingStatus(selectedSegment) : null;
+	const selectedWordTimingDisplay = selectedWordTimingStatus
+		? getWordTimingDisplay(selectedWordTimingStatus)
+		: null;
+	const selectedDisplayWords = useMemo(
+		() => (selectedSegment ? getDisplayWords(selectedSegment) : []),
+		[selectedSegment]
 	);
 
 	return (
@@ -176,16 +284,14 @@ export function PropertiesPanel({
 									className="w-full text-sm font-medium text-slate-900 bg-slate-50 border border-blue-500 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
 								/>
 							) : (
-								<p
+								<button
+									type="button"
 									onClick={handleNameClick}
-									onKeyDown={(e) => e.key === "Enter" && handleNameClick()}
-									tabIndex={0}
-									role="button"
-									className="text-sm font-medium text-slate-900 break-words leading-snug cursor-pointer hover:bg-slate-100 rounded px-2 py-1 -mx-2 transition-colors"
+									className="block w-full text-left text-sm font-medium text-slate-900 break-words leading-snug cursor-pointer hover:bg-slate-100 rounded px-2 py-1 -mx-2 transition-colors"
 									title="Click to edit"
 								>
 									{meta.name}
-								</p>
+								</button>
 							)}
 							<p className="text-xs text-slate-400">Audio Source</p>
 						</div>
@@ -206,6 +312,136 @@ export function PropertiesPanel({
 				</div>
 			</div>
 
+			{/* Views */}
+			{editorGranularity && onEditorGranularityChange && (
+				<div className="border-b border-slate-200 flex-shrink-0">
+					<button
+						type="button"
+						onClick={() => setEditorPropertiesCollapsed(!editorPropertiesCollapsed)}
+						className="flex items-center justify-between w-full px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-100 hover:bg-slate-200 transition-colors"
+					>
+						<span className="flex items-center gap-2">
+							{editorPropertiesCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+							Views
+						</span>
+					</button>
+
+					<div
+						className={cn(
+							"overflow-hidden transition-all duration-200",
+							editorPropertiesCollapsed ? "max-h-0 opacity-0" : "max-h-72 opacity-100"
+						)}
+					>
+						<div className="space-y-3 bg-white px-4 py-4">
+							<div className="text-xs font-medium text-slate-500">Editor view</div>
+							<div className="grid grid-cols-3 gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1">
+								{editorGranularityOptions.map((option) => (
+									<button
+										key={option.value}
+										type="button"
+										onClick={() => onEditorGranularityChange(option.value)}
+										className={cn(
+											"min-w-0 rounded-md px-2 py-2 text-left transition-colors",
+											editorGranularity === option.value
+												? "bg-white text-slate-950 shadow-sm"
+												: "text-slate-500 hover:text-slate-800"
+										)}
+									>
+										<span className="block truncate text-sm font-medium">{option.label}</span>
+									</button>
+								))}
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Assisted Cleanup */}
+			{speakers.length > 0 && (
+				<div className="border-b border-slate-200 flex-shrink-0">
+					<button
+						type="button"
+						onClick={() => setSpeakerRepairCollapsed(!speakerRepairCollapsed)}
+						className="flex items-center justify-between w-full px-4 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-100 hover:bg-slate-200 transition-colors"
+					>
+						<span className="flex items-center gap-2">
+							{speakerRepairCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
+							Assisted Cleanup
+						</span>
+						{speakerWarnings.length > 0 && (
+							<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 normal-case">
+								{speakerWarnings.length}
+							</span>
+						)}
+					</button>
+
+					<div
+						className={cn(
+							"overflow-hidden transition-all duration-200",
+							speakerRepairCollapsed ? "max-h-0 opacity-0" : "max-h-[34rem] opacity-100"
+						)}
+					>
+						<div className="space-y-4 bg-white px-4 py-4">
+							<div className="space-y-2">
+								<div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+									<Info size={13} />
+									Consistency warnings
+								</div>
+								{speakerWarnings.length === 0 ? (
+									<div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+										No speaker consistency warnings.
+									</div>
+								) : (
+									<div className="space-y-2">
+										{speakerWarnings.map((warning) => (
+											<div
+												key={warning.id}
+												className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800"
+											>
+												{warning.text}
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+
+							<div className="space-y-2">
+								<div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+									<Bot size={13} />
+									Suggestions
+								</div>
+								<div className="grid gap-2">
+									<button
+										type="button"
+										disabled
+										className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-medium text-slate-400"
+									>
+										<Sparkles size={13} />
+										Infer likely speaker names
+									</button>
+									<button
+										type="button"
+										disabled
+										className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-medium text-slate-400"
+									>
+										<SearchCheck size={13} />
+										Detect name-address clues
+									</button>
+									<button
+										type="button"
+										disabled
+										className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-medium text-slate-400"
+									>
+										<ArrowRightLeft size={13} />
+										Suggest diarization corrections
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
 			{/* Segment Properties */}
 			{selectedSegment ? (
 				<div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -218,10 +454,19 @@ export function PropertiesPanel({
 							{segmentCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
 							Segment Properties
 						</span>
-						{selectedSegment.wordsDirty && (
-							<span className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px] font-medium normal-case">
-								<AlertTriangle size={10} />
-								Out of sync
+						{selectedWordTimingDisplay && (
+							<span
+								className={cn(
+									"flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium normal-case",
+									selectedWordTimingDisplay.tone === "emerald" && "bg-emerald-100 text-emerald-700",
+									selectedWordTimingDisplay.tone === "blue" && "bg-blue-100 text-blue-700",
+									selectedWordTimingDisplay.tone === "amber" && "bg-amber-100 text-amber-700",
+									selectedWordTimingDisplay.tone === "slate" && "bg-slate-200 text-slate-500"
+								)}
+								title={selectedWordTimingDisplay.description}
+							>
+								{selectedWordTimingStatus === "dirty" && <AlertTriangle size={10} />}
+								{selectedWordTimingDisplay.label}
 							</span>
 						)}
 					</button>
@@ -284,9 +529,17 @@ export function PropertiesPanel({
 								</button>
 								<button
 									type="button"
-									className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-all text-sm font-medium"
+									onClick={handleRealignSegment}
+									disabled={selectedDisplayWords.length === 0}
+									title="Estimate word timing from the current segment text and duration"
+									className={cn(
+										"flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium",
+										selectedDisplayWords.length === 0
+											? "bg-slate-100 text-slate-300"
+											: "bg-slate-900 text-white hover:bg-slate-800"
+									)}
 								>
-									<AlignLeft size={14} /> Align
+									<AlignLeft size={14} /> Re-align
 								</button>
 							</div>
 						</div>
@@ -304,8 +557,22 @@ export function PropertiesPanel({
 								<Type size={12} />
 								Words
 								<span className="text-slate-400 font-normal normal-case">
-									({getDisplayWords(selectedSegment).length})
+									({selectedDisplayWords.length})
 								</span>
+								{selectedWordTimingDisplay && (
+									<span
+										className={cn(
+											"rounded px-1.5 py-0.5 text-[10px] font-medium normal-case",
+											selectedWordTimingDisplay.tone === "emerald" &&
+												"bg-emerald-100 text-emerald-700",
+											selectedWordTimingDisplay.tone === "blue" && "bg-blue-100 text-blue-700",
+											selectedWordTimingDisplay.tone === "amber" && "bg-amber-100 text-amber-700",
+											selectedWordTimingDisplay.tone === "slate" && "bg-slate-200 text-slate-500"
+										)}
+									>
+										{selectedWordTimingDisplay.label}
+									</span>
+								)}
 							</span>
 						</button>
 
@@ -317,28 +584,23 @@ export function PropertiesPanel({
 						>
 							<div className="px-4 py-4 bg-white h-full flex flex-col">
 								<div className="space-y-1 flex-1 overflow-y-auto min-h-0">
-									{getDisplayWords(selectedSegment).map((word, idx) => {
+									{selectedDisplayWords.map((word, idx) => {
 										const isCurrentWord = getCurrentWordIndex(selectedSegment) === idx;
 										return (
 											<div
-												key={`${word.word}-${idx}`}
-												onClick={() => onSeek?.(word.start)}
-												onKeyDown={(e) => {
-													if (e.key === "Enter" || e.key === " ") {
-														e.preventDefault();
-														onSeek?.(word.start);
-													}
-												}}
+												key={`${word.word}-${word.start}-${word.end}`}
 												className={cn(
-													"flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors group",
+													"flex items-center gap-2 p-2 rounded-lg transition-colors group",
 													isCurrentWord
 														? "bg-blue-100 border border-blue-300"
 														: "hover:bg-slate-100 border border-transparent"
 												)}
 											>
-												<span
+												<button
+													type="button"
+													onClick={() => onSeek?.(word.start)}
 													className={cn(
-														"flex-1 text-sm truncate",
+														"flex-1 truncate text-left text-sm",
 														isCurrentWord
 															? "text-blue-700"
 															: word.interpolated
@@ -348,7 +610,7 @@ export function PropertiesPanel({
 													title={word.word}
 												>
 													{word.word}
-												</span>
+												</button>
 												<input
 													type="number"
 													step="0.01"

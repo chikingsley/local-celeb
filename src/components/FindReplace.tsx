@@ -162,10 +162,10 @@ export default function FindReplace({
 		const newMatches: SearchMatch[] = [];
 
 		for (const segment of segments) {
-			let match: RegExpExecArray | null;
 			pattern.lastIndex = 0;
+			let match = pattern.exec(segment.text);
 
-			while ((match = pattern.exec(segment.text)) !== null) {
+			while (match !== null) {
 				newMatches.push({
 					segmentId: segment.id,
 					startIndex: match.index,
@@ -176,6 +176,7 @@ export default function FindReplace({
 				if (match[0].length === 0) {
 					pattern.lastIndex++;
 				}
+				match = pattern.exec(segment.text);
 			}
 		}
 
@@ -199,8 +200,14 @@ export default function FindReplace({
 		}
 	}, [query, segments, buildPattern, onSelectSegment, scrollToSegment, scrollToTime]);
 
-	const goToNextMatch = () => goToMatch(currentMatchIndex + 1);
-	const goToPrevMatch = () => goToMatch(currentMatchIndex - 1);
+	const goToNextMatch = useCallback(
+		() => goToMatch(currentMatchIndex + 1),
+		[goToMatch, currentMatchIndex]
+	);
+	const goToPrevMatch = useCallback(
+		() => goToMatch(currentMatchIndex - 1),
+		[goToMatch, currentMatchIndex]
+	);
 
 	// Apply preserve case transformation
 	const applyPreserveCase = useCallback(
@@ -238,7 +245,11 @@ export default function FindReplace({
 			replacement +
 			segment.text.substring(match.endIndex);
 
-		onUpdateSegment(match.segmentId, { text: newText });
+		onUpdateSegment(match.segmentId, {
+			text: newText,
+			wordsDirty: true,
+			wordTimingStatus: "dirty",
+		});
 	}, [matches, currentMatchIndex, segments, replaceText, onUpdateSegment, applyPreserveCase]);
 
 	// Replace all matches
@@ -254,7 +265,11 @@ export default function FindReplace({
 				applyPreserveCase(match, replaceText)
 			);
 			if (newText !== segment.text) {
-				onUpdateSegment(segment.id, { text: newText });
+				onUpdateSegment(segment.id, {
+					text: newText,
+					wordsDirty: true,
+					wordTimingStatus: "dirty",
+				});
 			}
 		}
 	}, [matches, query, buildPattern, segments, replaceText, onUpdateSegment, applyPreserveCase]);
@@ -304,6 +319,8 @@ export default function FindReplace({
 
 	return (
 		<div
+			role="dialog"
+			aria-label="Find and replace"
 			className="sticky top-2 right-4 ml-auto mr-4 z-50 bg-white border border-slate-200 rounded-lg shadow-lg w-fit"
 			onKeyDown={handleKeyDown}
 		>

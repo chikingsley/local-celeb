@@ -5,7 +5,7 @@ import {
 	GripVertical,
 	Magnet,
 	MoreVertical,
-	MoveHorizontal,
+	Palette,
 	Pause,
 	Pencil,
 	Play,
@@ -26,6 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { findSilenceGaps } from "@/lib/timeline-gaps";
 import {
 	getSegmentEdgeTimes,
 	type SnapConfig,
@@ -36,11 +37,12 @@ import {
 import { cn, formatTime, parseTime } from "@/lib/utils";
 import { PLAYBACK_SPEEDS, type PlaybackSpeed, usePlayerStore } from "@/stores/player-store";
 import type { Segment, Speaker } from "@/types";
-import { ZOOM } from "@/types";
+import { SPEAKER_COLORS, ZOOM } from "@/types";
 
 interface TimelineProps {
 	segments: Segment[];
 	speakers: Speaker[];
+	audioUrl?: string | null;
 	selectedSegmentId: string | null;
 	onSelectSegment: (id: string) => void;
 	isPlaying: boolean;
@@ -59,6 +61,7 @@ interface TimelineProps {
 	onDeleteSpeaker: (id: string) => void;
 	onMergeSpeakers: (fromId: string, toId: string) => void;
 	onReorderSpeakers: (fromIndex: number, toIndex: number) => void;
+	onCloseTimelineGaps: () => void;
 }
 
 interface ContextMenuState {
@@ -76,9 +79,73 @@ interface DragState {
 	initialEndTime: number;
 }
 
+function buildWaveformPeaks(audioBuffer: AudioBuffer, peakCount = 1600): number[] {
+	const peaks: number[] = [];
+	const channelData = Array.from({ length: audioBuffer.numberOfChannels }, (_, index) =>
+		audioBuffer.getChannelData(index)
+	);
+	const sampleCount = audioBuffer.length;
+	const samplesPerPeak = Math.max(1, Math.floor(sampleCount / peakCount));
+
+	for (let peakIndex = 0; peakIndex < peakCount; peakIndex += 1) {
+		const start = peakIndex * samplesPerPeak;
+		const end = Math.min(sampleCount, start + samplesPerPeak);
+		let peak = 0;
+		for (const channel of channelData) {
+			for (let index = start; index < end; index += 1) {
+				peak = Math.max(peak, Math.abs(channel[index] ?? 0));
+			}
+		}
+		peaks.push(peak);
+	}
+
+	const maxPeak = Math.max(...peaks, 0.0001);
+	return peaks.map((peak) => peak / maxPeak);
+}
+
+function waveformPath(peaks: number[]): string {
+	if (peaks.length === 0) return "";
+	return peaks
+		.map((peak, index) => {
+			const x = peaks.length === 1 ? 0 : (index / (peaks.length - 1)) * 1000;
+			const halfHeight = Math.max(1, peak * 46);
+			return `M${x.toFixed(2)} ${(50 - halfHeight).toFixed(2)}V${(50 + halfHeight).toFixed(2)}`;
+		})
+		.join(" ");
+}
+
+function resamplePeaks(peaks: number[], targetCount: number): number[] {
+	if (peaks.length <= targetCount) return peaks;
+	return Array.from({ length: targetCount }, (_, index) => {
+		const start = Math.floor((index / targetCount) * peaks.length);
+		const end = Math.max(start + 1, Math.floor(((index + 1) / targetCount) * peaks.length));
+		return Math.max(...peaks.slice(start, end));
+	});
+}
+
+function segmentWaveformPath(
+	peaks: number[] | null,
+	start: number,
+	end: number,
+	totalDuration: number
+): string {
+	if (!peaks || peaks.length === 0 || totalDuration <= 0 || end <= start) return "";
+	const startIndex = Math.max(0, Math.floor((start / totalDuration) * peaks.length));
+	const endIndex = Math.min(peaks.length, Math.ceil((end / totalDuration) * peaks.length));
+	const slice = peaks.slice(startIndex, Math.max(startIndex + 1, endIndex));
+	const targetCount = Math.max(12, Math.min(64, Math.ceil((end - start) * 8)));
+	return waveformPath(resamplePeaks(slice, targetCount));
+}
+
+function formatGapDuration(seconds: number): string {
+	if (seconds >= 60) return formatTime(seconds);
+	return `${seconds.toFixed(seconds >= 10 ? 0 : 1)}s`;
+}
+
 export function Timeline({
 	segments,
 	speakers,
+	audioUrl,
 	selectedSegmentId,
 	onSelectSegment,
 	isPlaying,
@@ -97,17 +164,18 @@ export function Timeline({
 	onDeleteSpeaker,
 	onMergeSpeakers,
 	onReorderSpeakers,
+	onCloseTimelineGaps,
 }: TimelineProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const rulerRef = useRef<HTMLDivElement>(null);
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const [editingSpeakerId, setEditingSpeakerId] = useState<string | null>(null);
 	const [activeMenuSpeakerId, setActiveMenuSpeakerId] = useState<string | null>(null);
-	const [mergeTargetMode, setMergeTargetMode] = useState<string | null>(null);
 	const [draggedSpeakerIndex, setDraggedSpeakerIndex] = useState<number | null>(null);
 	const [dragState, setDragState] = useState<DragState | null>(null);
 	const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 	const [assignSpeakerMenuOpen, setAssignSpeakerMenuOpen] = useState(false);
+	const [waveformPeaks, setWaveformPeaks] = useState<number[] | null>(null);
 
 	// Grid snapping
 	const [gridSnap, setGridSnap] = useState(true);
@@ -117,6 +185,15 @@ export function Timeline({
 	const [dragLineSnap, setDragLineSnap] = useState(true);
 	const [snapGuides, setSnapGuides] = useState<number[]>([]); // Times where guides should show
 	const edgeThreshold = 0.2; // Snap within 0.2 seconds of other edges
+	const timelineWidth = Math.max(100, totalDuration * zoomLevel + 500);
+	const silenceGaps = useMemo(() => findSilenceGaps(segments), [segments]);
+	const closeableGapCount = silenceGaps.filter((gap) => gap.closeAmount > 0).length;
+	const totalGapDuration = silenceGaps.reduce((sum, gap) => sum + gap.duration, 0);
+	const trackHeight = Math.max(96, speakers.length * 96);
+	const waveformSvgPath = useMemo(
+		() => (waveformPeaks ? waveformPath(waveformPeaks) : ""),
+		[waveformPeaks]
+	);
 
 	// Cross-component scroll coordination
 	const registerScrollToTime = usePlayerStore((s) => s.registerScrollToTime);
@@ -126,6 +203,45 @@ export function Timeline({
 
 	// Track if we're doing programmatic scroll (to distinguish from user scroll)
 	const isProgrammaticScrollRef = useRef(false);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		if (!audioUrl) {
+			setWaveformPeaks(null);
+			return;
+		}
+
+		const loadWaveform = async () => {
+			try {
+				const response = await fetch(audioUrl);
+				const arrayBuffer = await response.arrayBuffer();
+				const contextCtor =
+					window.AudioContext ??
+					(window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+				if (!contextCtor) {
+					throw new Error("AudioContext is not available.");
+				}
+				const audioContext = new contextCtor();
+				const decoded = await audioContext.decodeAudioData(arrayBuffer);
+				await audioContext.close();
+				if (!cancelled) {
+					setWaveformPeaks(buildWaveformPeaks(decoded));
+				}
+			} catch (error) {
+				console.info("Unable to decode waveform:", error);
+				if (!cancelled) {
+					setWaveformPeaks(null);
+				}
+			}
+		};
+
+		void loadWaveform();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [audioUrl]);
 
 	// Register scroll-to-time callback
 	useEffect(() => {
@@ -218,8 +334,19 @@ export function Timeline({
 		[onSelectSegment, scrollToSegment]
 	);
 
-	// Auto-scroll during drag
-	const [autoScroll, setAutoScroll] = useState(true);
+	const cycleSpeakerColor = useCallback(
+		(speaker: Speaker) => {
+			const currentIndex = SPEAKER_COLORS.findIndex(
+				(color) => color.toLowerCase() === speaker.color.toLowerCase()
+			);
+			const nextColor =
+				SPEAKER_COLORS[(currentIndex + 1) % SPEAKER_COLORS.length] ?? SPEAKER_COLORS[0];
+			onUpdateSpeaker(speaker.id, { color: nextColor });
+		},
+		[onUpdateSpeaker]
+	);
+
+	// Auto-scroll during drag near timeline edges.
 	const autoScrollZone = 80; // Pixels from edge to trigger scroll
 	const autoScrollSpeed = 8; // Pixels per frame
 	const autoScrollRef = useRef<number | null>(null);
@@ -230,13 +357,13 @@ export function Timeline({
 
 	// Generate stable waveform heights per segment (memoized to prevent re-renders)
 	const waveformHeights = useMemo(() => {
-		const heights: Record<string, number[]> = {};
+		const heights: Record<string, { id: string; height: number }[]> = {};
 		for (const seg of segments) {
 			// Use segment ID as seed for consistent heights
 			const seed = seg.id.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
 			heights[seg.id] = Array.from({ length: 10 }, (_, i) => {
 				const pseudoRandom = Math.sin(seed * (i + 1) * 9999) * 0.5 + 0.5;
-				return 30 + pseudoRandom * 40;
+				return { id: `${seg.id}-wave-${i}`, height: 30 + pseudoRandom * 40 };
 			});
 		}
 		return heights;
@@ -250,29 +377,41 @@ export function Timeline({
 	};
 
 	// Build snap config from current state
-	const snapConfig: SnapConfig = {
-		gridEnabled: gridSnap,
-		gridInterval: gridSnapInterval,
-		edgeEnabled: dragLineSnap,
-		edgeThreshold: edgeThreshold,
-	};
+	const snapConfig: SnapConfig = useMemo(
+		() => ({
+			gridEnabled: gridSnap,
+			gridInterval: gridSnapInterval,
+			edgeEnabled: dragLineSnap,
+			edgeThreshold: edgeThreshold,
+		}),
+		[dragLineSnap, gridSnap]
+	);
 
 	// Get snap targets for a segment (all other segment edges)
-	const getSnapTargets = (excludeSegmentId: string): number[] => {
-		return getSegmentEdgeTimes(segments, excludeSegmentId, parseTime);
-	};
+	const getSnapTargets = useCallback(
+		(excludeSegmentId: string): number[] => {
+			return getSegmentEdgeTimes(segments, excludeSegmentId, parseTime);
+		},
+		[segments]
+	);
 
 	// Wrapper for edge snapping with current config
-	const performEdgeSnap = (time: number, excludeSegmentId: string) => {
-		const targets = getSnapTargets(excludeSegmentId);
-		return snapToEdge(time, targets, edgeThreshold, dragLineSnap);
-	};
+	const performEdgeSnap = useCallback(
+		(time: number, excludeSegmentId: string) => {
+			const targets = getSnapTargets(excludeSegmentId);
+			return snapToEdge(time, targets, edgeThreshold, dragLineSnap);
+		},
+		[dragLineSnap, getSnapTargets]
+	);
 
 	// Wrapper for combined snapping with current config
-	const performSnap = (time: number, excludeSegmentId: string): number => {
-		const targets = getSnapTargets(excludeSegmentId);
-		return snapTime(time, targets, snapConfig).time;
-	};
+	const performSnap = useCallback(
+		(time: number, excludeSegmentId: string): number => {
+			const targets = getSnapTargets(excludeSegmentId);
+			return snapTime(time, targets, snapConfig).time;
+		},
+		[getSnapTargets, snapConfig]
+	);
 
 	// Auto-scroll timeline when playing
 	useEffect(() => {
@@ -390,20 +529,23 @@ export function Timeline({
 	for (let i = 0; i <= totalDuration; i += step) {
 		rulerMarkers.push(i);
 	}
+	const gridLineTimes = Array.from(
+		{ length: Math.ceil(totalDuration / gridSnapInterval) + 1 },
+		(_, i) => i * gridSnapInterval
+	);
 
 	// Close menus on click outside
 	useEffect(() => {
 		const closeMenu = () => {
 			setActiveMenuSpeakerId(null);
-			setMergeTargetMode(null);
 			setContextMenu(null);
 			setAssignSpeakerMenuOpen(false);
 		};
-		if (activeMenuSpeakerId || mergeTargetMode || contextMenu) {
+		if (activeMenuSpeakerId || contextMenu) {
 			window.addEventListener("click", closeMenu);
 		}
 		return () => window.removeEventListener("click", closeMenu);
-	}, [activeMenuSpeakerId, mergeTargetMode, contextMenu]);
+	}, [activeMenuSpeakerId, contextMenu]);
 
 	// Handle right-click on segment
 	const handleContextMenu = (e: React.MouseEvent, segmentId: string) => {
@@ -430,40 +572,32 @@ export function Timeline({
 			const deltaX = mouseX - dragState.initialX;
 			const deltaTime = deltaX / zoomLevel;
 
-			// Auto-scroll when near edges
-			if (autoScroll) {
-				const relativeX = e.clientX - rect.left;
-				const containerWidth = rect.width;
+			const relativeX = e.clientX - rect.left;
+			const containerWidth = rect.width;
 
-				// Cancel any existing scroll animation
-				if (autoScrollRef.current) {
-					cancelAnimationFrame(autoScrollRef.current);
-					autoScrollRef.current = null;
-				}
+			if (autoScrollRef.current) {
+				cancelAnimationFrame(autoScrollRef.current);
+				autoScrollRef.current = null;
+			}
 
-				// Check if near left or right edge
-				if (relativeX < autoScrollZone) {
-					// Scroll left
-					const scrollAmount = -autoScrollSpeed * (1 - relativeX / autoScrollZone);
-					const doScroll = () => {
-						if (containerRef.current && dragState) {
-							containerRef.current.scrollLeft += scrollAmount;
-							autoScrollRef.current = requestAnimationFrame(doScroll);
-						}
-					};
-					autoScrollRef.current = requestAnimationFrame(doScroll);
-				} else if (relativeX > containerWidth - autoScrollZone) {
-					// Scroll right
-					const scrollAmount =
-						autoScrollSpeed * (1 - (containerWidth - relativeX) / autoScrollZone);
-					const doScroll = () => {
-						if (containerRef.current && dragState) {
-							containerRef.current.scrollLeft += scrollAmount;
-							autoScrollRef.current = requestAnimationFrame(doScroll);
-						}
-					};
-					autoScrollRef.current = requestAnimationFrame(doScroll);
-				}
+			if (relativeX < autoScrollZone) {
+				const scrollAmount = -autoScrollSpeed * (1 - relativeX / autoScrollZone);
+				const doScroll = () => {
+					if (containerRef.current && dragState) {
+						containerRef.current.scrollLeft += scrollAmount;
+						autoScrollRef.current = requestAnimationFrame(doScroll);
+					}
+				};
+				autoScrollRef.current = requestAnimationFrame(doScroll);
+			} else if (relativeX > containerWidth - autoScrollZone) {
+				const scrollAmount = autoScrollSpeed * (1 - (containerWidth - relativeX) / autoScrollZone);
+				const doScroll = () => {
+					if (containerRef.current && dragState) {
+						containerRef.current.scrollLeft += scrollAmount;
+						autoScrollRef.current = requestAnimationFrame(doScroll);
+					}
+				};
+				autoScrollRef.current = requestAnimationFrame(doScroll);
 			}
 
 			const segment = segments.find((s) => s.id === dragState.segmentId);
@@ -556,16 +690,7 @@ export function Timeline({
 			document.removeEventListener("mousemove", handleMouseMove);
 			document.removeEventListener("mouseup", handleMouseUp);
 		};
-	}, [
-		dragState,
-		segments,
-		zoomLevel,
-		onUpdateSegment,
-		gridSnap,
-		autoScroll,
-		performEdgeSnap,
-		performSnap,
-	]);
+	}, [dragState, segments, zoomLevel, onUpdateSegment, gridSnap, performEdgeSnap, performSnap]);
 
 	const handleSegmentDragStart = (
 		e: React.MouseEvent,
@@ -627,48 +752,46 @@ export function Timeline({
 						<span className="hidden sm:inline">Edges</span>
 					</button>
 
-					{/* Auto-scroll Toggle */}
-					<button
-						type="button"
-						onClick={() => setAutoScroll(!autoScroll)}
-						className={cn(
-							"p-1.5 rounded flex items-center gap-1.5 text-xs font-medium transition-colors",
-							autoScroll
-								? "bg-green-100 text-green-700 hover:bg-green-200"
-								: "text-slate-500 hover:bg-slate-100"
-						)}
-						title={`Auto-scroll: ${autoScroll ? "ON" : "OFF"} - Scroll when dragging near edges`}
-					>
-						<MoveHorizontal size={14} />
-						<span className="hidden sm:inline">Scroll</span>
-					</button>
+					{isPlaying && !autoFollowEnabled && (
+						<button
+							type="button"
+							onClick={snapToPlayhead}
+							className="flex items-center gap-1.5 rounded bg-red-100 p-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200"
+							title="Resume following the playhead"
+						>
+							<Target size={14} />
+							<span className="hidden sm:inline">Resume follow</span>
+						</button>
+					)}
 
-					{/* Auto-follow Indicator - always visible, state changes with playback */}
 					<button
 						type="button"
-						onClick={isPlaying ? snapToPlayhead : undefined}
-						disabled={!isPlaying}
+						onClick={onCloseTimelineGaps}
+						disabled={closeableGapCount === 0}
 						className={cn(
-							"p-1.5 rounded flex items-center gap-1.5 text-xs font-medium transition-colors",
-							!isPlaying
-								? "bg-slate-100 text-slate-400 cursor-not-allowed"
-								: autoFollowEnabled
-									? "bg-green-100 text-green-700 hover:bg-green-200"
-									: "bg-red-100 text-red-700 hover:bg-red-200"
+							"rounded px-2 py-1 text-xs font-medium transition-colors inline-flex items-center gap-1.5",
+							closeableGapCount > 0
+								? "bg-slate-900 text-white hover:bg-slate-800"
+								: "bg-slate-100 text-slate-400 cursor-not-allowed"
 						)}
 						title={
-							!isPlaying
-								? "Auto-follow (inactive when paused)"
-								: autoFollowEnabled
-									? "Auto-following playhead"
-									: "Click to snap back to playhead"
+							closeableGapCount > 0
+								? `Shift transcript segment timings earlier across ${closeableGapCount} silence gap${closeableGapCount === 1 ? "" : "s"}. The media file is unchanged.`
+								: "No transcript silence gaps of 0.5s or longer."
 						}
 					>
-						<Target size={14} />
-						<span className="hidden sm:inline">
-							{!isPlaying ? "Follow" : autoFollowEnabled ? "Following" : "Follow"}
-						</span>
+						<Scissors size={13} />
+						<span className="hidden md:inline">Close gaps</span>
 					</button>
+
+					<span
+						className="hidden rounded bg-slate-50 px-2 py-1 text-xs font-medium text-slate-500 lg:inline-flex"
+						title="Detected transcript gaps where no segment occupies the timeline."
+					>
+						{silenceGaps.length === 0
+							? "0 gaps"
+							: `${silenceGaps.length} gaps / ${formatGapDuration(totalGapDuration)}`}
+					</span>
 				</div>
 
 				{/* Center: Playback Controls */}
@@ -738,6 +861,7 @@ export function Timeline({
 						<Plus size={14} className="cursor-pointer hover:text-blue-600" />
 					</div>
 					{/* Ruler Header */}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: Timeline ruler is a pointer-scrub surface, not a command button. */}
 					<div
 						ref={rulerRef}
 						className="flex-1 bg-slate-50 overflow-x-hidden relative cursor-crosshair"
@@ -745,10 +869,7 @@ export function Timeline({
 						onMouseMove={handleRulerMouseMove}
 						onMouseLeave={handleRulerMouseLeave}
 					>
-						<div
-							style={{ width: `${Math.max(100, totalDuration * zoomLevel + 500)}px` }}
-							className="h-full relative"
-						>
+						<div style={{ width: `${timelineWidth}px` }} className="h-full relative">
 							{rulerMarkers.map((time) => (
 								<div
 									key={time}
@@ -791,6 +912,7 @@ export function Timeline({
 					{/* Speakers Column */}
 					<div className="w-64 shrink-0 bg-white border-r border-slate-200 z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
 						{speakers.map((speaker, index) => (
+							// biome-ignore lint/a11y/noStaticElementInteractions: This row is a native drag/drop target for speaker reordering.
 							<div
 								key={speaker.id}
 								className={cn(
@@ -813,6 +935,18 @@ export function Timeline({
 									>
 										{speaker.name.charAt(0)}
 									</div>
+									<button
+										type="button"
+										aria-label={`Change ${speaker.name} color`}
+										title="Change color"
+										className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-white text-slate-500 opacity-0 shadow-sm transition-opacity hover:text-slate-900 group-hover:opacity-100"
+										onClick={(event) => {
+											event.stopPropagation();
+											cycleSpeakerColor(speaker);
+										}}
+									>
+										<Palette size={11} />
+									</button>
 								</div>
 
 								<div className="min-w-0 flex-1">
@@ -867,7 +1001,6 @@ export function Timeline({
 											setActiveMenuSpeakerId(
 												activeMenuSpeakerId === speaker.id ? null : speaker.id
 											);
-											setMergeTargetMode(null);
 										}}
 									>
 										<MoreVertical size={14} />
@@ -876,85 +1009,71 @@ export function Timeline({
 									{/* Dropdown Menu */}
 									{activeMenuSpeakerId === speaker.id && (
 										<div
-											className="absolute right-0 top-8 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 overflow-hidden"
+											role="menu"
+											className="absolute right-0 top-8 z-50 w-48 rounded-lg border border-slate-100 bg-white py-1 shadow-xl"
 											onClick={(e) => e.stopPropagation()}
 											onKeyDown={(e) => e.stopPropagation()}
 										>
-											{mergeTargetMode === speaker.id ? (
-												<div className="bg-slate-50">
-													<div className="px-3 py-2 text-xs font-semibold text-slate-500 border-b border-slate-100">
-														Move segments to...
-													</div>
-													<div className="max-h-40 overflow-y-auto">
-														{speakers
+											<button
+												type="button"
+												className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+												onClick={() => {
+													setEditingSpeakerId(speaker.id);
+													setActiveMenuSpeakerId(null);
+												}}
+											>
+												<Pencil size={14} className="text-slate-400" /> Rename
+											</button>
+											<div className="group/move relative">
+												<button
+													type="button"
+													className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"
+												>
+													<ArrowRightLeft size={14} className="text-slate-400" />
+													<span className="flex-1">Move segments to</span>
+													<span className="text-slate-300">›</span>
+												</button>
+												<div className="invisible absolute top-0 left-full ml-1 max-h-56 w-52 overflow-y-auto rounded-lg border border-slate-100 bg-white py-1 opacity-0 shadow-xl transition group-hover/move:visible group-hover/move:opacity-100 group-focus-within/move:visible group-focus-within/move:opacity-100">
+													{speakers.filter((s) => s.id !== speaker.id).length > 0 ? (
+														speakers
 															.filter((s) => s.id !== speaker.id)
 															.map((target) => (
 																<button
 																	key={target.id}
 																	type="button"
-																	className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center gap-2"
+																	className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600"
 																	onClick={() => {
 																		onMergeSpeakers(speaker.id, target.id);
 																		setActiveMenuSpeakerId(null);
-																		setMergeTargetMode(null);
 																	}}
 																>
-																	<div
-																		className="w-2 h-2 rounded-full"
-																		style={{ background: target.color }}
+																	<span
+																		className="h-2.5 w-2.5 rounded-full"
+																		style={{ backgroundColor: target.color }}
 																	/>
-																	{target.name}
+																	<span className="min-w-0 truncate">{target.name}</span>
 																</button>
-															))}
-														{speakers.length <= 1 && (
-															<div className="px-4 py-2 text-xs text-slate-400 italic">
-																No other speakers
-															</div>
-														)}
-													</div>
-													<button
-														type="button"
-														className="w-full text-left px-3 py-2 text-xs text-slate-500 hover:bg-slate-100 border-t border-slate-100"
-														onClick={() => setMergeTargetMode(null)}
-													>
-														&larr; Back
-													</button>
+															))
+													) : (
+														<div className="px-3 py-2 text-xs italic text-slate-400">
+															No other speakers
+														</div>
+													)}
 												</div>
-											) : (
-												<>
-													<button
-														type="button"
-														className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-														onClick={() => {
-															setEditingSpeakerId(speaker.id);
-															setActiveMenuSpeakerId(null);
-														}}
-													>
-														<Pencil size={14} className="text-slate-400" /> Rename
-													</button>
-													<button
-														type="button"
-														className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-														onClick={() => setMergeTargetMode(speaker.id)}
-													>
-														<ArrowRightLeft size={14} className="text-slate-400" /> Move segments to
-													</button>
-													<div className="h-px bg-slate-100 my-1" />
-													<button
-														type="button"
-														className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-														onClick={() => {
-															if (
-																window.confirm(`Delete ${speaker.name} and all their segments?`)
-															) {
-																onDeleteSpeaker(speaker.id);
-															}
-														}}
-													>
-														<Trash2 size={14} /> Delete
-													</button>
-												</>
-											)}
+											</div>
+											<div className="my-1 h-px bg-slate-100" />
+											<button
+												type="button"
+												className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50"
+												onClick={() => {
+													if (window.confirm(`Delete ${speaker.name} and all their segments?`)) {
+														onDeleteSpeaker(speaker.id);
+														setActiveMenuSpeakerId(null);
+													}
+												}}
+											>
+												<Trash2 size={14} /> Delete
+											</button>
 										</div>
 									)}
 								</div>
@@ -963,9 +1082,11 @@ export function Timeline({
 					</div>
 
 					{/* Timeline Tracks Column */}
+					{/* biome-ignore lint/a11y/noStaticElementInteractions: Timeline track is a pointer-scrub and drag canvas. */}
 					<div
 						ref={containerRef}
 						className="flex-1 overflow-x-auto overflow-y-hidden relative bg-slate-50/50 cursor-crosshair"
+						style={{ minHeight: `${trackHeight}px` }}
 						onScroll={handleTimelineScroll}
 						onMouseDown={handleTimelineMouseDown}
 						onMouseMove={handleTimelineMouseMove}
@@ -978,30 +1099,74 @@ export function Timeline({
 						}}
 					>
 						<div
-							style={{ width: `${Math.max(100, totalDuration * zoomLevel + 500)}px` }}
-							className="h-full relative"
+							style={{
+								width: `${Math.max(100, totalDuration * zoomLevel + 500)}px`,
+								height: `${trackHeight}px`,
+							}}
+							className="relative"
 						>
 							{/* Grid Lines (visual guides for snap intervals) */}
 							{gridSnap && zoomLevel > 30 && (
 								<div className="absolute top-0 bottom-0 left-0 right-0 pointer-events-none">
-									{Array.from({ length: Math.ceil(totalDuration / gridSnapInterval) + 1 }).map(
-										(_, i) => {
-											const time = i * gridSnapInterval;
-											const isMainLine = time % 1 === 0; // Full second marks
-											return (
-												<div
-													key={`grid-${i}`}
-													className={cn(
-														"absolute top-0 bottom-0 w-px",
-														isMainLine ? "bg-slate-200" : "bg-slate-100"
-													)}
-													style={{ left: `${time * zoomLevel}px` }}
-												/>
-											);
-										}
-									)}
+									{gridLineTimes.map((time) => {
+										const isMainLine = time % 1 === 0; // Full second marks
+										return (
+											<div
+												key={`grid-${time}`}
+												className={cn(
+													"absolute top-0 bottom-0 w-px",
+													isMainLine ? "bg-slate-200" : "bg-slate-100"
+												)}
+												style={{ left: `${time * zoomLevel}px` }}
+											/>
+										);
+									})}
 								</div>
 							)}
+
+							{waveformSvgPath && totalDuration > 0 && (
+								<div
+									className="pointer-events-none absolute top-0 bottom-0 left-0 z-0 opacity-45"
+									style={{ width: `${Math.max(1, totalDuration * zoomLevel)}px` }}
+									aria-hidden="true"
+								>
+									<svg
+										aria-hidden="true"
+										viewBox="0 0 1000 100"
+										preserveAspectRatio="none"
+										className="h-full w-full text-slate-400"
+									>
+										<path
+											d={waveformSvgPath}
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="1"
+											vectorEffect="non-scaling-stroke"
+										/>
+									</svg>
+								</div>
+							)}
+
+							{silenceGaps.map((gap) => {
+								const width = Math.max(1, gap.duration * zoomLevel);
+								return (
+									<div
+										key={gap.id}
+										className="pointer-events-none absolute top-0 bottom-0 border-x border-slate-300/70 bg-white/55"
+										style={{
+											left: `${gap.start * zoomLevel}px`,
+											width: `${width}px`,
+										}}
+										title={`${formatGapDuration(gap.duration)} silence gap`}
+									>
+										{width > 46 && (
+											<div className="sticky top-1 ml-1 inline-flex rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 shadow-sm">
+												{formatGapDuration(gap.duration)}
+											</div>
+										)}
+									</div>
+								);
+							})}
 
 							{/* Hover Preview Indicator (ghost playhead) */}
 							{hoverTime !== null && !isDraggingPlayhead && (
@@ -1061,8 +1226,15 @@ export function Timeline({
 												const isActive = start <= currentTime && end > currentTime;
 
 												const isDragging = dragState?.segmentId === seg.id;
+												const thumbnailPath = segmentWaveformPath(
+													waveformPeaks,
+													start,
+													end,
+													totalDuration
+												);
 
 												return (
+													// biome-ignore lint/a11y/noStaticElementInteractions: Segment blocks support click selection plus custom context menu and drag handles.
 													<div
 														key={seg.id}
 														data-segment
@@ -1103,24 +1275,44 @@ export function Timeline({
 														}}
 													>
 														{/* Draggable body (center area) */}
-														<div
-															className="absolute inset-0 left-3 right-3 cursor-grab active:cursor-grabbing"
+														<button
+															type="button"
+															aria-label={`Move ${seg.text}`}
+															className="absolute inset-0 left-3 right-3 cursor-grab border-0 bg-transparent p-0 active:cursor-grabbing"
 															onMouseDown={(e) => handleSegmentDragStart(e, seg.id, "move", seg)}
 														/>
 
-														{/* Waveform fake visualization inside segment */}
-														<div className="absolute inset-0 opacity-20 flex items-center justify-center gap-px px-3 pointer-events-none">
-															{(waveformHeights[seg.id] || []).map((h, i) => (
-																<div
-																	key={`wave-${seg.id}-${i}`}
-																	className="w-full bg-current rounded-full"
-																	style={{
-																		height: `${h}%`,
-																		color: speaker.color,
-																	}}
-																/>
-															))}
-														</div>
+														{thumbnailPath ? (
+															<div className="absolute inset-0 flex items-center px-3 opacity-35 pointer-events-none">
+																<svg
+																	aria-hidden="true"
+																	viewBox="0 0 1000 100"
+																	preserveAspectRatio="none"
+																	className="h-14 w-full"
+																>
+																	<path
+																		d={thumbnailPath}
+																		fill="none"
+																		stroke={speaker.color}
+																		strokeWidth="1.5"
+																		vectorEffect="non-scaling-stroke"
+																	/>
+																</svg>
+															</div>
+														) : (
+															<div className="absolute inset-0 opacity-20 flex items-center justify-center gap-px px-3 pointer-events-none">
+																{(waveformHeights[seg.id] || []).map((bar) => (
+																	<div
+																		key={bar.id}
+																		className="w-full bg-current rounded-full"
+																		style={{
+																			height: `${bar.height}%`,
+																			color: speaker.color,
+																		}}
+																	/>
+																))}
+															</div>
+														)}
 
 														{/* Tiny Text Preview if wide enough */}
 														{duration * zoomLevel > 40 && (
@@ -1130,20 +1322,24 @@ export function Timeline({
 														)}
 
 														{/* Left drag handle */}
-														<div
-															className="absolute left-0 top-0 bottom-0 w-3 cursor-w-resize hover:bg-black/20 transition-colors flex items-center justify-center"
+														<button
+															type="button"
+															aria-label={`Trim start of ${seg.text}`}
+															className="absolute left-0 top-0 bottom-0 flex w-3 cursor-w-resize items-center justify-center border-0 bg-transparent p-0 transition-colors hover:bg-black/20"
 															onMouseDown={(e) => handleSegmentDragStart(e, seg.id, "left", seg)}
 														>
 															<div className="w-0.5 h-6 bg-black/20 rounded-full" />
-														</div>
+														</button>
 
 														{/* Right drag handle */}
-														<div
-															className="absolute right-0 top-0 bottom-0 w-3 cursor-e-resize hover:bg-black/20 transition-colors flex items-center justify-center"
+														<button
+															type="button"
+															aria-label={`Trim end of ${seg.text}`}
+															className="absolute right-0 top-0 bottom-0 flex w-3 cursor-e-resize items-center justify-center border-0 bg-transparent p-0 transition-colors hover:bg-black/20"
 															onMouseDown={(e) => handleSegmentDragStart(e, seg.id, "right", seg)}
 														>
 															<div className="w-0.5 h-6 bg-black/20 rounded-full" />
-														</div>
+														</button>
 													</div>
 												);
 											})}
@@ -1159,6 +1355,7 @@ export function Timeline({
 			{/* Segment Context Menu */}
 			{contextMenu && (
 				<div
+					role="menu"
 					className="fixed bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-50 min-w-[180px]"
 					style={{ top: contextMenu.y, left: contextMenu.x }}
 					onClick={(e) => e.stopPropagation()}

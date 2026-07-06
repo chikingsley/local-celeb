@@ -2,13 +2,7 @@ import { Check } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { parseTime } from "@/lib/playback-utils";
 import { cn } from "@/lib/utils";
-import {
-	buildWordIndex,
-	findWordAtCharPositionFast,
-	findWordAtTimeFast,
-	getSegmentWords,
-	type WordIndex,
-} from "@/lib/word-index";
+import { buildWordIndex, findWordAtCharPositionFast, findWordAtTimeFast } from "@/lib/word-index";
 import { usePlayerStore } from "@/stores/player-store";
 import type { Segment, Speaker } from "@/types";
 
@@ -25,7 +19,6 @@ interface EditorProps {
 	onSelectSegment: (id: string) => void;
 	onUpdateSegment: (id: string, updates: Partial<Segment>) => void;
 	currentTime: number;
-	searchQuery?: string;
 	searchMatches?: SearchMatch[];
 	currentMatchIndex?: number;
 	onSeek?: (time: number) => void;
@@ -97,18 +90,21 @@ function HighlightedText({
 	const parts: React.ReactNode[] = [];
 	let lastIndex = 0;
 
-	highlights.forEach((hl, idx) => {
+	for (const hl of highlights) {
 		// Add text before highlight (transparent)
 		if (hl.start > lastIndex) {
 			parts.push(
-				<span key={`text-${idx}`} className="whitespace-pre-wrap text-transparent">
+				<span
+					key={`text-${lastIndex}-${hl.start}`}
+					className="whitespace-pre-wrap text-transparent"
+				>
 					{text.substring(lastIndex, hl.start)}
 				</span>
 			);
 		}
 
 		// Skip if overlapping with previous
-		if (hl.start < lastIndex) return;
+		if (hl.start < lastIndex) continue;
 
 		// Add highlighted text
 		const bgClass =
@@ -119,13 +115,16 @@ function HighlightedText({
 					: "bg-yellow-200";
 
 		parts.push(
-			<mark key={`hl-${idx}`} className={cn("rounded-sm text-transparent", bgClass)}>
+			<mark
+				key={`hl-${hl.start}-${hl.end}-${hl.type}`}
+				className={cn("rounded-sm text-transparent", bgClass)}
+			>
 				{text.substring(hl.start, hl.end)}
 			</mark>
 		);
 
 		lastIndex = hl.end;
-	});
+	}
 
 	// Add remaining text (transparent)
 	if (lastIndex < text.length) {
@@ -146,7 +145,6 @@ export function Editor({
 	onSelectSegment,
 	onUpdateSegment,
 	currentTime,
-	searchQuery,
 	searchMatches = [],
 	currentMatchIndex = 0,
 	onSeek,
@@ -267,24 +265,10 @@ export function Editor({
 		[searchMatches]
 	);
 
-	// Handle segment click - select, scroll timeline, and seek audio
-	const handleSegmentClick = useCallback(
-		(segment: Segment) => {
-			onSelectSegment(segment.id);
-			// Scroll timeline to this segment's start time
-			const startSec = parseTime(segment.startTime);
-			scrollToTime(startSec);
-			// Seek audio to segment start so pressing play works from here
-			onSeek?.(startSec);
-			// Re-enable auto-follow (clicking means "follow from here")
-			setAutoFollow(true);
-		},
-		[onSelectSegment, scrollToTime, onSeek, setAutoFollow]
-	);
-
 	// Handle word-level click - seek to the clicked word's timestamp
 	const handleTextareaClick = useCallback(
 		(segment: Segment, e: React.MouseEvent<HTMLTextAreaElement>) => {
+			onSelectSegment(segment.id);
 			const textarea = e.currentTarget;
 			// Get cursor position at click
 			const cursorPos = textarea.selectionStart;
@@ -307,7 +291,7 @@ export function Editor({
 			// Re-enable auto-follow
 			setAutoFollow(true);
 		},
-		[wordIndex, onSeek, scrollToTime, setAutoFollow]
+		[wordIndex, onSelectSegment, onSeek, scrollToTime, setAutoFollow]
 	);
 
 	return (
@@ -331,14 +315,8 @@ export function Editor({
 								(activeRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
 							}
 						}}
-						onClick={() => handleSegmentClick(segment)}
-						onKeyDown={(e) => {
-							if (e.key === "Enter" || e.key === " ") {
-								handleSegmentClick(segment);
-							}
-						}}
 						className={cn(
-							"group relative flex gap-6 p-6 transition-all duration-200 cursor-pointer border-l-4 border-l-transparent",
+							"group relative flex gap-6 p-6 transition-all duration-200 border-l-4 border-l-transparent",
 							isSelected && "bg-blue-50 border-l-blue-500 shadow-sm",
 							!isSelected && "hover:bg-slate-50 hover:border-l-slate-300",
 							isActive && !isSelected && "bg-amber-50/50 border-l-amber-400",
@@ -374,6 +352,7 @@ export function Editor({
 							{/* Speaker Dropdown Popover */}
 							{activeSpeakerDropdown === segment.id && (
 								<div
+									role="menu"
 									className="absolute top-10 left-0 z-50 w-56 bg-white rounded-lg shadow-xl border border-slate-100 overflow-hidden"
 									onClick={(e) => e.stopPropagation()}
 									onKeyDown={(e) => e.stopPropagation()}
@@ -454,6 +433,7 @@ export function Editor({
 									onUpdateSegment(segment.id, {
 										text: e.target.value,
 										wordsDirty: true,
+										wordTimingStatus: "dirty",
 									});
 									adjustHeight(segment.id);
 								}}

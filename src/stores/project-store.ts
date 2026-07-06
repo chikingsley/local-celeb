@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
-import { formatTime, generateId } from "@/lib/utils";
+import { closeSilenceGaps } from "@/lib/timeline-gaps";
+import { formatTime, generateId, parseTime } from "@/lib/utils";
 import {
 	AppView,
 	DEFAULT_SPEAKERS,
@@ -53,11 +54,15 @@ interface ProjectState {
 	setProjectData: (segments: Segment[], speakers: Speaker[]) => void;
 	addSegment: (currentTime: number, speakerId?: string) => void;
 	updateSegment: (id: string, updates: Partial<Segment>) => void;
+	updateSegments: (updatesById: Record<string, Partial<Segment>>) => void;
+	splitSegment: (id: string, splitTime?: number) => void;
+	mergeAdjacentSegment: (id: string, direction: "previous" | "next") => void;
 	deleteSegment: (id: string) => void;
 	updateSpeaker: (id: string, updates: Partial<Speaker>) => void;
 	deleteSpeaker: (id: string) => void;
 	mergeSpeakers: (fromId: string, toId: string) => void;
 	reorderSpeakers: (fromIndex: number, toIndex: number) => void;
+	closeTimelineGaps: () => void;
 
 	// History actions
 	undo: () => void;
@@ -76,6 +81,77 @@ const initialMeta: FileMetaData = {
 	language: "English",
 	date: "",
 };
+
+function sortSegmentsByStart(segments: Segment[]): Segment[] {
+	return [...segments].sort((a, b) => parseTime(a.startTime) - parseTime(b.startTime));
+}
+
+function splitTextAtRatio(text: string, ratio: number): [string, string] {
+	const trimmed = text.trim();
+	if (!trimmed) return ["", ""];
+
+	const target = Math.max(1, Math.min(trimmed.length - 1, Math.round(trimmed.length * ratio)));
+	const leftBoundary = trimmed.lastIndexOf(" ", target);
+	const rightBoundary = trimmed.indexOf(" ", target);
+	const splitIndex =
+		leftBoundary > 0 && target - leftBoundary <= Math.max(12, (rightBoundary - target || 0) + 8)
+			? leftBoundary
+			: rightBoundary > 0
+				? rightBoundary
+				: target;
+
+	return [trimmed.slice(0, splitIndex).trim(), trimmed.slice(splitIndex).trim()];
+}
+
+function splitWordsAtTime(
+	segment: Segment,
+	splitTime: number
+): [Segment["words"], Segment["words"]] {
+	if (!segment.words || segment.words.length === 0) return [undefined, undefined];
+
+	const leftWords = segment.words.filter((word) => (word.start + word.end) / 2 <= splitTime);
+	const rightWords = segment.words.filter((word) => (word.start + word.end) / 2 > splitTime);
+
+	return [
+		leftWords.length > 0 ? leftWords : undefined,
+		rightWords.length > 0 ? rightWords : undefined,
+	];
+}
+
+function wordsToText(words: Segment["words"]): string {
+	return (
+		words
+			?.map((word) => word.word)
+			.join(" ")
+			.trim() ?? ""
+	);
+}
+
+function joinSegmentText(first: Segment, second: Segment): string {
+	return [first.text.trim(), second.text.trim()].filter(Boolean).join("\n");
+}
+
+function splitWordTimingStatus(
+	segment: Segment,
+	words: Segment["words"]
+): Segment["wordTimingStatus"] {
+	if (segment.wordsDirty) return "dirty";
+	return words && words.length > 0 ? (segment.wordTimingStatus ?? "provider") : "absent";
+}
+
+function mergedWordTimingStatus(
+	first: Segment,
+	second: Segment,
+	words: Segment["words"]
+): Segment["wordTimingStatus"] {
+	if (first.wordsDirty || second.wordsDirty) return "dirty";
+	if (!words || words.length === 0) return "absent";
+	if (first.wordTimingStatus === "manual" || second.wordTimingStatus === "manual") return "manual";
+	if (first.wordTimingStatus === "estimated" || second.wordTimingStatus === "estimated") {
+		return "estimated";
+	}
+	return "provider";
+}
 
 export const useProjectStore = create<ProjectState>()(
 	subscribeWithSelector(
@@ -152,16 +228,7 @@ export const useProjectStore = create<ProjectState>()(
 						text: "",
 					};
 
-					// Insert segment in time order
-					const newSegments = [...state.segments, newSegment].sort((a, b) => {
-						const aStart = a.startTime
-							.split(":")
-							.reduce((acc, t, i) => acc + Number(t) * (i === 0 ? 60 : 1), 0);
-						const bStart = b.startTime
-							.split(":")
-							.reduce((acc, t, i) => acc + Number(t) * (i === 0 ? 60 : 1), 0);
-						return aStart - bStart;
-					});
+					const newSegments = sortSegmentsByStart([...state.segments, newSegment]);
 
 					set({
 						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
@@ -180,6 +247,119 @@ export const useProjectStore = create<ProjectState>()(
 						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
 						future: [],
 						segments: newSegments,
+						lastSavedAt: Date.now(),
+					});
+				},
+
+				updateSegments: (updatesById) => {
+					const state = get();
+					const ids = new Set(Object.keys(updatesById));
+					if (ids.size === 0) return;
+
+					const newSegments = state.segments.map((segment) =>
+						ids.has(segment.id) ? { ...segment, ...updatesById[segment.id] } : segment
+					);
+
+					set({
+						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
+						future: [],
+						segments: newSegments,
+						lastSavedAt: Date.now(),
+					});
+				},
+
+				splitSegment: (id, splitTime) => {
+					const state = get();
+					const segments = sortSegmentsByStart(state.segments);
+					const segmentIndex = segments.findIndex((segment) => segment.id === id);
+					if (segmentIndex === -1) return;
+
+					const segment = segments[segmentIndex];
+					const start = parseTime(segment.startTime);
+					const end = parseTime(segment.endTime);
+					if (end - start < 0.2) return;
+
+					const requestedSplit =
+						typeof splitTime === "number" && splitTime > start + 0.1 && splitTime < end - 0.1
+							? splitTime
+							: (start + end) / 2;
+					const splitAt = Math.max(start + 0.1, Math.min(end - 0.1, requestedSplit));
+					const ratio = (splitAt - start) / (end - start);
+					const [leftWords, rightWords] = splitWordsAtTime(segment, splitAt);
+					const [leftTextByRatio, rightTextByRatio] = splitTextAtRatio(segment.text, ratio);
+					const leftText = wordsToText(leftWords) || leftTextByRatio;
+					const rightText = wordsToText(rightWords) || rightTextByRatio;
+
+					const leftSegment: Segment = {
+						...segment,
+						endTime: formatTime(splitAt),
+						text: leftText,
+						...(leftWords ? { words: leftWords } : { words: undefined }),
+						...(segment.wordsDirty ? { wordsDirty: true } : {}),
+						wordTimingStatus: splitWordTimingStatus(segment, leftWords),
+					};
+					const rightSegment: Segment = {
+						...segment,
+						id: generateId("segment"),
+						startTime: formatTime(splitAt),
+						text: rightText,
+						...(rightWords ? { words: rightWords } : { words: undefined }),
+						...(segment.wordsDirty ? { wordsDirty: true } : {}),
+						wordTimingStatus: splitWordTimingStatus(segment, rightWords),
+					};
+
+					const newSegments = [
+						...segments.slice(0, segmentIndex),
+						leftSegment,
+						rightSegment,
+						...segments.slice(segmentIndex + 1),
+					];
+
+					set({
+						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
+						future: [],
+						segments: newSegments,
+						selectedSegmentId: rightSegment.id,
+						lastSavedAt: Date.now(),
+					});
+				},
+
+				mergeAdjacentSegment: (id, direction) => {
+					const state = get();
+					const segments = sortSegmentsByStart(state.segments);
+					const segmentIndex = segments.findIndex((segment) => segment.id === id);
+					if (segmentIndex === -1) return;
+
+					const neighborIndex = direction === "previous" ? segmentIndex - 1 : segmentIndex + 1;
+					const neighbor = segments[neighborIndex];
+					const segment = segments[segmentIndex];
+					if (!neighbor || neighbor.speakerId !== segment.speakerId) return;
+
+					const first = neighborIndex < segmentIndex ? neighbor : segment;
+					const second = neighborIndex < segmentIndex ? segment : neighbor;
+					const mergedWords =
+						first.words && second.words ? [...first.words, ...second.words] : undefined;
+					const mergedSegment: Segment = {
+						...first,
+						endTime: second.endTime,
+						text: joinSegmentText(first, second),
+						...(mergedWords ? { words: mergedWords } : { words: undefined }),
+						...(first.wordsDirty || second.wordsDirty ? { wordsDirty: true } : {}),
+						wordTimingStatus: mergedWordTimingStatus(first, second, mergedWords),
+					};
+
+					const removeIds = new Set([first.id, second.id]);
+					const newSegments = segments.flatMap((current) => {
+						if (current.id === first.id) return [mergedSegment];
+						if (removeIds.has(current.id)) return [];
+						return [current];
+					});
+
+					set({
+						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
+						future: [],
+						segments: newSegments,
+						selectedSegmentId: mergedSegment.id,
 						lastSavedAt: Date.now(),
 					});
 				},
@@ -241,6 +421,19 @@ export const useProjectStore = create<ProjectState>()(
 						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
 						future: [],
 						speakers: newSpeakers,
+						lastSavedAt: Date.now(),
+					});
+				},
+
+				closeTimelineGaps: () => {
+					const state = get();
+					const newSegments = closeSilenceGaps(state.segments);
+					if (newSegments === state.segments) return;
+
+					set({
+						past: [...state.past, { segments: state.segments, speakers: state.speakers }],
+						future: [],
+						segments: sortSegmentsByStart(newSegments),
 						lastSavedAt: Date.now(),
 					});
 				},

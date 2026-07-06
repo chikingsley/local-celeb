@@ -1,5 +1,7 @@
 import type { FileMetaData, Segment, Speaker } from "@/types";
+import { deriveTranscriptTurns } from "./transcript-turns";
 import { parseTime } from "./utils";
+import { getWordTimingStatus } from "./word-alignment";
 
 /**
  * Export formats supported by the application
@@ -36,6 +38,69 @@ export function secondsToVttTime(seconds: number): string {
 function getSpeakerName(speakerId: string, speakers: Speaker[]): string {
 	const speaker = speakers.find((s) => s.id === speakerId);
 	return speaker?.name ?? speakerId;
+}
+
+/**
+ * Export review text grouped by speaker turns.
+ */
+export function exportToReviewText(
+	segments: Segment[],
+	speakers: Speaker[],
+	options: { includeTimestamps?: boolean } = {}
+): string {
+	return deriveTranscriptTurns(segments)
+		.map((turn) => {
+			const speakerName = getSpeakerName(turn.speakerId, speakers);
+			const prefix = options.includeTimestamps
+				? `[${turn.startTime} - ${turn.endTime}] ${speakerName}:`
+				: `${speakerName}:`;
+			return `${prefix}\n${turn.text}`;
+		})
+		.join("\n\n");
+}
+
+/**
+ * Export normalized turn-level JSON for downstream review products.
+ */
+export function exportToTurnJson(
+	segments: Segment[],
+	speakers: Speaker[],
+	meta?: Partial<FileMetaData>
+): string {
+	const turns = deriveTranscriptTurns(segments).map((turn) => ({
+		id: turn.id,
+		speakerId: turn.speakerId,
+		speakerName: getSpeakerName(turn.speakerId, speakers),
+		startTime: turn.startTime,
+		endTime: turn.endTime,
+		text: turn.text,
+		segmentIds: turn.segmentIds,
+		wordsDirty: turn.wordsDirty,
+		hasWordTiming: turn.hasWordTiming,
+		wordTimingStatus: summarizeTurnWordTiming(turn.segmentIds, segments),
+	}));
+
+	return JSON.stringify(
+		{
+			version: "1.0",
+			exportedAt: new Date().toISOString(),
+			meta: meta ?? {},
+			speakers,
+			turns,
+		},
+		null,
+		2
+	);
+}
+
+function summarizeTurnWordTiming(segmentIds: string[], segments: Segment[]): string {
+	const statuses = new Set(
+		segmentIds
+			.map((segmentId) => segments.find((segment) => segment.id === segmentId))
+			.filter((segment): segment is Segment => segment !== undefined)
+			.map(getWordTimingStatus)
+	);
+	return statuses.size === 1 ? Array.from(statuses)[0] : "mixed";
 }
 
 /**

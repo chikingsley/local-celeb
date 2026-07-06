@@ -71,23 +71,31 @@ export default function Minimap({
 	}, [containerRef]);
 
 	// Handle click to navigate
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
+	const scrollToPercentage = useCallback(
+		(percentage: number, behavior: ScrollBehavior = "smooth") => {
 			const container = containerRef.current;
-			const minimap = minimapRef.current;
-			if (!container || !minimap) return;
-
-			const rect = minimap.getBoundingClientRect();
-			const clickY = e.clientY - rect.top;
-			const percentage = clickY / rect.height;
+			if (!container) return;
 			const scrollTarget = percentage * container.scrollHeight - container.clientHeight / 2;
 
 			container.scrollTo({
 				top: Math.max(0, scrollTarget),
-				behavior: "smooth",
+				behavior,
 			});
 		},
 		[containerRef]
+	);
+
+	// Handle click to navigate
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
+			const minimap = minimapRef.current;
+			if (!minimap) return;
+
+			const rect = minimap.getBoundingClientRect();
+			const clickY = e.clientY - rect.top;
+			scrollToPercentage(clickY / rect.height);
+		},
+		[scrollToPercentage]
 	);
 
 	// Handle drag
@@ -95,6 +103,29 @@ export default function Minimap({
 		e.preventDefault();
 		setIsDragging(true);
 	}, []);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			const container = containerRef.current;
+			if (!container) return;
+
+			const step = container.clientHeight / Math.max(container.scrollHeight, 1);
+			if (e.key === "ArrowDown" || e.key === "PageDown") {
+				e.preventDefault();
+				scrollToPercentage(Math.min(1, viewportTop / 100 + step), "auto");
+			} else if (e.key === "ArrowUp" || e.key === "PageUp") {
+				e.preventDefault();
+				scrollToPercentage(Math.max(0, viewportTop / 100 - step), "auto");
+			} else if (e.key === "Home") {
+				e.preventDefault();
+				scrollToPercentage(0, "auto");
+			} else if (e.key === "End") {
+				e.preventDefault();
+				scrollToPercentage(1, "auto");
+			}
+		},
+		[containerRef, scrollToPercentage, viewportTop]
+	);
 
 	useEffect(() => {
 		if (!isDragging) return;
@@ -145,8 +176,17 @@ export default function Minimap({
 	return (
 		<div
 			ref={minimapRef}
+			role="scrollbar"
+			aria-label="Transcript minimap"
+			aria-controls="transcript-scroll-region"
+			aria-orientation="vertical"
+			aria-valuemin={0}
+			aria-valuemax={100}
+			aria-valuenow={Math.round(viewportTop)}
+			tabIndex={0}
 			className="w-16 bg-slate-50 border-l border-slate-200 flex flex-col cursor-pointer select-none relative"
 			onClick={handleClick}
+			onKeyDown={handleKeyDown}
 		>
 			{/* Segments representation */}
 			<div className="flex-1 relative py-2 px-1.5">
@@ -172,7 +212,7 @@ export default function Minimap({
 							{/* Search match markers */}
 							{hasMatches && (
 								<div className="absolute inset-0 flex flex-col justify-center gap-px px-0.5">
-									{matchesBySegment[segment.id].slice(0, 3).map((match, idx) => {
+									{matchesBySegment[segment.id].slice(0, 3).map((match) => {
 										const globalIdx = searchMatches.findIndex(
 											(m) => m.segmentId === segment.id && m.startIndex === match.startIndex
 										);
@@ -180,7 +220,7 @@ export default function Minimap({
 
 										return (
 											<div
-												key={idx}
+												key={`${match.segmentId}-${match.startIndex}-${match.endIndex}`}
 												className={cn(
 													"h-0.5 rounded-full",
 													isCurrent ? "bg-orange-400" : "bg-yellow-400"
@@ -199,6 +239,13 @@ export default function Minimap({
 
 				{/* Viewport indicator */}
 				<div
+					role="slider"
+					aria-label="Visible transcript region"
+					aria-orientation="vertical"
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-valuenow={Math.round(viewportTop)}
+					tabIndex={0}
 					className={cn(
 						"absolute left-0 right-0 mx-1 rounded border-2 pointer-events-auto transition-opacity",
 						isDragging
@@ -211,6 +258,7 @@ export default function Minimap({
 						minHeight: "8px",
 					}}
 					onMouseDown={handleMouseDown}
+					onKeyDown={handleKeyDown}
 				/>
 			</div>
 

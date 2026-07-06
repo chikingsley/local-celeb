@@ -91,7 +91,6 @@ export function findWordCharacterRange(
 ): { start: number; end: number } | null {
 	if (!words || wordIndex < 0 || wordIndex >= words.length) return null;
 
-	const targetWord = words[wordIndex].word.trim();
 	let searchStart = 0;
 
 	// Find the nth occurrence by iterating through previous words

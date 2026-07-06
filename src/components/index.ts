@@ -1,3 +1,6 @@
+export { CleanupSegments } from "./CleanupSegments";
+export { CleanupTurns } from "./CleanupTurns";
+export { CleanupWords } from "./CleanupWords";
 export { default as CommandPalette } from "./CommandPalette";
 export { Editor } from "./Editor";
 export { EditorToolbar } from "./EditorToolbar";
@@ -5,6 +8,9 @@ export { default as ExportModal } from "./ExportModal";
 export { default as FindReplace } from "./FindReplace";
 export { default as Minimap } from "./Minimap";
 export { PropertiesPanel } from "./PropertiesPanel";
+export { ReviewEditor } from "./ReviewEditor";
+export { ReviewPanel } from "./ReviewPanel";
+export { default as SettingsModal } from "./SettingsModal";
 export { Sidebar } from "./Sidebar";
 export { Timeline } from "./Timeline";
 export { WelcomeScreen } from "./WelcomeScreen";

@@ -1,100 +1,65 @@
 # Local Celeb
 
-Professional AI transcription editor with speaker diarization and voice cloning preparation.
+Local Celeb is a local transcript review and editing workbench. The current repo is focused on the transcript UI/product shape: importing existing transcripts, reviewing by speaker turn, editing speaker/timing/segment data, and exporting useful transcript formats.
+
+## Current Shape
+
+- **Review mode** renders the transcript as speaker turns. A turn is one speaker's continuous speech until another speaker starts.
+- **Editor mode** keeps the turn, segment, word, and timeline surfaces for diarization, segment boundaries, timing, and word-alignment work.
+- The canonical direction is `Transcript -> Turn -> Segment -> Word`; turns are derived from the segment stream instead of stored as duplicate transcript text.
+- Transcript files can be imported directly without the proxy: JSON, JSONL, SRT, and VTT.
+- Audio/video transcription is still available through the optional Groq proxy when `GROQ_API_KEY` is configured.
 
 ## Tech Stack
 
-- **Frontend:** React 19, TypeScript, Vite
-- **Styling:** Tailwind CSS v4
-- **State Management:** Zustand
-- **Backend:** ElysiaJS (Bun)
-- **AI:** Google Gemini API
-- **Testing:** Vitest + React Testing Library
-- **Linting/Formatting:** Biome
-
-## Project Structure
-
-```text
-local-celeb-3/
-├── src/
-│   ├── components/     # React components
-│   ├── hooks/          # Custom React hooks
-│   ├── lib/            # Utilities (cn, formatTime, etc.)
-│   ├── services/       # API services
-│   ├── stores/         # Zustand stores
-│   ├── test/           # Test setup
-│   ├── types/          # TypeScript types & Zod schemas
-│   ├── App.tsx         # Main app component
-│   ├── main.tsx        # Entry point
-│   └── index.css       # Global styles
-├── server/
-│   └── index.ts        # ElysiaJS backend (Gemini proxy)
-├── biome.json          # Biome config
-├── vite.config.ts      # Vite config
-├── vitest.config.ts    # Vitest config
-└── tsconfig.json       # TypeScript config
-
-```text
-
-## Prerequisites
-
-- [Bun](https://bun.sh/) (v1.0+)
-- Google Gemini API key
+- React 19, TypeScript, Vite
+- Tailwind CSS v4
+- Zustand
+- Bun
+- Optional Elysia/Groq transcription proxy
+- Biome
 
 ## Setup
 
-1. Install dependencies:
+```bash
+bun install
+```
 
-   ```bash
-   bun install
-   ```
+For transcript-only UI work, run just the client:
 
-2. Set up your environment:
+```bash
+bun run dev:client -- --host 0.0.0.0
+```
 
-   ```bash
-   cp .env.local.example .env.local
-   # Edit .env.local and add your GEMINI_API_KEY
-   ```
+For audio/video transcription through Groq, configure the API key and run both client and server:
 
-3. Start the development servers:
+```bash
+cp .env.example .env.local
+# edit .env.local and set GROQ_API_KEY
+bun run dev
+```
 
-   ```bash
-   # Terminal 1 - Frontend
-   bun run dev:client
-
-   # Terminal 2 - Backend (API proxy)
-   bun run dev:server
-   ```
-
-   Or run both together:
-
-   ```bash
-   bun run dev
-   ```
-
-4. Open <http://localhost:3000>
+The Vite client defaults to <http://localhost:3000>. The proxy server defaults to port `3001`.
 
 ## Scripts
 
 | Command | Description |
 | ------- | ----------- |
-| `bun run dev` | Start both frontend and backend |
-| `bun run dev:client` | Start Vite dev server (port 3000) |
-| `bun run dev:server` | Start ElysiaJS server (port 3001) |
-| `bun run build` | Build for production |
-| `bun run preview` | Preview production build |
-| `bun run test` | Run tests in watch mode |
-| `bun run test:run` | Run tests once |
-| `bun run lint` | Check code with Biome |
-| `bun run lint:fix` | Fix lint issues |
-| `bun run format` | Format code with Biome |
+| `bun run dev` | Start client and optional Groq proxy |
+| `bun run dev:client` | Start the Vite client |
+| `bun run dev:server` | Start the Elysia/Groq proxy |
+| `bun run build` | Build the client |
+| `bun run preview` | Preview the production build |
+| `bun run typecheck` | Run TypeScript without emit |
+| `bun run lint` | Run Biome checks |
+| `bun run lint:fix` | Apply Biome safe fixes |
 
-## Features
+## Useful Paths
 
-- Upload audio/video files for transcription
-- AI-powered speaker diarization
-- Interactive transcript editor
-- Timeline visualization with playback controls
-- Speaker management (rename, merge, reorder, delete)
-- Undo/redo support
-- Resizable panels
+- `src/lib/transcript-import.ts`: transcript import adapters.
+- `src/lib/transcript-turns.ts`: derived turn model and segment/turn mappings.
+- `src/components/ReviewEditor.tsx`: turn-level review surface.
+- `src/components/Editor.tsx`: segment-level editor.
+- `public/fixtures/`: local sample media/transcript fixtures, including the multi-speaker Scribe fixture.
+- `docs/TODO.md`: active product and editor backlog.
+- `docs/research/`: evidence notes for transcript shapes and UI/editor references.

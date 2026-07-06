@@ -102,6 +102,11 @@ export const usePlayerStore = create<PlayerState>()((set, get) => ({
 	toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
 	setTimelineHeight: (height) => {
+		if (height <= 0) {
+			set({ timelineHeight: 0 });
+			return;
+		}
+
 		const clampedHeight = Math.max(
 			LAYOUT.MIN_TIMELINE_HEIGHT,
 			Math.min(height, window.innerHeight - LAYOUT.MAX_TIMELINE_HEIGHT_OFFSET)

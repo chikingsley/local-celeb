@@ -1,13 +1,32 @@
-import { Download, Redo2, Undo2 } from "lucide-react";
+import {
+	Download,
+	PanelBottomClose,
+	PanelBottomOpen,
+	PanelRightClose,
+	PanelRightOpen,
+	Redo2,
+	Search,
+	Settings,
+	Undo2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { TranscriptMode } from "@/types";
 
 interface EditorToolbarProps {
+	mode: TranscriptMode;
 	canUndo: boolean;
 	canRedo: boolean;
 	lastSavedAt: number | null;
+	timelineCollapsed: boolean;
+	rightPanelCollapsed: boolean;
+	onModeChange: (mode: TranscriptMode) => void;
 	onUndo: () => void;
 	onRedo: () => void;
+	onFind: () => void;
+	onToggleTimeline: () => void;
+	onToggleRightPanel: () => void;
+	onSettings: () => void;
 	onExport: () => void;
 }
 
@@ -28,11 +47,19 @@ function formatRelativeTime(timestamp: number | null): string {
 }
 
 export function EditorToolbar({
+	mode,
 	canUndo,
 	canRedo,
 	lastSavedAt,
+	timelineCollapsed,
+	rightPanelCollapsed,
+	onModeChange,
 	onUndo,
 	onRedo,
+	onFind,
+	onToggleTimeline,
+	onToggleRightPanel,
+	onSettings,
 	onExport,
 }: EditorToolbarProps) {
 	// Force re-render every 10s to update relative time
@@ -81,12 +108,60 @@ export function EditorToolbar({
 				</div>
 			</div>
 
+			<div className="flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+				{[
+					{ label: "Review", value: TranscriptMode.REVIEW },
+					{ label: "Editor", value: TranscriptMode.CLEANUP },
+				].map((item) => (
+					<button
+						key={item.value}
+						type="button"
+						onClick={() => onModeChange(item.value)}
+						className={cn(
+							"h-8 px-4 text-sm font-medium rounded-md transition-colors",
+							mode === item.value
+								? "bg-white text-slate-950 shadow-sm"
+								: "text-slate-500 hover:text-slate-800"
+						)}
+					>
+						{item.label}
+					</button>
+				))}
+			</div>
+
 			<div className="flex items-center gap-3">
 				<button
 					type="button"
-					className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+					onClick={onFind}
+					className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
 				>
-					Feedback
+					<Search size={16} />
+					Find
+				</button>
+				<div className="h-5 w-px bg-slate-200" />
+				<button
+					type="button"
+					onClick={onToggleTimeline}
+					className="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-colors"
+					title={timelineCollapsed ? "Show timeline" : "Hide timeline"}
+				>
+					{timelineCollapsed ? <PanelBottomOpen size={17} /> : <PanelBottomClose size={17} />}
+				</button>
+				<button
+					type="button"
+					onClick={onToggleRightPanel}
+					className="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-colors"
+					title={rightPanelCollapsed ? "Show properties" : "Hide properties"}
+				>
+					{rightPanelCollapsed ? <PanelRightOpen size={17} /> : <PanelRightClose size={17} />}
+				</button>
+				<button
+					type="button"
+					onClick={onSettings}
+					className="p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-colors"
+					title="Settings"
+				>
+					<Settings size={17} />
 				</button>
 				<button
 					type="button"

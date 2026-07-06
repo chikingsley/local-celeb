@@ -1,7 +1,7 @@
 import type { TranscriptionResponse } from "@/types";
 import { TranscriptionResponseSchema } from "@/types";
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_TRANSCRIPTION_API_BASE ?? "/api";
 
 class ApiError extends Error {
 	constructor(

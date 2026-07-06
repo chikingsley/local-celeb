@@ -1,17 +1,21 @@
-import { ArrowRight, Sparkles, Upload } from "lucide-react";
+import { ArrowRight, FileText, Sparkles, Upload, Users } from "lucide-react";
 
 interface WelcomeScreenProps {
 	isProcessing: boolean;
 	loadingMessage: string;
 	onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	onTranscriptUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	onLoadSample: () => void;
+	onLoadMultiSpeakerSample: () => void;
 }
 
 export function WelcomeScreen({
 	isProcessing,
 	loadingMessage,
 	onFileUpload,
+	onTranscriptUpload,
 	onLoadSample,
+	onLoadMultiSpeakerSample,
 }: WelcomeScreenProps) {
 	return (
 		<div className="flex flex-col items-center justify-center min-h-full p-6 font-sans bg-white">
@@ -30,28 +34,49 @@ export function WelcomeScreen({
 					</div>
 				) : (
 					<>
-						{/* Upload Area */}
-						<label className="group block w-full cursor-pointer">
-							<div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
-								<div className="flex flex-col items-center gap-4">
-									<div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
-										<Upload className="h-6 w-6 text-slate-600" />
-									</div>
-									<div>
-										<p className="text-lg font-medium text-slate-900">
-											Drop your audio or video file here
-										</p>
-										<p className="text-slate-500 mt-1">or click to browse</p>
+						<div className="grid gap-4 sm:grid-cols-2">
+							{/* Upload Area */}
+							<label className="group block w-full cursor-pointer">
+								<div className="h-full border-2 border-dashed border-slate-200 rounded-2xl p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
+									<div className="flex flex-col items-center gap-4">
+										<div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+											<Upload className="h-6 w-6 text-slate-600" />
+										</div>
+										<div>
+											<p className="text-lg font-medium text-slate-900">Audio or video</p>
+											<p className="text-slate-500 mt-1">Open local media</p>
+										</div>
 									</div>
 								</div>
-							</div>
-							<input
-								type="file"
-								accept="audio/*,video/*"
-								className="hidden"
-								onChange={onFileUpload}
-							/>
-						</label>
+								<input
+									type="file"
+									accept="audio/*,video/*,.srt,.vtt,.webvtt,text/vtt"
+									multiple
+									className="hidden"
+									onChange={onFileUpload}
+								/>
+							</label>
+
+							<label className="group block w-full cursor-pointer">
+								<div className="h-full border-2 border-dashed border-slate-200 rounded-2xl p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
+									<div className="flex flex-col items-center gap-4">
+										<div className="h-14 w-14 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+											<FileText className="h-6 w-6 text-slate-600" />
+										</div>
+										<div>
+											<p className="text-lg font-medium text-slate-900">Transcript file</p>
+											<p className="text-slate-500 mt-1">JSON, JSONL, SRT, or VTT</p>
+										</div>
+									</div>
+								</div>
+								<input
+									type="file"
+									accept=".json,.jsonl,.srt,.vtt,application/json,text/plain,text/vtt"
+									className="hidden"
+									onChange={onTranscriptUpload}
+								/>
+							</label>
+						</div>
 
 						{/* Divider */}
 						<div className="flex items-center gap-4 my-8">
@@ -60,19 +85,33 @@ export function WelcomeScreen({
 							<div className="flex-1 h-px bg-slate-200" />
 						</div>
 
-						{/* Sample Button */}
-						<button
-							type="button"
-							onClick={onLoadSample}
-							className="group inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition-all"
-						>
-							<Sparkles size={18} className="text-amber-500" />
-							<span>Try with a sample</span>
-							<ArrowRight
-								size={16}
-								className="text-slate-400 group-hover:translate-x-0.5 transition-transform"
-							/>
-						</button>
+						{/* Sample Buttons */}
+						<div className="flex flex-wrap justify-center gap-3">
+							<button
+								type="button"
+								onClick={onLoadSample}
+								className="group inline-flex items-center gap-2 rounded-full bg-slate-100 px-5 py-3 font-medium text-slate-700 transition-all hover:bg-slate-200"
+							>
+								<Sparkles size={18} className="text-amber-500" />
+								<span>Try Scar sample</span>
+								<ArrowRight
+									size={16}
+									className="text-slate-400 transition-transform group-hover:translate-x-0.5"
+								/>
+							</button>
+							<button
+								type="button"
+								onClick={onLoadMultiSpeakerSample}
+								className="group inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 font-medium text-white transition-all hover:bg-slate-800"
+							>
+								<Users size={18} className="text-emerald-300" />
+								<span>Try speaker sample</span>
+								<ArrowRight
+									size={16}
+									className="text-slate-400 transition-transform group-hover:translate-x-0.5"
+								/>
+							</button>
+						</div>
 
 						{/* Features hint */}
 						<p className="text-sm text-slate-400 mt-12">

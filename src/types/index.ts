@@ -13,7 +13,17 @@ export const WordTimestampSchema = z.object({
 	start: z.number(), // seconds
 	end: z.number(), // seconds
 	interpolated: z.boolean().optional(), // true if timestamp was estimated, not from Whisper
+	confidence: z.number().optional(),
+	logprob: z.number().optional(),
 });
+
+export const WordTimingStatusSchema = z.enum([
+	"provider",
+	"manual",
+	"estimated",
+	"absent",
+	"dirty",
+]);
 
 export const SegmentSchema = z.object({
 	id: z.string().min(1),
@@ -23,6 +33,38 @@ export const SegmentSchema = z.object({
 	text: z.string(),
 	words: z.array(WordTimestampSchema).optional(), // Word-level timestamps from Groq/Whisper
 	wordsDirty: z.boolean().optional(), // true if text was edited and timestamps need re-alignment
+	wordTimingStatus: WordTimingStatusSchema.optional(),
+});
+
+export const TranscriptSourceMetaSchema = z.object({
+	format: z.string().optional(),
+	filename: z.string().optional(),
+	provider: z.string().optional(),
+	model: z.string().optional(),
+	modelId: z.string().optional(),
+	modelKey: z.string().optional(),
+	audioPath: z.string().optional(),
+	audioDuration: z.number().optional(),
+	processingTime: z.number().optional(),
+	recordingId: z.string().optional(),
+	transcriptionId: z.string().optional(),
+	languageCode: z.string().optional(),
+	languageProbability: z.number().optional(),
+	detail: z.array(z.string()).optional(),
+	timestampsRequested: z.boolean().optional(),
+	timestampsIncluded: z.boolean().optional(),
+	timingSource: z.string().optional(),
+	serviceMode: z.string().optional(),
+	jobId: z.string().optional(),
+	sourceKind: z.string().optional(),
+	inputKey: z.string().optional(),
+	mediaFilename: z.string().optional(),
+	outputArtifacts: z.array(z.string()).optional(),
+	recordCount: z.number().optional(),
+	warnings: z.array(z.string()).optional(),
+	rawResponse: z.unknown().optional(),
+	resultWrapper: z.unknown().optional(),
+	records: z.array(z.unknown()).optional(),
 });
 
 export const FileMetaDataSchema = z.object({
@@ -30,6 +72,9 @@ export const FileMetaDataSchema = z.object({
 	duration: z.number().nonnegative(),
 	language: z.string(),
 	date: z.string(),
+	notes: z.string().optional(),
+	summary: z.string().optional(),
+	source: TranscriptSourceMetaSchema.optional(),
 });
 
 export const TranscriptionResponseSchema = z.object({
@@ -39,7 +84,9 @@ export const TranscriptionResponseSchema = z.object({
 // TypeScript types derived from schemas
 export type Speaker = z.infer<typeof SpeakerSchema>;
 export type WordTimestamp = z.infer<typeof WordTimestampSchema>;
+export type WordTimingStatus = z.infer<typeof WordTimingStatusSchema>;
 export type Segment = z.infer<typeof SegmentSchema>;
+export type TranscriptSourceMeta = z.infer<typeof TranscriptSourceMetaSchema>;
 export type FileMetaData = z.infer<typeof FileMetaDataSchema>;
 export type TranscriptionResponse = z.infer<typeof TranscriptionResponseSchema>;
 
@@ -47,6 +94,17 @@ export type TranscriptionResponse = z.infer<typeof TranscriptionResponseSchema>;
 export enum AppView {
 	WELCOME = "WELCOME",
 	EDITOR = "EDITOR",
+}
+
+export enum TranscriptMode {
+	REVIEW = "review",
+	CLEANUP = "cleanup",
+}
+
+export enum CleanupGranularity {
+	TURNS = "turns",
+	SEGMENTS = "segments",
+	WORDS = "words",
 }
 
 // Processing step for loading states

@@ -159,7 +159,12 @@ export default function CommandPalette({
 	return (
 		<div className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]">
 			{/* Backdrop */}
-			<div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+			<button
+				type="button"
+				aria-label="Close command palette"
+				className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+				onClick={onClose}
+			/>
 
 			{/* Command Dialog */}
 			<Command
@@ -223,6 +228,7 @@ export default function CommandPalette({
 						{/* Shortcuts View */}
 						<div className="flex items-center border-b border-slate-200 px-4 py-3">
 							<button
+								type="button"
 								onClick={() => setShowShortcuts(false)}
 								className="text-sm text-blue-600 hover:text-blue-700"
 							>
@@ -241,8 +247,11 @@ export default function CommandPalette({
 										{category}
 									</h3>
 									<div className="space-y-1">
-										{shortcuts.map((shortcut, index) => (
-											<div key={index} className="flex items-center justify-between py-1.5">
+										{shortcuts.map((shortcut) => (
+											<div
+												key={`${shortcut.category}-${shortcut.key}-${shortcut.description}`}
+												className="flex items-center justify-between py-1.5"
+											>
 												<span className="text-sm text-slate-700">{shortcut.description}</span>
 												<kbd className="px-2 py-1 text-xs font-mono bg-slate-100 rounded text-slate-600">
 													{shortcut.key}

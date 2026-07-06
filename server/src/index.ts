@@ -33,6 +33,11 @@ interface OutputSegment {
 	words?: WordTimestamp[];
 }
 
+const port = Number(process.env.TRANSCRIPTION_SERVER_PORT ?? process.env.PORT ?? 3001);
+const groqModel = process.env.GROQ_MODEL ?? "whisper-large-v3-turbo";
+const groqLanguage = process.env.GROQ_LANGUAGE ?? "en";
+const hasGroqApiKey = () => Boolean(process.env.GROQ_API_KEY);
+
 // Convert seconds to MM:SS format
 function formatTime(seconds: number): string {
 	const mins = Math.floor(seconds / 60);
@@ -57,13 +62,24 @@ function base64ToFile(base64: string, mimeType: string): File {
 
 const app = new Elysia()
 	.use(cors())
-	.get("/api/health", () => ({ status: "ok", timestamp: new Date().toISOString() }))
+	.get("/api/health", () => ({
+		status: "ok",
+		provider: "groq",
+		configured: hasGroqApiKey(),
+		model: groqModel,
+		language: groqLanguage,
+		timestamp: new Date().toISOString(),
+	}))
 	.post(
 		"/api/transcribe",
-		async ({ body }) => {
+		async ({ body, set }) => {
 			const apiKey = process.env.GROQ_API_KEY;
 			if (!apiKey) {
-				throw new Error("GROQ_API_KEY not configured");
+				set.status = 503;
+				return {
+					error:
+						"Groq transcription proxy is not configured. Set GROQ_API_KEY or import transcript files directly.",
+				};
 			}
 
 			const groq = new Groq({ apiKey });
@@ -77,10 +93,10 @@ const app = new Elysia()
 				// Call Groq's Whisper API with word-level timestamps
 				const transcription = await groq.audio.transcriptions.create({
 					file: audioFile,
-					model: "whisper-large-v3-turbo",
+					model: groqModel,
 					response_format: "verbose_json",
 					timestamp_granularities: ["word", "segment"],
-					language: "en",
+					language: groqLanguage,
 					temperature: 0,
 				});
 
@@ -143,9 +159,10 @@ const app = new Elysia()
 			}),
 		}
 	)
-	.listen(3001);
+	.listen(Number.isFinite(port) ? port : 3001);
 
 console.log(`Server running at http://localhost:${app.server?.port}`);
-console.log("Using Groq Whisper Large V3 Turbo for transcription");
+console.log(`Groq transcription proxy: ${hasGroqApiKey() ? "configured" : "not configured"}`);
+console.log(`Groq model: ${groqModel}, language: ${groqLanguage}`);
 
 export type App = typeof app;

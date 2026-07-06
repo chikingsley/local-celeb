@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added an evidence-backed transcript model with `Transcript -> Turn -> Segment -> Word` as the canonical hierarchy.
+- Added import normalization for Local Celeb JSON, Scribe JSONL word-first records, Superwhisper-style provider JSON, job-wrapper results, SRT, and VTT.
+- Added Review and Editor workflows, with Editor views for Turns, Segments, and Words.
+- Added turn-based review/editing, turn-level JSON export, subtitle export, review text export, project JSON export, and segment/word JSON export.
+- Added sidecar media/subtitle import detection for local media plus SRT/VTT files.
+- Added a retained multi-speaker Scribe fixture and matching MP3 sample for speaker-repair UI testing.
+- Added waveform rendering, per-segment waveform thumbnails, silence-gap visualization, close-gaps timing repair, local word re-alignment, and browser-generated audio export by speaker or turn.
+- Added mode-aware right panels for review metadata/actions and editor view/assisted cleanup details.
+
+### Changed
+
+- Renamed the visible cleanup workflow to `Editor` and moved the `Turns | Segments | Words` view selector into the right panel.
+- Moved manual speaker management toward the timeline speaker rail, including inline rename, color cycling, speaker deletion, and hover-based move-segments submenu.
+- Simplified timeline controls by making drag-near-edge scrolling automatic and removing the non-action waveform status badge.
+- Made the Groq transcription proxy optional/configurable and updated environment/server docs away from the older Gemini wording.
+- Updated dependencies and shadcn/Tailwind-related component setup for the current app direction.
+- Refreshed `docs/TODO.md` to be active-work only instead of a completed phase checklist.
+
+### Removed
+
+- Deleted the archived Tauri example project from `docs/tauri-example-project`.
+- Deleted the low-value Vitest/unit-test layer and old test setup.
+- Removed `package-lock.json` in favor of the Bun lockfile.
+
+### Fixed
+
+- Fixed transcript import/export flows around provider metadata, missing word timing, dirty alignment state, and optional service wrappers.
+- Fixed playback/editor follow behavior so manual scroll can pause following and click/seek actions resume it.
+- Fixed timeline track clipping at short panel heights by giving the track surface enough height to match speaker rows.
+
 ## [0.5.0] - 2024-12-01
 
 ### Added
