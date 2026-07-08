@@ -2,6 +2,7 @@ import { Pause, Play } from "lucide-react";
 import type { ChangeEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppSidebar } from "@/app/app-sidebar";
+import { loadSampleManifest, type SampleEntry } from "@/app/samples";
 import { LAYOUT } from "@/app/layout-constants";
 import { AppView, CleanupGranularity, TranscriptMode } from "@/app/view-state";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -396,6 +397,16 @@ export function App() {
 		}
 	}, [activeSample]);
 
+	const [samples, setSamples] = useState<SampleEntry[]>([]);
+
+	useEffect(() => {
+		loadSampleManifest()
+			.then(setSamples)
+			.catch((error) => {
+				console.error("Failed to load sample manifest:", error);
+			});
+	}, []);
+
 	// Search state
 	const [searchMatches, setSearchMatches] = useState<
 		{ segmentId: string; startIndex: number; endIndex: number }[]
@@ -692,6 +703,29 @@ export function App() {
 		}
 	}, [applyTranscriptImport, setAudioUrl, setProcessing, showError]);
 
+	const loadSampleEntry = useCallback(
+		async (sample: SampleEntry) => {
+			setProcessing(true, `Loading ${sample.title}...`);
+			try {
+				const response = await fetch(sample.transcript);
+				if (!response.ok) {
+					throw new Error(`Failed to load sample: ${response.status}`);
+				}
+				const text = await response.text();
+				const result = importTranscriptText(text, `${sample.id}.scribe.jsonl`);
+				setAudioUrl(sample.audio);
+				applyTranscriptImport(result, sample.title);
+				setActiveSample(sample.id);
+			} catch (error) {
+				console.error("Failed to load sample:", error);
+				showError(error instanceof Error ? error.message : "Failed to load sample.");
+			} finally {
+				setProcessing(false);
+			}
+		},
+		[applyTranscriptImport, setAudioUrl, setProcessing, showError]
+	);
+
 	// Toggle play
 	const togglePlay = useCallback(() => {
 		if (audioRef.current) {
@@ -853,11 +887,11 @@ export function App() {
 			<AppSidebar
 				activeSample={activeSample}
 				meta={meta}
-				onLoadMultiSpeakerSample={handleLoadMultiSpeakerSample}
-				onLoadSample={handleLoadSample}
 				onNavigate={setView}
 				onOpenExport={openExport}
 				onOpenSettings={openSettings}
+				onSelectSample={loadSampleEntry}
+				samples={samples}
 				segmentCount={segments.length}
 			/>
 			<SidebarInset className="min-w-0 overflow-hidden bg-white font-sans text-slate-900">

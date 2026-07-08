@@ -1,0 +1,82 @@
+[
+  {
+    "id": "01-other-ventures2e-wb-audio-l1-u1-02",
+    "title": "Ventures 1 · Unit 1 (Introductions)",
+    "transcript": "/samples/01-other-ventures2e-wb-audio-l1-u1-02.scribe.jsonl",
+    "audio": "/samples/01-other-ventures2e-wb-audio-l1-u1-02.mp3",
+    "speakers": 13,
+    "durationSec": 127
+  },
+  {
+    "id": "02-lets-talk-03-track-3",
+    "title": "Let's Talk 1 · Track 3 (Questions)",
+    "transcript": "/samples/02-lets-talk-03-track-3.scribe.jsonl",
+    "audio": "/samples/02-lets-talk-03-track-3.mp3",
+    "speakers": 13,
+    "durationSec": 136
+  },
+  {
+    "id": "03-contemporary-ct3-sb-u12-p119-exb",
+    "title": "Contemporary Topics 3 · Unit 12 (Discussion B)",
+    "transcript": "/samples/03-contemporary-ct3-sb-u12-p119-exb.scribe.jsonl",
+    "audio": "/samples/03-contemporary-ct3-sb-u12-p119-exb.mp3",
+    "speakers": 5,
+    "durationSec": 94
+  },
+  {
+    "id": "04-passages-i09-passages-1-units-7-9-second",
+    "title": "Passages 1 · Unit 8 Quiz",
+    "transcript": "/samples/04-passages-i09-passages-1-units-7-9-second.scribe.jsonl",
+    "audio": "/samples/04-passages-i09-passages-1-units-7-9-second.mp3",
+    "speakers": 3,
+    "durationSec": 135
+  },
+  {
+    "id": "05-other-ventures2e-wb-audio-l1-u3-10",
+    "title": "Ventures 1 · Unit 3 (Friends & Family)",
+    "transcript": "/samples/05-other-ventures2e-wb-audio-l1-u3-10.scribe.jsonl",
+    "audio": "/samples/05-other-ventures2e-wb-audio-l1-u3-10.mp3",
+    "speakers": 9,
+    "durationSec": 158
+  },
+  {
+    "id": "06-lets-talk-02-track-2",
+    "title": "Let's Talk 1 · Track 2 (Conversations)",
+    "transcript": "/samples/06-lets-talk-02-track-2.scribe.jsonl",
+    "audio": "/samples/06-lets-talk-02-track-2.mp3",
+    "speakers": 12,
+    "durationSec": 144
+  },
+  {
+    "id": "07-contemporary-ct3-sb-u12-p119-exa",
+    "title": "Contemporary Topics 3 · Unit 12 (Discussion A)",
+    "transcript": "/samples/07-contemporary-ct3-sb-u12-p119-exa.scribe.jsonl",
+    "audio": "/samples/07-contemporary-ct3-sb-u12-p119-exa.mp3",
+    "speakers": 5,
+    "durationSec": 97
+  },
+  {
+    "id": "08-passages-i09-passages-1-units-7-9-audio",
+    "title": "Passages 1 · Unit 7 Quiz",
+    "transcript": "/samples/08-passages-i09-passages-1-units-7-9-audio.scribe.jsonl",
+    "audio": "/samples/08-passages-i09-passages-1-units-7-9-audio.mp3",
+    "speakers": 2,
+    "durationSec": 105
+  },
+  {
+    "id": "09-other-09-track-9",
+    "title": "Listening · Unit 8 (p.112)",
+    "transcript": "/samples/09-other-09-track-9.scribe.jsonl",
+    "audio": "/samples/09-other-09-track-9.mp3",
+    "speakers": 8,
+    "durationSec": 102
+  },
+  {
+    "id": "10-lets-talk-11-track-11",
+    "title": "Let's Talk 1 · Track 11 (Success)",
+    "transcript": "/samples/10-lets-talk-11-track-11.scribe.jsonl",
+    "audio": "/samples/10-lets-talk-11-track-11.mp3",
+    "speakers": 7,
+    "durationSec": 149
+  }
+]

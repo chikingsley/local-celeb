@@ -1,4 +1,4 @@
-import { AudioLines, ChevronsUpDown, FileText, Home, LogOut, Mic2, Plus, Settings, Users } from "lucide-react";
+import { AudioLines, ChevronsUpDown, FileText, Home, LogOut, Mic2, Plus, Settings } from "lucide-react";
 import { useCallback } from "react";
 import { AppView } from "@/app/view-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,17 +27,18 @@ import {
 	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import type { SampleEntry } from "@/app/samples";
 import type { FileMetaData } from "@/domain/transcript/types";
 import { formatTime } from "@/lib/utils";
 
 interface AppSidebarProps {
 	activeSample: string | null;
 	meta: FileMetaData;
-	onLoadMultiSpeakerSample: () => void;
-	onLoadSample: () => void;
 	onNavigate: (view: AppView) => void;
 	onOpenExport: () => void;
 	onOpenSettings: () => void;
+	onSelectSample: (sample: SampleEntry) => void;
+	samples: SampleEntry[];
 	segmentCount: number;
 }
 
@@ -98,11 +99,11 @@ function AppSwitcher({ onNavigateHome, onOpenSettings }: AppSwitcherProps) {
 interface FilesNavProps {
 	activeSample: string | null;
 	onAddFile: () => void;
-	onLoadMultiSpeakerSample: () => void;
-	onLoadSample: () => void;
+	onSelectSample: (sample: SampleEntry) => void;
+	samples: SampleEntry[];
 }
 
-function FilesNav({ activeSample, onAddFile, onLoadMultiSpeakerSample, onLoadSample }: FilesNavProps) {
+function FilesNav({ activeSample, onAddFile, onSelectSample, samples }: FilesNavProps) {
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>Files</SidebarGroupLabel>
@@ -112,26 +113,18 @@ function FilesNav({ activeSample, onAddFile, onLoadMultiSpeakerSample, onLoadSam
 			</SidebarGroupAction>
 			<SidebarGroupContent>
 				<SidebarMenu className="group-data-[collapsible=icon]:items-center">
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							isActive={activeSample === "scar"}
-							onClick={onLoadSample}
-							tooltip="Scar sample"
-						>
-							<AudioLines />
-							<span>Scar sample</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							isActive={activeSample === "speaker"}
-							onClick={onLoadMultiSpeakerSample}
-							tooltip="Speaker sample"
-						>
-							<Users />
-							<span>Speaker sample</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
+					{samples.map((sample) => (
+						<SidebarMenuItem key={sample.id}>
+							<SidebarMenuButton
+								isActive={activeSample === sample.id}
+								onClick={() => onSelectSample(sample)}
+								tooltip={sample.title}
+							>
+								<AudioLines />
+								<span>{sample.title}</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
 				</SidebarMenu>
 			</SidebarGroupContent>
 		</SidebarGroup>
@@ -219,10 +212,10 @@ function UserNav({ duration, hasTranscript, onOpenExport, onOpenSettings }: User
 export function AppSidebar({
 	activeSample,
 	meta,
+	samples,
 	segmentCount,
 	onNavigate,
-	onLoadSample,
-	onLoadMultiSpeakerSample,
+	onSelectSample,
 	onOpenSettings,
 	onOpenExport,
 }: AppSidebarProps) {
@@ -242,8 +235,8 @@ export function AppSidebar({
 				<FilesNav
 					activeSample={activeSample}
 					onAddFile={handleNavigateHome}
-					onLoadMultiSpeakerSample={onLoadMultiSpeakerSample}
-					onLoadSample={onLoadSample}
+					onSelectSample={onSelectSample}
+					samples={samples}
 				/>
 			</SidebarContent>
 
