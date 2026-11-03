@@ -153,14 +153,14 @@ Evidence from prior chat/memory, not live files in this checkout:
 
 Local verification note:
 
-- The old `/home/simon/github/episodic/all-language-data-work/french-course-transcripts/Pimsleur` checkout is not present on this machine now.
+- The old `/home/simon/github/language-learning/episodic/all-language-data-work/french-course-transcripts/Pimsleur` checkout is not present on this machine now.
 - Treat this as historical evidence for provider shape and workflow requirements, not a currently inspected artifact.
 
 ### Deployed Superwhisper Service
 
 Files:
 
-- `/home/simon/github/peacock-asr/packages/omni-curator/src/omni_curator/scribe/swservice.py`
+- `/home/simon/github/ai-lab/peacock-asr/packages/omni-curator/src/omni_curator/scribe/swservice.py`
 - `home-mac:~/GitHub/superwhisper-api/cloudflare-api/src/routes/transcriptions.ts`
 - `home-mac:~/GitHub/superwhisper-api/cloudflare-api/src/jobs/schema.ts`
 - `home-mac:~/GitHub/superwhisper-api/cloudflare-api/src/jobs/transcription.ts`

@@ -1,10 +1,10 @@
 export interface SampleEntry {
+	audio: string;
+	durationSec: number;
 	id: string;
+	speakers: number;
 	title: string;
 	transcript: string;
-	audio: string;
-	speakers: number;
-	durationSec: number;
 }
 
 export async function loadSampleManifest(): Promise<SampleEntry[]> {
