@@ -1,14 +1,10 @@
 import {
 	AlertTriangle,
 	AlignLeft,
-	ArrowRightLeft,
-	Bot,
 	ChevronDown,
 	ChevronRight,
 	Clock,
 	Info,
-	SearchCheck,
-	Sparkles,
 	Timer,
 	Type,
 } from "lucide-react";
@@ -23,6 +19,8 @@ import {
 	getWordTimingDisplay,
 	getWordTimingStatus,
 } from "@/domain/transcript/word-alignment";
+import { ProposalQueue } from "@/features/assist/proposal-queue";
+import type { ProposalReviewController } from "@/features/assist/use-proposal-review";
 import { cn, formatTime, parseTime } from "@/lib/utils";
 
 interface PropertiesPanelProps {
@@ -34,6 +32,7 @@ interface PropertiesPanelProps {
 	onSeek?: (time: number) => void;
 	onUpdateMeta?: (updates: Partial<FileMetaData>) => void;
 	onUpdateSegment: (id: string, updates: Partial<Segment>) => void;
+	proposalReview: ProposalReviewController;
 	segments?: Segment[];
 	selectedSegment: Segment | null;
 	speakers?: Speaker[];
@@ -505,39 +504,6 @@ function AssistedCleanupSection({
 							</div>
 						)}
 					</div>
-
-					<div className="space-y-2">
-						<div className="flex items-center gap-2 font-medium text-slate-500 text-xs">
-							<Bot size={13} />
-							Suggestions
-						</div>
-						<div className="grid gap-2">
-							<button
-								className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium text-slate-400 text-xs"
-								disabled
-								type="button"
-							>
-								<Sparkles size={13} />
-								Infer likely speaker names
-							</button>
-							<button
-								className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium text-slate-400 text-xs"
-								disabled
-								type="button"
-							>
-								<SearchCheck size={13} />
-								Detect name-address clues
-							</button>
-							<button
-								className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium text-slate-400 text-xs"
-								disabled
-								type="button"
-							>
-								<ArrowRightLeft size={13} />
-								Suggest diarization corrections
-							</button>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -739,6 +705,7 @@ export function PropertiesPanel({
 	speakers = [],
 	currentTime,
 	onUpdateSegment,
+	proposalReview,
 	onDeleteSegment,
 	onUpdateMeta,
 	onSeek,
@@ -955,6 +922,7 @@ export function PropertiesPanel({
 				onToggle={toggleSpeakerRepairCollapsed}
 				speakerWarnings={speakerWarnings}
 			/>
+			<ProposalQueue controller={proposalReview} />
 			<SelectedSegmentPanel
 				getCurrentWordIndex={getCurrentWordIndex}
 				onDeleteSegment={handleDeleteSegment}

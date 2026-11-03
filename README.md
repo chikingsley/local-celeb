@@ -9,6 +9,8 @@ Local Celeb is a local transcript review and editing workbench. The current repo
 - The canonical direction is `Transcript -> Turn -> Segment -> Word`; turns are derived from the segment stream instead of stored as duplicate transcript text.
 - Transcript files can be imported directly: JSON, JSONL, SRT, and VTT.
 - Audio/video files can be opened together with an SRT/VTT sidecar transcript. Live transcription is intentionally out of scope for this UI workbench.
+- Playback follows the active transcript turn until the user scrolls away, then offers an explicit return-to-current-speech action; the minimap shows the active turn, segment, and playhead.
+- The right panel includes a deterministic proposal-review prototype for grouped spelling, spacing, punctuation, and serial-comma changes. Accepted groups apply as one undoable edit; a future AI analyzer can emit the same proposal format.
 
 ## Tech Stack
 
@@ -48,6 +50,7 @@ The Vite dev server binds to `0.0.0.0` on port `3000` so it can be reached from 
 
 - `src/app/`: app shell, sidebar, view state, and layout constants.
 - `src/features/`: feature surfaces for editor, timeline, export, find/replace, settings, and welcome.
+- `src/features/assist/`: reusable proposal-review state and UI for deterministic rules now and model-generated findings later.
 - `src/components/ui/`: generated shadcn/Base UI primitives.
 - `src/domain/transcript/`: transcript types, import/export adapters, turn derivation, and word alignment.
 - `src/domain/timeline/`: timeline math and gap repair helpers.

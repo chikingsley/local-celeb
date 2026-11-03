@@ -2,12 +2,14 @@ import { Pause, Play } from "lucide-react";
 import type { ChangeEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppSidebar } from "@/app/app-sidebar";
-import { loadSampleManifest, type SampleEntry } from "@/app/samples";
 import { LAYOUT } from "@/app/layout-constants";
+import { loadSampleManifest, type SampleEntry } from "@/app/samples";
 import { AppView, CleanupGranularity, TranscriptMode } from "@/app/view-state";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { importTranscriptText, type TranscriptImportResult } from "@/domain/transcript/import";
+import type { EnglishVariant, ProposalOccurrence } from "@/domain/transcript/proposals";
 import type { Segment, Speaker, TranscriptSourceMeta } from "@/domain/transcript/types";
+import { useProposalReview } from "@/features/assist/use-proposal-review";
 import { CleanupSegments } from "@/features/editor/cleanup-segments";
 import { CleanupTurns } from "@/features/editor/cleanup-turns";
 import { CleanupWords } from "@/features/editor/cleanup-words";
@@ -17,6 +19,7 @@ import { ReviewEditor } from "@/features/editor/review-editor";
 import { ReviewPanel } from "@/features/editor/review-panel";
 import { ExportModal } from "@/features/export/export-modal";
 import { FindReplace } from "@/features/find-replace/find-replace";
+import { PlaybackFollowButton } from "@/features/playback/playback-follow-button";
 import { SettingsModal } from "@/features/settings/settings-modal";
 import { Minimap } from "@/features/timeline/minimap";
 import { Timeline } from "@/features/timeline/timeline";
@@ -29,6 +32,17 @@ import { useProjectStore, useSelectedSegment } from "@/stores/project-store";
 
 const MULTI_SPEAKER_SAMPLE_TRANSCRIPT = "/fixtures/passages-unit-8-multispeaker.scribe.jsonl";
 const MULTI_SPEAKER_SAMPLE_AUDIO = "/fixtures/passages-unit-8-multispeaker.mp3";
+
+function englishVariantForLanguage(language: string): EnglishVariant {
+	const normalized = language.trim().toLowerCase();
+	if (normalized.includes("british") || normalized.includes("en-gb") || normalized === "uk") {
+		return "en-GB";
+	}
+	if (normalized === "en" || normalized.includes("english") || normalized.includes("en-us")) {
+		return "en-US";
+	}
+	return "transcript";
+}
 
 function mediaElementFor(file: File): HTMLMediaElement {
 	return file.type.startsWith("video/") ? document.createElement("video") : new Audio();
@@ -507,7 +521,10 @@ export function App() {
 	const setPlaybackSpeed = usePlayerStore((s) => s.setPlaybackSpeed);
 	const registerSeekAudio = usePlayerStore((s) => s.registerSeekAudio);
 	const seekTo = usePlayerStore((s) => s.seekTo);
+	const autoFollowEnabled = usePlayerStore((s) => s.autoFollowEnabled);
 	const setAutoFollow = usePlayerStore((s) => s.setAutoFollow);
+	const scrollToSegment = usePlayerStore((s) => s.scrollToSegment);
+	const scrollToTime = usePlayerStore((s) => s.scrollToTime);
 	const timelineHeight = usePlayerStore((s) => s.timelineHeight);
 	const setTimelineHeight = usePlayerStore((s) => s.setTimelineHeight);
 	const rightSidebarWidth = usePlayerStore((s) => s.rightSidebarWidth);
@@ -518,6 +535,38 @@ export function App() {
 	const setIsResizingSidebar = usePlayerStore((s) => s.setIsResizingSidebar);
 	const timelineCollapsed = timelineHeight <= 0;
 	const rightPanelCollapsed = rightSidebarWidth <= 0;
+
+	const handleProposalNavigation = useCallback(
+		(occurrence: ProposalOccurrence, occurrences: ProposalOccurrence[], index: number) => {
+			handleMatchesChange(
+				occurrences.map((item) => ({
+					endIndex: item.endIndex,
+					segmentId: item.segmentId,
+					startIndex: item.startIndex,
+				})),
+				index
+			);
+			setSelectedSegmentId(occurrence.segmentId);
+			scrollToSegment(occurrence.segmentId);
+			const segment = segments.find((candidate: Segment) => candidate.id === occurrence.segmentId);
+			if (segment) {
+				scrollToTime(parseTime(segment.startTime));
+			}
+		},
+		[handleMatchesChange, scrollToSegment, scrollToTime, segments, setSelectedSegmentId]
+	);
+	const clearProposalNavigation = useCallback(() => {
+		handleMatchesChange([], 0);
+	}, [handleMatchesChange]);
+	const proposalDocumentKey = `${meta.name}:${segments.length}:${segments[0]?.id ?? "empty"}`;
+	const proposalReview = useProposalReview({
+		defaultEnglishVariant: englishVariantForLanguage(meta.language),
+		documentKey: proposalDocumentKey,
+		onApplyUpdates: updateSegments,
+		onClearNavigation: clearProposalNavigation,
+		onNavigate: handleProposalNavigation,
+		segments,
+	});
 
 	const applyTranscriptImport = useCallback(
 		(
@@ -818,7 +867,7 @@ export function App() {
 		}
 
 		// Find the segment containing currentTime
-		const currentSegment = segments.find((seg) => {
+		const currentSegment = segments.find((seg: Segment) => {
 			const start = parseTime(seg.startTime);
 			const end = parseTime(seg.endTime);
 			return currentTime >= start && currentTime < end;
@@ -853,6 +902,30 @@ export function App() {
 			editorProgrammaticScrollRef.current = false;
 		}, 500);
 	}, []);
+
+	const resumePlaybackFollow = useCallback(() => {
+		setAutoFollow(true);
+		const activeSegment = segments.find((segment: Segment) => {
+			const start = parseTime(segment.startTime);
+			const end = parseTime(segment.endTime);
+			return start <= currentTime && end > currentTime;
+		});
+		if (!activeSegment) {
+			return;
+		}
+		handleProgrammaticScroll();
+		setSelectedSegmentId(activeSegment.id);
+		scrollToSegment(activeSegment.id);
+		scrollToTime(currentTime);
+	}, [
+		currentTime,
+		handleProgrammaticScroll,
+		scrollToSegment,
+		scrollToTime,
+		segments,
+		setAutoFollow,
+		setSelectedSegmentId,
+	]);
 
 	useAppKeyboardShortcuts({
 		currentTime,
@@ -932,90 +1005,99 @@ export function App() {
 							<div className="flex min-w-0 flex-1 flex-col">
 								{/* Scrollable Transcript Editor with Minimap */}
 								<div className="flex flex-1 overflow-hidden">
-									{/* Main Editor Scroll Area */}
-									<div
-										className="relative flex-1 overflow-y-auto bg-white"
-										id="transcript-scroll-region"
-										onScroll={handleEditorScroll}
-										ref={editorScrollRef}
-									>
-										{/* Find & Replace Panel */}
-										<FindReplace
-											initialQuery={initialFindQuery}
-											isOpen={isFindOpen}
-											onClose={closeFind}
-											onMatchesChange={handleMatchesChange}
-											onSelectSegment={setSelectedSegmentId}
-											onUpdateSegment={updateSegment}
-											segments={segments}
-										/>
-
-										{mode === TranscriptMode.REVIEW ? (
-											<ReviewEditor
-												currentMatchIndex={currentMatchIndex}
-												currentTime={currentTime}
-												onProgrammaticScroll={handleProgrammaticScroll}
-												onSeek={handleSeek}
+									<div className="relative min-w-0 flex-1">
+										{/* Main Editor Scroll Area */}
+										<div
+											className="absolute inset-0 overflow-y-auto bg-white"
+											id="transcript-scroll-region"
+											onScroll={handleEditorScroll}
+											ref={editorScrollRef}
+										>
+											{/* Find & Replace Panel */}
+											<FindReplace
+												initialQuery={initialFindQuery}
+												isOpen={isFindOpen}
+												onClose={closeFind}
+												onMatchesChange={handleMatchesChange}
 												onSelectSegment={setSelectedSegmentId}
-												onUpdateSegments={updateSegments}
-												scrollContainerRef={editorScrollRef}
-												searchMatches={searchMatches}
+												onUpdateSegment={updateSegment}
 												segments={segments}
-												selectedSegmentId={selectedSegmentId}
-												showTimestamps={showReviewTimestamps}
-												speakers={speakers}
 											/>
-										) : (
-											<div className="min-h-full">
-												{cleanupGranularity === CleanupGranularity.TURNS && (
-													<CleanupTurns
-														currentTime={currentTime}
-														onSeek={handleSeek}
-														onSelectSegment={setSelectedSegmentId}
-														onUpdateSegments={updateSegments}
-														segments={segments}
-														selectedSegmentId={selectedSegmentId}
-														speakers={speakers}
-													/>
-												)}
 
-												{cleanupGranularity === CleanupGranularity.SEGMENTS && (
-													<CleanupSegments
-														currentMatchIndex={currentMatchIndex}
-														currentTime={currentTime}
-														onMergeAdjacentSegment={mergeAdjacentSegment}
-														onProgrammaticScroll={handleProgrammaticScroll}
-														onSeek={handleSeek}
-														onSelectSegment={setSelectedSegmentId}
-														onSplitSegment={splitSegment}
-														onUpdateSegment={updateSegment}
-														scrollContainerRef={editorScrollRef}
-														searchMatches={searchMatches}
-														segments={segments}
-														selectedSegmentId={selectedSegmentId}
-														speakers={speakers}
-													/>
-												)}
+											{mode === TranscriptMode.REVIEW ? (
+												<ReviewEditor
+													currentMatchIndex={currentMatchIndex}
+													currentTime={currentTime}
+													onProgrammaticScroll={handleProgrammaticScroll}
+													onSeek={handleSeek}
+													onSelectSegment={setSelectedSegmentId}
+													onUpdateSegments={updateSegments}
+													scrollContainerRef={editorScrollRef}
+													searchMatches={searchMatches}
+													segments={segments}
+													selectedSegmentId={selectedSegmentId}
+													showTimestamps={showReviewTimestamps}
+													speakers={speakers}
+												/>
+											) : (
+												<div className="min-h-full">
+													{cleanupGranularity === CleanupGranularity.TURNS && (
+														<CleanupTurns
+															currentTime={currentTime}
+															onSeek={handleSeek}
+															onSelectSegment={setSelectedSegmentId}
+															onUpdateSegments={updateSegments}
+															segments={segments}
+															selectedSegmentId={selectedSegmentId}
+															speakers={speakers}
+														/>
+													)}
 
-												{cleanupGranularity === CleanupGranularity.WORDS && (
-													<CleanupWords
-														currentTime={currentTime}
-														onSeek={handleSeek}
-														onSelectSegment={setSelectedSegmentId}
-														onUpdateSegment={updateSegment}
-														segments={segments}
-														selectedSegmentId={selectedSegmentId}
-														speakers={speakers}
-													/>
-												)}
-											</div>
-										)}
+													{cleanupGranularity === CleanupGranularity.SEGMENTS && (
+														<CleanupSegments
+															currentMatchIndex={currentMatchIndex}
+															currentTime={currentTime}
+															onMergeAdjacentSegment={mergeAdjacentSegment}
+															onProgrammaticScroll={handleProgrammaticScroll}
+															onSeek={handleSeek}
+															onSelectSegment={setSelectedSegmentId}
+															onSplitSegment={splitSegment}
+															onUpdateSegment={updateSegment}
+															scrollContainerRef={editorScrollRef}
+															searchMatches={searchMatches}
+															segments={segments}
+															selectedSegmentId={selectedSegmentId}
+															speakers={speakers}
+														/>
+													)}
+
+													{cleanupGranularity === CleanupGranularity.WORDS && (
+														<CleanupWords
+															currentTime={currentTime}
+															onSeek={handleSeek}
+															onSelectSegment={setSelectedSegmentId}
+															onUpdateSegment={updateSegment}
+															segments={segments}
+															selectedSegmentId={selectedSegmentId}
+															speakers={speakers}
+														/>
+													)}
+												</div>
+											)}
+										</div>
+										<PlaybackFollowButton
+											className="absolute bottom-4 left-1/2 z-30 -translate-x-1/2"
+											isFollowing={autoFollowEnabled}
+											isPlaying={isPlaying}
+											onResume={resumePlaybackFollow}
+										/>
 									</div>
 
 									{/* Minimap */}
 									<Minimap
 										containerRef={editorScrollRef}
 										currentMatchIndex={currentMatchIndex}
+										currentTime={currentTime}
 										searchMatches={searchMatches}
 										segments={segments}
 										speakers={speakers}
@@ -1069,6 +1151,7 @@ export function App() {
 											meta={meta}
 											onOpenExport={openExport}
 											onUpdateMeta={setMeta}
+											proposalReview={proposalReview}
 											segments={segments}
 											speakers={speakers}
 										/>
@@ -1082,6 +1165,7 @@ export function App() {
 											onSeek={seekTo}
 											onUpdateMeta={setMeta}
 											onUpdateSegment={updateSegment}
+											proposalReview={proposalReview}
 											segments={segments}
 											selectedSegment={selectedSegment}
 											speakers={speakers}

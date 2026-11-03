@@ -1,5 +1,16 @@
-import { AudioLines, ChevronsUpDown, FileText, Home, LogOut, Mic2, Plus, Settings } from "lucide-react";
+import {
+	AudioLines,
+	ChevronsUpDown,
+	FileText,
+	Home,
+	LogOut,
+	Mic2,
+	Plus,
+	Settings,
+} from "lucide-react";
+import type { MouseEvent } from "react";
 import { useCallback } from "react";
+import type { SampleEntry } from "@/app/samples";
 import { AppView } from "@/app/view-state";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -24,10 +35,8 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarRail,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import type { SampleEntry } from "@/app/samples";
 import type { FileMetaData } from "@/domain/transcript/types";
 import { formatTime } from "@/lib/utils";
 
@@ -51,7 +60,7 @@ function AppSwitcher({ onNavigateHome, onOpenSettings }: AppSwitcherProps) {
 	const { isMobile } = useSidebar();
 
 	return (
-		<SidebarMenu className="group-data-[collapsible=icon]:items-center">
+		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger
@@ -104,6 +113,17 @@ interface FilesNavProps {
 }
 
 function FilesNav({ activeSample, onAddFile, onSelectSample, samples }: FilesNavProps) {
+	const handleSampleClick = useCallback(
+		(event: MouseEvent<HTMLButtonElement>) => {
+			const { sampleId } = event.currentTarget.dataset;
+			const sample = samples.find((entry) => entry.id === sampleId);
+			if (sample) {
+				onSelectSample(sample);
+			}
+		},
+		[onSelectSample, samples]
+	);
+
 	return (
 		<SidebarGroup>
 			<SidebarGroupLabel>Files</SidebarGroupLabel>
@@ -112,12 +132,13 @@ function FilesNav({ activeSample, onAddFile, onSelectSample, samples }: FilesNav
 				<span className="sr-only">Add file</span>
 			</SidebarGroupAction>
 			<SidebarGroupContent>
-				<SidebarMenu className="group-data-[collapsible=icon]:items-center">
+				<SidebarMenu>
 					{samples.map((sample) => (
 						<SidebarMenuItem key={sample.id}>
 							<SidebarMenuButton
+								data-sample-id={sample.id}
 								isActive={activeSample === sample.id}
-								onClick={() => onSelectSample(sample)}
+								onClick={handleSampleClick}
 								tooltip={sample.title}
 							>
 								<AudioLines />
@@ -142,7 +163,7 @@ function UserNav({ duration, hasTranscript, onOpenExport, onOpenSettings }: User
 	const { isMobile } = useSidebar();
 
 	return (
-		<SidebarMenu className="group-data-[collapsible=icon]:items-center">
+		<SidebarMenu>
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger
@@ -226,7 +247,7 @@ export function AppSidebar({
 	}, [onNavigate]);
 
 	return (
-		<Sidebar collapsible="icon" variant="inset">
+		<Sidebar collapsible="none">
 			<SidebarHeader>
 				<AppSwitcher onNavigateHome={handleNavigateHome} onOpenSettings={onOpenSettings} />
 			</SidebarHeader>
@@ -248,8 +269,6 @@ export function AppSidebar({
 					onOpenSettings={onOpenSettings}
 				/>
 			</SidebarFooter>
-
-			<SidebarRail />
 		</Sidebar>
 	);
 }

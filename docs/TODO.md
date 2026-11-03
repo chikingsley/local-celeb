@@ -24,13 +24,13 @@ Transcript
 
 ## Next Work
 
-- [ ] Redesign the home screen around actual project/file entry points instead of a generic upload splash.
-- [ ] Decide the local project data model: single transcript file, project JSON with media sidecar, or indexed local library.
-- [ ] Back the shadcn/Base UI sidebar with real local project/file rows, including creation, listing, selection, rename, removal, recents, and empty states.
-- [ ] Isolate editor state per open file/project so undo/redo, selected segment, playback time, view, and panel state do not leak across files.
+- [ ] Redesign the home screen around the bundled Samples list and transcript/media import entry points instead of a generic upload splash.
+- [ ] Reset transient editor state deliberately when switching samples or importing a new transcript so undo/redo, selection, playback time, and panel state do not leak.
 - [ ] Add a real add-speaker flow from the timeline speaker header.
 - [ ] Validate speaker-row menu placement at narrow widths and short timeline heights, especially hover submenus near the viewport edge.
-- [ ] Turn assisted cleanup placeholders into a review queue with accept/reject actions instead of disabled buttons.
+- [ ] Add an optional AI analyzer that emits the existing proposal format for contextual grammar, terminology, speaker-name, and diarization findings without mutating transcript text directly.
+- [ ] Expand and persist per-transcript style profiles beyond the deterministic American/British spelling and serial-comma prototype; see `docs/research/transcript-style-profiles.md`.
+- [ ] Attach reference labels or URLs to AI proposals when a style profile names an external dictionary, style guide, or terminology list.
 - [ ] Preserve and display transcript/source dates when provider metadata includes them.
-- [ ] Run a visual QA pass for the multi-speaker fixture across Review and Editor views.
+- [ ] Run a visual QA pass across the ten bundled samples for Review, Editor, proposal navigation, follow/resume behavior, minimap playback markers, and filled waveforms.
 - [ ] Revisit whether grid/edge snap controls should move into a compact timeline settings menu.

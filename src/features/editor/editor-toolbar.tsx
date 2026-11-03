@@ -12,7 +12,6 @@ import {
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { TranscriptMode } from "@/app/view-state";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
 interface EditorToolbarProps {
@@ -96,8 +95,6 @@ export function EditorToolbar({
 	return (
 		<header className="z-20 flex h-14 shrink-0 items-center justify-between border-slate-200 border-b bg-white px-4">
 			<div className="flex items-center gap-4">
-				<SidebarTrigger className="-ml-1 text-slate-500" />
-				<div className="mx-1 h-4 w-px bg-slate-200" />
 				<div className="flex items-center gap-1 text-slate-400">
 					<button
 						className={cn(

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { parseTime } from "@/domain/playback/playback-utils";
 import type { Segment, Speaker } from "@/domain/transcript/types";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +12,7 @@ interface SearchMatch {
 interface MinimapProps {
 	containerRef: React.RefObject<HTMLElement | null>;
 	currentMatchIndex?: number;
+	currentTime: number;
 	searchMatches?: SearchMatch[];
 	segments: Segment[];
 	speakers: Speaker[];
@@ -20,6 +22,7 @@ export function Minimap({
 	segments,
 	speakers,
 	containerRef,
+	currentTime,
 	searchMatches = [],
 	currentMatchIndex = 0,
 }: MinimapProps) {
@@ -28,6 +31,43 @@ export function Minimap({
 	const [viewportHeight, setViewportHeight] = useState(100);
 	const [isDragging, setIsDragging] = useState(false);
 	const [_totalHeight, setTotalHeight] = useState(0);
+	const activeSegmentIndex = useMemo(
+		() =>
+			segments.findIndex((segment) => {
+				const start = parseTime(segment.startTime);
+				const end = parseTime(segment.endTime);
+				return start <= currentTime && end > currentTime;
+			}),
+		[currentTime, segments]
+	);
+	const activeTurnRange = useMemo(() => {
+		if (activeSegmentIndex < 0) {
+			return null;
+		}
+		const activeSpeakerId = segments[activeSegmentIndex]?.speakerId;
+		let start = activeSegmentIndex;
+		let end = activeSegmentIndex;
+		while (start > 0 && segments[start - 1]?.speakerId === activeSpeakerId) {
+			start -= 1;
+		}
+		while (end < segments.length - 1 && segments[end + 1]?.speakerId === activeSpeakerId) {
+			end += 1;
+		}
+		return { end, start };
+	}, [activeSegmentIndex, segments]);
+	const playheadTop = useMemo(() => {
+		if (activeSegmentIndex < 0 || segments.length === 0) {
+			return null;
+		}
+		const segment = segments[activeSegmentIndex];
+		if (!segment) {
+			return null;
+		}
+		const start = parseTime(segment.startTime);
+		const end = parseTime(segment.endTime);
+		const progress = Math.max(0, Math.min(1, (currentTime - start) / Math.max(end - start, 0.001)));
+		return ((activeSegmentIndex + progress) / segments.length) * 100;
+	}, [activeSegmentIndex, currentTime, segments]);
 
 	// Get speaker color
 	const getSpeakerColor = useCallback(
@@ -202,9 +242,14 @@ export function Minimap({
 		>
 			{/* Segments representation */}
 			<div className="relative flex-1 px-1.5 py-2">
-				{segments.map((segment, _index) => {
+				{segments.map((segment, index) => {
 					const hasMatches = matchesBySegment[segment.id]?.length > 0;
 					const matchCount = matchesBySegment[segment.id]?.length ?? 0;
+					const isActiveSegment = index === activeSegmentIndex;
+					const isActiveTurn =
+						activeTurnRange !== null &&
+						index >= activeTurnRange.start &&
+						index <= activeTurnRange.end;
 
 					return (
 						<div
@@ -215,39 +260,51 @@ export function Minimap({
 								minHeight: "2px",
 							}}
 						>
-							{/* Segment bar */}
 							<div
-								className="absolute inset-0 rounded-sm opacity-60"
+								className={cn(
+									"absolute inset-0 rounded-sm transition-opacity",
+									isActiveTurn ? "opacity-95 ring-1 ring-foreground/30" : "opacity-60"
+								)}
 								style={{ backgroundColor: getSpeakerColor(segment.speakerId) }}
 							/>
+							{isActiveSegment ? (
+								<div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-foreground" />
+							) : null}
 
-							{/* Search match markers */}
-							{hasMatches && (
+							{hasMatches ? (
 								<div className="absolute inset-0 flex flex-col justify-center gap-px px-0.5">
 									{matchesBySegment[segment.id].slice(0, 3).map((match) => {
-										const globalIdx = searchMatches.findIndex(
-											(m) => m.segmentId === segment.id && m.startIndex === match.startIndex
+										const globalIndex = searchMatches.findIndex(
+											(candidate) =>
+												candidate.segmentId === segment.id &&
+												candidate.startIndex === match.startIndex
 										);
-										const isCurrent = globalIdx === currentMatchIndex;
-
 										return (
 											<div
 												className={cn(
 													"h-0.5 rounded-full",
-													isCurrent ? "bg-orange-400" : "bg-yellow-400"
+													globalIndex === currentMatchIndex ? "bg-orange-400" : "bg-yellow-400"
 												)}
 												key={`${match.segmentId}-${match.startIndex}-${match.endIndex}`}
 											/>
 										);
 									})}
-									{matchCount > 3 && (
+									{matchCount > 3 ? (
 										<div className="h-0.5 rounded-full bg-yellow-400 opacity-50" />
-									)}
+									) : null}
 								</div>
-							)}
+							) : null}
 						</div>
 					);
 				})}
+
+				{playheadTop === null ? null : (
+					<div
+						aria-hidden="true"
+						className="pointer-events-none absolute right-0 left-0 z-20 h-0.5 -translate-y-1/2 bg-primary shadow-sm"
+						style={{ top: `${playheadTop}%` }}
+					/>
+				)}
 
 				{/* Viewport indicator */}
 				<div

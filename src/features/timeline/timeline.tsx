@@ -12,7 +12,6 @@ import {
 	Plus,
 	Scissors,
 	Search,
-	Target,
 	Trash2,
 	UserRound,
 	ZoomIn,
@@ -32,6 +31,7 @@ import { ZOOM } from "@/app/layout-constants";
 import {
 	Select,
 	SelectContent,
+	SelectGroup,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
@@ -46,6 +46,7 @@ import {
 } from "@/domain/timeline/timeline-utils";
 import { SPEAKER_COLORS } from "@/domain/transcript/constants";
 import type { Segment, Speaker } from "@/domain/transcript/types";
+import { PlaybackFollowButton } from "@/features/playback/playback-follow-button";
 import { cn, formatTime, parseTime } from "@/lib/utils";
 import { PLAYBACK_SPEEDS, type PlaybackSpeed, usePlayerStore } from "@/stores/player-store";
 
@@ -138,13 +139,21 @@ function waveformPath(peaks: number[]): string {
 	if (peaks.length === 0) {
 		return "";
 	}
-	return peaks
-		.map((peak, index) => {
-			const x = peaks.length === 1 ? 0 : (index / (peaks.length - 1)) * 1000;
-			const halfHeight = Math.max(1, peak * 46);
-			return `M${x.toFixed(2)} ${(50 - halfHeight).toFixed(2)}V${(50 + halfHeight).toFixed(2)}`;
-		})
+	const points = peaks.map((peak, index) => ({
+		halfHeight: Math.max(1, peak * 46),
+		x: peaks.length === 1 ? 0 : (index / (peaks.length - 1)) * 1000,
+	}));
+	const top = points
+		.map(
+			(point, index) =>
+				`${index === 0 ? "M" : "L"}${point.x.toFixed(2)} ${(50 - point.halfHeight).toFixed(2)}`
+		)
 		.join(" ");
+	const bottom = [...points]
+		.reverse()
+		.map((point) => `L${point.x.toFixed(2)} ${(50 + point.halfHeight).toFixed(2)}`)
+		.join(" ");
+	return `${top} ${bottom} Z`;
 }
 
 function resamplePeaks(peaks: number[], targetCount: number): number[] {
@@ -732,13 +741,7 @@ function TimelineSegmentBlock({
 						preserveAspectRatio="none"
 						viewBox="0 0 1000 100"
 					>
-						<path
-							d={thumbnailPath}
-							fill="none"
-							stroke={speaker.color}
-							strokeWidth="1.5"
-							vectorEffect="non-scaling-stroke"
-						/>
+						<path d={thumbnailPath} fill={speaker.color} />
 					</svg>
 				</div>
 			) : (
@@ -1574,17 +1577,13 @@ export function Timeline({
 						<span className="hidden sm:inline">Edges</span>
 					</button>
 
-					{isPlaying && !autoFollowEnabled && (
-						<button
-							className="flex items-center gap-1.5 rounded bg-red-100 p-1.5 font-medium text-red-700 text-xs transition-colors hover:bg-red-200"
-							onClick={snapToPlayhead}
-							title="Resume following the playhead"
-							type="button"
-						>
-							<Target size={14} />
-							<span className="hidden sm:inline">Resume follow</span>
-						</button>
-					)}
+					<PlaybackFollowButton
+						compact
+						isFollowing={autoFollowEnabled}
+						isPlaying={isPlaying}
+						label="Resume follow"
+						onResume={snapToPlayhead}
+					/>
 
 					<button
 						className={cn(
@@ -1623,11 +1622,13 @@ export function Timeline({
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{PLAYBACK_SPEEDS.map((speed) => (
-								<SelectItem className="text-xs" key={speed} value={speed.toString()}>
-									{speed}x
-								</SelectItem>
-							))}
+							<SelectGroup>
+								{PLAYBACK_SPEEDS.map((speed) => (
+									<SelectItem className="text-xs" key={speed} value={speed.toString()}>
+										{speed}x
+									</SelectItem>
+								))}
+							</SelectGroup>
 						</SelectContent>
 					</Select>
 					<button
@@ -1813,13 +1814,7 @@ export function Timeline({
 										preserveAspectRatio="none"
 										viewBox="0 0 1000 100"
 									>
-										<path
-											d={waveformSvgPath}
-											fill="none"
-											stroke="currentColor"
-											strokeWidth="1"
-											vectorEffect="non-scaling-stroke"
-										/>
+										<path d={waveformSvgPath} fill="currentColor" />
 									</svg>
 								</div>
 							)}

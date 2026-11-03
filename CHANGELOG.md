@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added mode-aware right panels for review metadata/actions and editor view/assisted cleanup details.
 - Added sidebar migration notes grounded in current shadcn/Base UI docs and the local project/file state gap.
 - Added a shadcn/Base UI sidebar shell with app identity, workspace navigation, current-file actions, sample loaders, import actions, and a fake local user/settings footer.
+- Added a reusable playback-follow control shared by the transcript and timeline, including an explicit return-to-current-speech action after manual scrolling.
+- Added active-turn, active-segment, and playhead indicators to the transcript minimap.
+- Added a deterministic transcript proposal queue with per-transcript English spelling and serial-comma profiles, grouped occurrence navigation, reasons, accept/reject actions, and one-step undo application.
 
 ### Changed
 
@@ -29,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Switched shadcn generation to the Base UI `base-nova` style and migrated generated primitives to `@base-ui/react`.
 - Reorganized app code into `src/app`, `src/features`, and `src/domain`, with generated shadcn primitives isolated under `src/components/ui`.
 - Refreshed `docs/TODO.md` to be active-work only instead of a completed phase checklist.
+- Changed timeline and segment waveforms from separated strokes to solid filled envelopes.
 
 ### Removed
 
@@ -37,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deleted the Elysia/Groq transcription proxy, server scripts, proxy config, and Groq documentation.
 - Deleted the unused command palette and its `cmdk` dependency.
 - Deleted the old custom left sidebar after replacing it with the shadcn sidebar shell.
+- Deleted the obsolete `improve-side-panel` Next.js prototype after its useful layout ideas were harvested.
 - Removed the app-component barrel export in favor of direct feature imports.
 - Removed generated `dist` and `.cache` directories from the working tree.
 - Removed `package-lock.json` in favor of the Bun lockfile.

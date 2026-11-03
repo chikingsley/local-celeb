@@ -1,11 +1,8 @@
 import {
-	Bot,
 	Clipboard,
 	Download,
 	FileText,
-	MessageSquareText,
 	NotebookText,
-	SearchCheck,
 	Sparkles,
 	Subtitles,
 	Tags,
@@ -21,12 +18,15 @@ import {
 import { deriveTranscriptTurns } from "@/domain/transcript/turns";
 import type { FileMetaData, Segment, Speaker, WordTimingStatus } from "@/domain/transcript/types";
 import { getWordTimingStatus } from "@/domain/transcript/word-alignment";
+import { ProposalQueue } from "@/features/assist/proposal-queue";
+import type { ProposalReviewController } from "@/features/assist/use-proposal-review";
 import { formatTime, parseTime } from "@/lib/utils";
 
 interface ReviewPanelProps {
 	meta: FileMetaData;
 	onOpenExport: () => void;
 	onUpdateMeta: (updates: Partial<FileMetaData>) => void;
+	proposalReview: ProposalReviewController;
 	segments: Segment[];
 	speakers: Speaker[];
 }
@@ -48,6 +48,7 @@ export function ReviewPanel({
 	speakers,
 	onUpdateMeta,
 	onOpenExport,
+	proposalReview,
 }: ReviewPanelProps) {
 	const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
 	const turns = useMemo(() => deriveTranscriptTurns(segments), [segments]);
@@ -375,30 +376,7 @@ export function ReviewPanel({
 					/>
 				</section>
 
-				<section className="bg-white px-4 py-4">
-					<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
-						<Bot size={14} />
-						Assist
-					</div>
-					<div className="grid gap-2">
-						{[
-							{ icon: MessageSquareText, label: "Summarize" },
-							{ icon: MessageSquareText, label: "Ask about transcript" },
-							{ icon: SearchCheck, label: "Find likely mistakes" },
-							{ icon: Tags, label: "Suggest speaker names" },
-						].map((item) => (
-							<button
-								className="flex items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-left font-medium text-slate-400 text-sm"
-								disabled
-								key={item.label}
-								type="button"
-							>
-								<item.icon size={15} />
-								{item.label}
-							</button>
-						))}
-					</div>
-				</section>
+				<ProposalQueue controller={proposalReview} />
 			</div>
 		</aside>
 	);

@@ -198,6 +198,7 @@ export function ReviewEditor({
 	const turns = useMemo(() => deriveTranscriptTurns(segments), [segments]);
 	const isPlaying = usePlayerStore((s) => s.isPlaying);
 	const autoFollowEnabled = usePlayerStore((s) => s.autoFollowEnabled);
+	const registerScrollToSegment = usePlayerStore((s) => s.registerScrollToSegment);
 	const scrollToTime = usePlayerStore((s) => s.scrollToTime);
 	const setAutoFollow = usePlayerStore((s) => s.setAutoFollow);
 
@@ -219,6 +220,17 @@ export function ReviewEditor({
 	);
 
 	const lastScrolledTurnRef = useRef<string | null>(null);
+
+	useEffect(() => {
+		registerScrollToSegment((segmentId: string) => {
+			const turn = turns.find((candidate) => candidate.segmentIds.includes(segmentId));
+			const element = turn ? turnRefs.current[turn.id] : null;
+			if (element) {
+				onProgrammaticScroll?.();
+				element.scrollIntoView({ behavior: "smooth", block: "center" });
+			}
+		});
+	}, [onProgrammaticScroll, registerScrollToSegment, turns]);
 
 	const adjustHeight = useCallback((id: string) => {
 		const el = textareaRefs.current[id];
