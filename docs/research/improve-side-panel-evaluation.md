@@ -35,4 +35,4 @@ Files reviewed:
 
 ## Decision
 
-Do not merge `improve-side-panel` wholesale. The useful ideas have been harvested into the main app. The remaining tree should be treated as archive/deletion candidate, not canonical product code.
+Do not merge `improve-side-panel` wholesale. The useful ideas were harvested into the main app, and the obsolete prototype tree was removed on 2026-07-11. This note remains as historical evidence for that decision, not as a description of canonical product code.

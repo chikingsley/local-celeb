@@ -2,6 +2,8 @@
 
 Date: 2026-07-06
 
+Status note, 2026-07-11: the local-library ideas below are historical migration context, not the active product direction. The canonical sidebar now exposes a manifest-driven list of bundled samples plus transcript/media import. Local project creation, recents, rename, removal, and indexed-library work are intentionally out of scope.
+
 ## Evidence Checked
 
 Official docs:
@@ -56,12 +58,14 @@ Local files:
 - Library: disabled placeholder until the local project/file model exists.
 - Footer: fake local user menu with settings/export/sign-out shape.
 
-## Remaining Product Gap
+## Historical Product Gap
 
-The sidebar shell can exist before the final file model, but the live sidebar still needs the model decision:
+The original migration left the following model decision open:
 
 - what a project is,
 - how transcript and media sidecars are stored,
 - whether the app tracks recent files or a local library,
 - how undo/redo and playback state attach to one open file,
 - how rename/delete/import actions are represented.
+
+The decision was later narrowed to bundled samples plus imports. The active backlog lives in `docs/TODO.md` and does not include a persistent local library.

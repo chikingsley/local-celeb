@@ -7,13 +7,7 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": [
-      "!**/node_modules",
-      "!**/dist",
-      "!**/.next",
-      "!**/coverage",
-      "!improve-side-panel"
-    ]
+    "includes": ["!**/node_modules", "!**/dist", "!**/.next", "!**/coverage"]
   },
   "formatter": {
     "enabled": true,
