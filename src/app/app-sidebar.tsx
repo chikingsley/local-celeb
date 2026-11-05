@@ -68,12 +68,12 @@ function AppSwitcher({ onNavigateHome, onOpenSettings }: AppSwitcherProps) {
 							<SidebarMenuButton className="data-[size=lg]:h-11" size="lg" tooltip="Local Celeb" />
 						}
 					>
-						<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+						<div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
 							<Mic2 className="size-4" />
 						</div>
 						<div className="grid flex-1 text-left text-sm leading-tight">
 							<span className="truncate font-semibold">Local Celeb</span>
-							<span className="truncate text-sidebar-foreground/70 text-xs">
+							<span className="text-sidebar-foreground/70 truncate text-xs">
 								Transcript workspace
 							</span>
 						</div>
@@ -180,7 +180,7 @@ function UserNav({ duration, hasTranscript, onOpenExport, onOpenSettings }: User
 						</Avatar>
 						<div className="grid flex-1 text-left text-sm leading-tight">
 							<span className="truncate font-medium">Simon Local</span>
-							<span className="truncate text-sidebar-foreground/70 text-xs">
+							<span className="text-sidebar-foreground/70 truncate text-xs">
 								{duration ? formatTime(duration) : "Local session"}
 							</span>
 						</div>

@@ -84,10 +84,10 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 	const selectedOccurrence = selectedProposal?.occurrences[currentOccurrenceIndex];
 
 	return (
-		<section className="flex max-h-[34rem] flex-col gap-3 overflow-y-auto border-border border-b bg-background px-4 py-4">
+		<section className="border-border bg-background flex max-h-[34rem] flex-col gap-3 overflow-y-auto border-b px-4 py-4">
 			<div className="flex items-start justify-between gap-3">
 				<div className="flex min-w-0 flex-col gap-1">
-					<div className="flex items-center gap-2 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
+					<div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
 						<Sparkles />
 						Review proposals
 					</div>
@@ -103,7 +103,7 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 			</div>
 
 			<div className="flex flex-col gap-2">
-				<div className="flex flex-col gap-1 text-muted-foreground text-xs">
+				<div className="text-muted-foreground flex flex-col gap-1 text-xs">
 					<span id="proposal-english-variant-label">English spelling</span>
 					<Select onValueChange={handleEnglishVariantChange} value={englishVariant}>
 						<SelectTrigger aria-labelledby="proposal-english-variant-label" className="w-full">
@@ -119,7 +119,7 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 					</Select>
 				</div>
 
-				<div className="flex flex-col gap-1 text-muted-foreground text-xs">
+				<div className="text-muted-foreground flex flex-col gap-1 text-xs">
 					<span id="proposal-serial-comma-label">Serial comma</span>
 					<Select onValueChange={handleSerialCommaChange} value={serialComma}>
 						<SelectTrigger aria-labelledby="proposal-serial-comma-label" className="w-full">
@@ -152,8 +152,8 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 					{proposals.map((proposal) => (
 						<Button
 							className={cn(
-								"h-auto w-full justify-start whitespace-normal py-2 text-left",
-								selectedProposal?.id === proposal.id && "ring-2 ring-ring"
+								"h-auto w-full justify-start py-2 text-left whitespace-normal",
+								selectedProposal?.id === proposal.id && "ring-ring ring-2"
 							)}
 							data-proposal-id={proposal.id}
 							key={proposal.id}
@@ -161,10 +161,10 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 							variant="outline"
 						>
 							<span className="flex min-w-0 flex-1 flex-col gap-0.5">
-								<span className="font-medium text-foreground text-xs leading-5">
+								<span className="text-foreground text-xs leading-5 font-medium">
 									{proposal.title}
 								</span>
-								<span className="text-[11px] text-muted-foreground">{statusLabel(proposal)}</span>
+								<span className="text-muted-foreground text-[11px]">{statusLabel(proposal)}</span>
 							</span>
 						</Button>
 					))}
@@ -172,19 +172,19 @@ export function ProposalQueue({ controller }: ProposalQueueProps) {
 			) : null}
 
 			{selectedProposal ? (
-				<div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
+				<div className="border-border bg-muted/30 flex flex-col gap-3 rounded-lg border p-3">
 					<div className="flex flex-col gap-1">
-						<div className="font-semibold text-foreground text-sm">{selectedProposal.title}</div>
+						<div className="text-foreground text-sm font-semibold">{selectedProposal.title}</div>
 						<p className="text-muted-foreground text-xs leading-5">{selectedProposal.reason}</p>
 					</div>
 
 					{selectedOccurrence ? (
-						<div className="flex flex-col gap-2 rounded-md bg-background p-2 text-xs">
+						<div className="bg-background flex flex-col gap-2 rounded-md p-2 text-xs">
 							<div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
 								<span className="text-muted-foreground">Before</span>
-								<code className="break-words text-foreground">{selectedOccurrence.before}</code>
+								<code className="text-foreground break-words">{selectedOccurrence.before}</code>
 								<span className="text-muted-foreground">After</span>
-								<code className="break-words text-foreground">{selectedOccurrence.after}</code>
+								<code className="text-foreground break-words">{selectedOccurrence.after}</code>
 							</div>
 							<div className="flex items-center justify-between gap-2">
 								<Button

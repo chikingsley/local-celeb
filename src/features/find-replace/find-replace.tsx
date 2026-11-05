@@ -34,7 +34,7 @@ interface FindReplaceProps {
 	segments: Segment[];
 }
 
-const REGEX_SPECIAL_CHARS_PATTERN = /[.*+?^${}()|[\]\\]/g;
+const REGEX_SPECIAL_CHARS_PATTERN = /[.*+?^${}()|[\]\\]/gu;
 
 export function FindReplace({
 	isOpen,
@@ -57,7 +57,7 @@ export function FindReplace({
 	const [showReplace, setShowReplace] = useState(false);
 
 	// Track if user has started typing (to enable auto-scroll)
-	const hasTypedRef = useRef(false);
+	const hasTypedRef = useRef<boolean>(false);
 	const findInputRef = useRef<HTMLInputElement>(null);
 	const replaceInputRef = useRef<HTMLInputElement>(null);
 
@@ -424,7 +424,7 @@ export function FindReplace({
 					<div className="relative flex-1">
 						<input
 							className={cn(
-								"w-56 rounded border py-1 pr-20 pl-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500",
+								"w-56 rounded border py-1 pr-20 pl-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none",
 								regexError ? "border-red-400" : "border-slate-200"
 							)}
 							onChange={handleQueryChange}
@@ -476,14 +476,14 @@ export function FindReplace({
 							</button>
 						</div>
 						{regexError ? (
-							<div className="absolute top-full left-0 z-10 mt-1 rounded border border-red-200 bg-white p-1 text-red-500 text-xs shadow-sm">
+							<div className="absolute top-full left-0 z-10 mt-1 rounded border border-red-200 bg-white p-1 text-xs text-red-500 shadow-sm">
 								{regexError}
 							</div>
 						) : null}
 					</div>
 
 					{/* Match count */}
-					<span className="min-w-[50px] text-center text-slate-500 text-xs">{matchCountLabel}</span>
+					<span className="min-w-[50px] text-center text-xs text-slate-500">{matchCountLabel}</span>
 
 					{/* Navigation */}
 					<button
@@ -522,7 +522,7 @@ export function FindReplace({
 						{/* Replace Input with preserve case button inside */}
 						<div className="relative flex-1">
 							<input
-								className="w-56 rounded border border-slate-200 py-1 pr-8 pl-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+								className="w-56 rounded border border-slate-200 py-1 pr-8 pl-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
 								onChange={handleReplaceTextChange}
 								placeholder="Replace"
 								ref={replaceInputRef}

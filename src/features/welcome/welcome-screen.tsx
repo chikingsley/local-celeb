@@ -21,8 +21,8 @@ export function WelcomeScreen({
 		<div className="flex min-h-full flex-col items-center justify-center bg-white p-6 font-sans">
 			<div className="w-full max-w-2xl text-center">
 				{/* Title */}
-				<h1 className="mb-4 font-semibold text-5xl text-slate-900 tracking-tight">Local Celeb</h1>
-				<p className="mb-16 text-slate-500 text-xl">Local transcript review and editor</p>
+				<h1 className="mb-4 text-5xl font-semibold tracking-tight text-slate-900">Local Celeb</h1>
+				<p className="mb-16 text-xl text-slate-500">Local transcript review and editor</p>
 
 				{isProcessing ? (
 					<div className="flex flex-col items-center justify-center py-12">
@@ -37,13 +37,13 @@ export function WelcomeScreen({
 						<div className="grid gap-4 sm:grid-cols-2">
 							{/* Upload Area */}
 							<label className="group block w-full cursor-pointer">
-								<div className="h-full rounded-2xl border-2 border-slate-200 border-dashed p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
+								<div className="h-full rounded-2xl border-2 border-dashed border-slate-200 p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
 									<div className="flex flex-col items-center gap-4">
 										<div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-slate-200">
 											<Upload className="h-6 w-6 text-slate-600" />
 										</div>
 										<div>
-											<p className="font-medium text-lg text-slate-900">Media + subtitles</p>
+											<p className="text-lg font-medium text-slate-900">Media + subtitles</p>
 											<p className="mt-1 text-slate-500">Audio/video with SRT or VTT</p>
 										</div>
 									</div>
@@ -58,13 +58,13 @@ export function WelcomeScreen({
 							</label>
 
 							<label className="group block w-full cursor-pointer">
-								<div className="h-full rounded-2xl border-2 border-slate-200 border-dashed p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
+								<div className="h-full rounded-2xl border-2 border-dashed border-slate-200 p-8 transition-all duration-200 hover:border-slate-400 hover:bg-slate-50/50">
 									<div className="flex flex-col items-center gap-4">
 										<div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-slate-200">
 											<FileText className="h-6 w-6 text-slate-600" />
 										</div>
 										<div>
-											<p className="font-medium text-lg text-slate-900">Transcript file</p>
+											<p className="text-lg font-medium text-slate-900">Transcript file</p>
 											<p className="mt-1 text-slate-500">JSON, JSONL, SRT, or VTT</p>
 										</div>
 									</div>
@@ -81,7 +81,7 @@ export function WelcomeScreen({
 						{/* Divider */}
 						<div className="my-8 flex items-center gap-4">
 							<div className="h-px flex-1 bg-slate-200" />
-							<span className="text-slate-400 text-sm">or</span>
+							<span className="text-sm text-slate-400">or</span>
 							<div className="h-px flex-1 bg-slate-200" />
 						</div>
 
@@ -114,7 +114,7 @@ export function WelcomeScreen({
 						</div>
 
 						{/* Features hint */}
-						<p className="mt-12 text-slate-400 text-sm">
+						<p className="mt-12 text-sm text-slate-400">
 							Word-level timestamps, speaker labels, export to SRT/VTT/JSON
 						</p>
 					</>

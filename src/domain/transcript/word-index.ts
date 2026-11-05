@@ -1,8 +1,8 @@
 import { parseTime } from "@/domain/playback/playback-utils";
 import type { Segment, WordTimestamp } from "@/domain/transcript/types";
 
-const PUNCTUATION_PATTERN = /[.,!?;:'"()[\]{}]/g;
-const WORD_SPLIT_PATTERN = /\s+/;
+const PUNCTUATION_PATTERN = /[.,!?;:'"()[\]{}]/gu;
+const WORD_SPLIT_PATTERN = /\s+/u;
 
 /**
  * Extended word with character positions for efficient lookup

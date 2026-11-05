@@ -243,7 +243,7 @@ export function exportToCsv(segments: Segment[], speakers: Speaker[]): string {
 	const rows = segments.map((segment) => {
 		const speakerName = getSpeakerName(segment.speakerId, speakers);
 		// Escape quotes in text and wrap in quotes
-		const escapedText = `"${segment.text.replace(/"/g, '""')}"`;
+		const escapedText = `"${segment.text.replace(/"/gu, '""')}"`;
 		return `${segment.startTime},${segment.endTime},"${speakerName}",${escapedText}`;
 	});
 

@@ -133,10 +133,10 @@ function TurnCard({
 				isActive && !isSelectedTurn && "border-amber-300"
 			)}
 		>
-			<div className="flex flex-wrap items-start justify-between gap-3 border-slate-100 border-b px-4 py-3">
+			<div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
 				<div className="flex min-w-0 items-start gap-3">
 					<div
-						className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
+						className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
 						style={{ backgroundColor: speaker?.color }}
 					>
 						{speaker ? speaker.name.charAt(0) : "?"}
@@ -144,7 +144,7 @@ function TurnCard({
 					<div className="min-w-0">
 						<div className="flex flex-wrap items-center gap-2">
 							<select
-								className="max-w-48 rounded-md border border-slate-200 bg-white px-2 py-1 font-semibold text-slate-800 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+								className="max-w-48 rounded-md border border-slate-200 bg-white px-2 py-1 text-sm font-semibold text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								onChange={handleSpeakerChange}
 								value={turn.speakerId}
 							>
@@ -155,13 +155,13 @@ function TurnCard({
 								))}
 							</select>
 							{turn.wordsDirty ? (
-								<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-medium text-amber-700 text-xs">
+								<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
 									<AlertTriangle size={12} />
 									alignment dirty
 								</span>
 							) : null}
 						</div>
-						<div className="mt-1 flex flex-wrap items-center gap-3 text-slate-400 text-xs">
+						<div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-slate-400">
 							<span className="inline-flex items-center gap-1 font-mono">
 								<Clock size={12} />
 								{turn.startTime} - {turn.endTime}
@@ -176,7 +176,7 @@ function TurnCard({
 
 				<div className="flex flex-wrap items-center gap-2">
 					<button
-						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 font-medium text-slate-600 text-xs transition hover:bg-slate-50"
+						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
 						onClick={handleRealignClick}
 						title="Estimate word timing for every segment in this turn"
 						type="button"
@@ -185,7 +185,7 @@ function TurnCard({
 						Re-align
 					</button>
 					<button
-						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 font-medium text-slate-600 text-xs transition hover:bg-slate-50"
+						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
 						onClick={handleSeekFirst}
 						type="button"
 					>
@@ -193,7 +193,7 @@ function TurnCard({
 						First
 					</button>
 					<button
-						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 font-medium text-slate-600 text-xs transition hover:bg-slate-50"
+						className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
 						onClick={handleSeekLast}
 						type="button"
 					>
@@ -203,7 +203,7 @@ function TurnCard({
 					<div className="relative">
 						<select
 							className={cn(
-								"rounded-md border px-2.5 py-1.5 font-medium text-xs outline-none transition",
+								"rounded-md border px-2.5 py-1.5 text-xs font-medium transition outline-none",
 								canSplit
 									? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 									: "border-slate-100 bg-slate-50 text-slate-300"
@@ -233,7 +233,7 @@ function TurnCard({
 			</div>
 
 			<div className="px-4 py-3">
-				<p className="mb-3 line-clamp-3 font-serif text-base text-slate-800 leading-7">
+				<p className="mb-3 line-clamp-3 font-serif text-base leading-7 text-slate-800">
 					{turn.text}
 				</p>
 				<div className="flex flex-wrap gap-2">
@@ -344,7 +344,7 @@ export function CleanupTurns({
 
 	if (turns.length === 0) {
 		return (
-			<div className="flex min-h-full items-center justify-center py-24 text-slate-400 text-sm">
+			<div className="flex min-h-full items-center justify-center py-24 text-sm text-slate-400">
 				No transcript loaded.
 			</div>
 		);

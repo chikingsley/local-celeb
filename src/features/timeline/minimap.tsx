@@ -214,16 +214,13 @@ export function Minimap({
 	const segmentHeight = segments.length > 0 ? 100 / segments.length : 0;
 
 	// Group matches by segment for markers
-	const matchesBySegment = searchMatches.reduce(
-		(acc, match) => {
-			if (!acc[match.segmentId]) {
-				acc[match.segmentId] = [];
-			}
-			acc[match.segmentId].push(match);
-			return acc;
-		},
-		{} as Record<string, SearchMatch[]>
-	);
+	const matchesBySegment = searchMatches.reduce<Record<string, SearchMatch[]>>((acc, match) => {
+		if (!acc[match.segmentId]) {
+			acc[match.segmentId] = [];
+		}
+		acc[match.segmentId].push(match);
+		return acc;
+	}, {});
 
 	return (
 		<div
@@ -233,7 +230,7 @@ export function Minimap({
 			aria-valuemax={100}
 			aria-valuemin={0}
 			aria-valuenow={Math.round(viewportTop)}
-			className="relative flex w-16 cursor-pointer select-none flex-col border-slate-200 border-l bg-slate-50"
+			className="relative flex w-16 cursor-pointer flex-col border-l border-slate-200 bg-slate-50 select-none"
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 			ref={minimapRef}
@@ -263,12 +260,12 @@ export function Minimap({
 							<div
 								className={cn(
 									"absolute inset-0 rounded-sm transition-opacity",
-									isActiveTurn ? "opacity-95 ring-1 ring-foreground/30" : "opacity-60"
+									isActiveTurn ? "ring-foreground/30 opacity-95 ring-1" : "opacity-60"
 								)}
 								style={{ backgroundColor: getSpeakerColor(segment.speakerId) }}
 							/>
 							{isActiveSegment ? (
-								<div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-foreground" />
+								<div className="bg-foreground absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2" />
 							) : null}
 
 							{hasMatches ? (
@@ -301,7 +298,7 @@ export function Minimap({
 				{playheadTop === null ? null : (
 					<div
 						aria-hidden="true"
-						className="pointer-events-none absolute right-0 left-0 z-20 h-0.5 -translate-y-1/2 bg-primary shadow-sm"
+						className="bg-primary pointer-events-none absolute right-0 left-0 z-20 h-0.5 -translate-y-1/2 shadow-sm"
 						style={{ top: `${playheadTop}%` }}
 					/>
 				)}
@@ -333,7 +330,7 @@ export function Minimap({
 
 			{/* Match count indicator */}
 			{searchMatches.length > 0 && (
-				<div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded bg-yellow-100 px-1.5 py-0.5 font-medium text-[10px] text-yellow-800">
+				<div className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded bg-yellow-100 px-1.5 py-0.5 text-[10px] font-medium text-yellow-800">
 					{currentMatchIndex + 1}/{searchMatches.length}
 				</div>
 			)}

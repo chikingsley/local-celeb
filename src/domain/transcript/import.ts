@@ -91,23 +91,23 @@ export interface TranscriptImportResult {
 
 const DEFAULT_SEGMENT_GAP_SECONDS = 3;
 const SOFT_MAX_SEGMENT_SECONDS = 14;
-const CUE_BLOCK_SEPARATOR_PATTERN = /\n{2,}/;
-const CUE_MARKUP_PATTERN = /<[^>]+>/g;
-const LINE_BREAK_PATTERN = /\r?\n/;
-const SRT_LINE_BREAK_PATTERN = /\r\n/g;
-const SPEAKER_ID_PATTERN = /^speaker_\d+$/;
-const SPEAKER_NUMBER_PATTERN = /^\d+$/;
-const SPEAKER_PREFIX_PATTERN = /^speaker_/;
-const SUBTITLE_TIME_PATTERN = /(.+?)\s+-->\s+([^\s]+)/;
-const TITLE_WORD_PATTERN = /\b\w/g;
-const TRAILING_SENTENCE_PATTERN = /[.!?]["')\]]?$/;
-const VTT_HEADER_PATTERN = /^WEBVTT[^\n]*\n+/i;
-const VTT_VOICE_PATTERN = /^<v\s+([^>]+)>(.*)$/i;
-const WORD_SEPARATOR_PATTERN = /\s+/;
-const WORD_SEPARATOR_OR_DASH_PATTERN = /[\s-]+/g;
-const SPEAKER_SLUG_SEPARATOR_PATTERN = /[^a-z0-9]+/g;
-const SPEAKER_SLUG_TRIM_PATTERN = /^_+|_+$/g;
-const PUNCTUATION_PREFIX_PATTERN = /^[.,!?;:%)\]}]/;
+const CUE_BLOCK_SEPARATOR_PATTERN = /\n{2,}/u;
+const CUE_MARKUP_PATTERN = /<[^>]+>/gu;
+const LINE_BREAK_PATTERN = /\r?\n/u;
+const SRT_LINE_BREAK_PATTERN = /\r\n/gu;
+const SPEAKER_ID_PATTERN = /^speaker_\d+$/u;
+const SPEAKER_NUMBER_PATTERN = /^\d+$/u;
+const SPEAKER_PREFIX_PATTERN = /^speaker_/u;
+const SUBTITLE_TIME_PATTERN = /(?<start>.+?)\s+-->\s+(?<end>[^\s]+)/u;
+const TITLE_WORD_PATTERN = /\b\w/gu;
+const TRAILING_SENTENCE_PATTERN = /[.!?]["')\]]?$/u;
+const VTT_HEADER_PATTERN = /^WEBVTT[^\n]*\n+/iu;
+const VTT_VOICE_PATTERN = /^<v\s+(?<speaker>[^>]+)>(?<text>.*)$/iu;
+const WORD_SEPARATOR_PATTERN = /\s+/u;
+const WORD_SEPARATOR_OR_DASH_PATTERN = /[\s-]+/gu;
+const SPEAKER_SLUG_SEPARATOR_PATTERN = /[^a-z0-9]+/gu;
+const SPEAKER_SLUG_TRIM_PATTERN = /^_+|_+$/gu;
+const PUNCTUATION_PREFIX_PATTERN = /^[.,!?;:%)\]}]/u;
 
 export function importTranscriptText(
 	text: string,
@@ -730,9 +730,9 @@ function importSubtitle(
 		}
 
 		const voice = rawText.match(VTT_VOICE_PATTERN);
-		const speakerName = voice?.[1]?.trim();
+		const speakerName = voice?.groups?.speaker?.trim();
 		const speakerId = speakerName ? slugSpeakerId(speakerName) : "speaker_1";
-		const cleanText = stripCueMarkup(voice?.[2] ?? rawText);
+		const cleanText = stripCueMarkup(voice?.groups?.text ?? rawText);
 		if (!cleanText) {
 			continue;
 		}
@@ -1216,7 +1216,7 @@ function slugSpeakerId(value: string): string {
 }
 
 function titleSpeaker(id: string, index: number): string {
-	const raw = id.replace(SPEAKER_PREFIX_PATTERN, "").replace(/_/g, " ").trim();
+	const raw = id.replace(SPEAKER_PREFIX_PATTERN, "").replace(/_/gu, " ").trim();
 	if (!raw || SPEAKER_NUMBER_PATTERN.test(raw)) {
 		return `Speaker ${index + 1}`;
 	}

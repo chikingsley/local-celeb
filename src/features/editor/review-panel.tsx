@@ -31,8 +31,8 @@ interface ReviewPanelProps {
 	speakers: Speaker[];
 }
 
-const FILENAME_EXTENSION_PATTERN = /\.[^.]+$/;
-const WORD_SEPARATOR_PATTERN = /\s+/;
+const FILENAME_EXTENSION_PATTERN = /\.[^.]+$/u;
+const WORD_SEPARATOR_PATTERN = /\s+/u;
 
 function countWords(text: string): number {
 	return text.trim().split(WORD_SEPARATOR_PATTERN).filter(Boolean).length;
@@ -188,16 +188,16 @@ export function ReviewPanel({
 	}, [filename, meta, segments, speakers]);
 
 	return (
-		<aside className="flex h-full w-full flex-col overflow-hidden border-slate-200 border-l bg-slate-50">
-			<div className="border-slate-200 border-b bg-white px-4 py-4">
-				<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+		<aside className="flex h-full w-full flex-col overflow-hidden border-l border-slate-200 bg-slate-50">
+			<div className="border-b border-slate-200 bg-white px-4 py-4">
+				<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 					<FileText size={14} />
 					Review
 				</div>
 				<label className="block space-y-1.5">
-					<span className="font-medium text-slate-500 text-xs">Name</span>
+					<span className="text-xs font-medium text-slate-500">Name</span>
 					<input
-						className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 font-medium text-slate-900 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+						className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-sm font-medium text-slate-900 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						onChange={handleNameChange}
 						type="text"
 						value={meta.name}
@@ -205,18 +205,18 @@ export function ReviewPanel({
 				</label>
 				<div className="mt-3 grid grid-cols-2 gap-3">
 					<label className="space-y-1.5">
-						<span className="font-medium text-slate-500 text-xs">Language</span>
+						<span className="text-xs font-medium text-slate-500">Language</span>
 						<input
-							className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-slate-800 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+							className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							onChange={handleLanguageChange}
 							type="text"
 							value={meta.language}
 						/>
 					</label>
 					<label className="space-y-1.5">
-						<span className="font-medium text-slate-500 text-xs">Date</span>
+						<span className="text-xs font-medium text-slate-500">Date</span>
 						<input
-							className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-slate-800 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+							className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-2 text-sm text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							onChange={handleDateChange}
 							type="text"
 							value={meta.date}
@@ -226,52 +226,52 @@ export function ReviewPanel({
 			</div>
 
 			<div className="flex-1 overflow-y-auto">
-				<section className="border-slate-200 border-b bg-white px-4 py-4">
-					<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+				<section className="border-b border-slate-200 bg-white px-4 py-4">
+					<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 						<Tags size={14} />
 						Stats
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div>
-							<div className="font-semibold text-lg text-slate-900">{turns.length}</div>
-							<div className="text-slate-500 text-xs">Turns</div>
+							<div className="text-lg font-semibold text-slate-900">{turns.length}</div>
+							<div className="text-xs text-slate-500">Turns</div>
 						</div>
 						<div>
-							<div className="font-semibold text-lg text-slate-900">{segments.length}</div>
-							<div className="text-slate-500 text-xs">Segments</div>
+							<div className="text-lg font-semibold text-slate-900">{segments.length}</div>
+							<div className="text-xs text-slate-500">Segments</div>
 						</div>
 						<div>
-							<div className="font-semibold text-lg text-slate-900">{speakerCount}</div>
-							<div className="text-slate-500 text-xs">Speakers</div>
+							<div className="text-lg font-semibold text-slate-900">{speakerCount}</div>
+							<div className="text-xs text-slate-500">Speakers</div>
 						</div>
 						<div>
-							<div className="font-mono font-semibold text-lg text-slate-900">
+							<div className="font-mono text-lg font-semibold text-slate-900">
 								{formatTime(duration)}
 							</div>
-							<div className="text-slate-500 text-xs">Duration</div>
+							<div className="text-xs text-slate-500">Duration</div>
 						</div>
 						<div>
-							<div className="font-semibold text-lg text-slate-900">{wordCount}</div>
-							<div className="text-slate-500 text-xs">Words</div>
+							<div className="text-lg font-semibold text-slate-900">{wordCount}</div>
+							<div className="text-xs text-slate-500">Words</div>
 						</div>
 						<div>
-							<div className="font-semibold text-lg text-slate-900">{timedWordCount}</div>
-							<div className="text-slate-500 text-xs">Timed words</div>
+							<div className="text-lg font-semibold text-slate-900">{timedWordCount}</div>
+							<div className="text-xs text-slate-500">Timed words</div>
 						</div>
 					</div>
 					{dirtySegmentCount > 0 && (
-						<div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-medium text-amber-700 text-xs">
+						<div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
 							{dirtySegmentCount} segment{dirtySegmentCount === 1 ? "" : "s"} need alignment review
 						</div>
 					)}
 					{wordTimingStats.absent > 0 && (
-						<div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 font-medium text-slate-600 text-xs">
+						<div className="mt-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
 							{wordTimingStats.absent} segment{wordTimingStats.absent === 1 ? "" : "s"} have no word
 							timing
 						</div>
 					)}
 					{wordTimingStats.estimated > 0 && (
-						<div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 font-medium text-amber-700 text-xs">
+						<div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
 							{wordTimingStats.estimated} segment
 							{wordTimingStats.estimated === 1 ? "" : "s"} use estimated word timing
 						</div>
@@ -279,8 +279,8 @@ export function ReviewPanel({
 				</section>
 
 				{sourceRows.length > 0 && (
-					<section className="border-slate-200 border-b bg-white px-4 py-4">
-						<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+					<section className="border-b border-slate-200 bg-white px-4 py-4">
+						<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 							<Tags size={14} />
 							Source
 						</div>
@@ -297,14 +297,14 @@ export function ReviewPanel({
 					</section>
 				)}
 
-				<section className="border-slate-200 border-b bg-white px-4 py-4">
-					<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+				<section className="border-b border-slate-200 bg-white px-4 py-4">
+					<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 						<Download size={14} />
 						Actions
 					</div>
 					<div className="grid gap-2">
 						<button
-							className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-left font-medium text-slate-700 text-sm transition hover:border-slate-300 hover:bg-slate-50"
+							className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
 							onClick={handleCopyTranscript}
 							type="button"
 						>
@@ -313,13 +313,13 @@ export function ReviewPanel({
 								Copy transcript
 							</span>
 							{copyStatus !== "idle" && (
-								<span className="text-slate-400 text-xs">
+								<span className="text-xs text-slate-400">
 									{copyStatus === "copied" ? "Copied" : "Failed"}
 								</span>
 							)}
 						</button>
 						<button
-							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left font-medium text-slate-700 text-sm transition hover:border-slate-300 hover:bg-slate-50"
+							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
 							onClick={handleExportReviewText}
 							type="button"
 						>
@@ -327,7 +327,7 @@ export function ReviewPanel({
 							Export transcript
 						</button>
 						<button
-							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left font-medium text-slate-700 text-sm transition hover:border-slate-300 hover:bg-slate-50"
+							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
 							onClick={handleExportSubtitles}
 							type="button"
 						>
@@ -335,7 +335,7 @@ export function ReviewPanel({
 							Export subtitles
 						</button>
 						<button
-							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left font-medium text-slate-700 text-sm transition hover:border-slate-300 hover:bg-slate-50"
+							className="flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
 							onClick={handleExportTurns}
 							type="button"
 						>
@@ -343,7 +343,7 @@ export function ReviewPanel({
 							Export turns JSON
 						</button>
 						<button
-							className="rounded-md bg-slate-900 px-3 py-2 text-left font-medium text-sm text-white transition hover:bg-slate-800"
+							className="rounded-md bg-slate-900 px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-slate-800"
 							onClick={onOpenExport}
 							type="button"
 						>
@@ -352,25 +352,25 @@ export function ReviewPanel({
 					</div>
 				</section>
 
-				<section className="border-slate-200 border-b bg-white px-4 py-4">
-					<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+				<section className="border-b border-slate-200 bg-white px-4 py-4">
+					<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 						<Sparkles size={14} />
 						Summary
 					</div>
 					<textarea
-						className="min-h-24 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-slate-800 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+						className="min-h-24 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						onChange={handleSummaryChange}
 						value={meta.summary ?? ""}
 					/>
 				</section>
 
-				<section className="border-slate-200 border-b bg-white px-4 py-4">
-					<div className="mb-3 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+				<section className="border-b border-slate-200 bg-white px-4 py-4">
+					<div className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 						<NotebookText size={14} />
 						Notes
 					</div>
 					<textarea
-						className="min-h-28 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-slate-800 text-sm leading-6 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+						className="min-h-28 w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						onChange={handleNotesChange}
 						value={meta.notes ?? ""}
 					/>

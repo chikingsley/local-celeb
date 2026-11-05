@@ -1,7 +1,7 @@
 import type { Segment, WordTimestamp, WordTimingStatus } from "@/domain/transcript/types";
 import { parseTime } from "@/lib/utils";
 
-const WORD_SPLIT_PATTERN = /\s+/;
+const WORD_SPLIT_PATTERN = /\s+/u;
 
 export interface WordTimingDisplay {
 	description: string;

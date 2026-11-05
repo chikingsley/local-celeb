@@ -244,7 +244,7 @@ function CollapsedTimelineBar({
 }: CollapsedTimelineBarProps) {
 	const progress = duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
 	return (
-		<div className="flex h-12 shrink-0 items-center justify-center gap-4 border-slate-200 border-t bg-white px-4">
+		<div className="flex h-12 shrink-0 items-center justify-center gap-4 border-t border-slate-200 bg-white px-4">
 			<button
 				aria-label={isPlaying ? "Pause playback" : "Play playback"}
 				className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-white transition-colors hover:bg-slate-800"
@@ -253,7 +253,7 @@ function CollapsedTimelineBar({
 			>
 				{isPlaying ? <Pause size={15} /> : <Play className="ml-0.5" size={15} />}
 			</button>
-			<div className="font-mono text-slate-500 text-xs">
+			<div className="font-mono text-xs text-slate-500">
 				{formatTime(currentTime)} / {formatTime(duration)}
 			</div>
 			<div className="h-1.5 max-w-md flex-1 overflow-hidden rounded-full bg-slate-200">
@@ -344,7 +344,7 @@ function TimelineDock({
 			</button>
 
 			<div
-				className="z-10 border-slate-200 border-t bg-white shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]"
+				className="z-10 border-t border-slate-200 bg-white shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)]"
 				style={{ height: `${timelineHeight}px` }}
 			>
 				<Timeline

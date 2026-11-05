@@ -87,13 +87,13 @@ export function CleanupSegments({
 
 	return (
 		<div className="min-h-full">
-			<div className="border-slate-200 border-b bg-slate-50 px-6 py-3">
+			<div className="border-b border-slate-200 bg-slate-50 px-6 py-3">
 				<div className="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
 					<div className="min-w-0">
-						<div className="font-semibold text-slate-500 text-xs uppercase tracking-wider">
+						<div className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
 							Segment tools
 						</div>
-						<div className="mt-0.5 truncate text-slate-500 text-sm">
+						<div className="mt-0.5 truncate text-sm text-slate-500">
 							{selected
 								? `${selected.startTime} - ${selected.endTime} · ${selected.text || "Empty segment"}`
 								: "Select a segment to split or merge"}
@@ -102,7 +102,7 @@ export function CleanupSegments({
 					<div className="flex flex-wrap items-center gap-2">
 						<button
 							className={cn(
-								"inline-flex items-center gap-2 rounded-md border px-3 py-2 font-medium text-sm transition",
+								"inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition",
 								selected && canSplit
 									? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
 									: "border-slate-100 bg-slate-100 text-slate-300"
@@ -116,7 +116,7 @@ export function CleanupSegments({
 						</button>
 						<button
 							className={cn(
-								"inline-flex items-center gap-2 rounded-md border px-3 py-2 font-medium text-sm transition",
+								"inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition",
 								canMergePrevious
 									? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
 									: "border-slate-100 bg-slate-100 text-slate-300"
@@ -130,7 +130,7 @@ export function CleanupSegments({
 						</button>
 						<button
 							className={cn(
-								"inline-flex items-center gap-2 rounded-md border px-3 py-2 font-medium text-sm transition",
+								"inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition",
 								canMergeNext
 									? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
 									: "border-slate-100 bg-slate-100 text-slate-300"

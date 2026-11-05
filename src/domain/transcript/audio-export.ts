@@ -21,9 +21,9 @@ export interface AudioExportItem {
 
 const WAV_BITS_PER_SAMPLE = 16;
 const WAV_BYTES_PER_SAMPLE = WAV_BITS_PER_SAMPLE / 8;
-const FILENAME_EXTENSION_PATTERN = /\.[a-z0-9]+$/i;
-const FILENAME_SEPARATOR_PATTERN = /[^a-z0-9]+/g;
-const LEADING_TRAILING_DASH_PATTERN = /^-+|-+$/g;
+const FILENAME_EXTENSION_PATTERN = /\.[a-z0-9]+$/iu;
+const FILENAME_SEPARATOR_PATTERN = /[^a-z0-9]+/gu;
+const LEADING_TRAILING_DASH_PATTERN = /^-+|-+$/gu;
 
 export function buildSpeakerAudioExportItems(
 	segments: Segment[],

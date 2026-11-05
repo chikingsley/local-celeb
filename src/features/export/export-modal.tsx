@@ -91,7 +91,7 @@ const FORMAT_OPTIONS: FormatOption[] = [
 		label: "CSV",
 	},
 ];
-const FILENAME_EXTENSION_PATTERN = /\.[^.]+$/;
+const FILENAME_EXTENSION_PATTERN = /\.[^.]+$/u;
 
 function FormatOptionButton({ option, selectedFormat, onSelectFormat }: FormatOptionButtonProps) {
 	const isSelected = selectedFormat === option.format;
@@ -117,7 +117,7 @@ function FormatOptionButton({ option, selectedFormat, onSelectFormat }: FormatOp
 				<div className={cn("font-medium", isSelected ? "text-blue-900" : "text-slate-900")}>
 					{option.label}
 				</div>
-				<div className="text-slate-500 text-sm">{option.description}</div>
+				<div className="text-sm text-slate-500">{option.description}</div>
 			</div>
 		</button>
 	);
@@ -136,11 +136,11 @@ function AudioExportButton({ disabled, icon, label, summary, onExport }: AudioEx
 			onClick={onExport}
 			type="button"
 		>
-			<div className="flex items-center gap-2 font-medium text-sm">
+			<div className="flex items-center gap-2 text-sm font-medium">
 				{icon}
 				{label}
 			</div>
-			<div className="mt-1 text-slate-500 text-xs">{summary}</div>
+			<div className="mt-1 text-xs text-slate-500">{summary}</div>
 		</button>
 	);
 }
@@ -238,8 +238,8 @@ export function ExportModal({
 			/>
 			<div className="relative mx-4 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-lg bg-white shadow-xl">
 				{/* Header */}
-				<div className="flex items-center justify-between border-slate-200 border-b px-6 py-4">
-					<h2 className="font-semibold text-lg text-slate-900">Export Transcript</h2>
+				<div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+					<h2 className="text-lg font-semibold text-slate-900">Export Transcript</h2>
 					<button
 						className="rounded p-1 text-slate-400 transition-colors hover:text-slate-600"
 						onClick={onClose}
@@ -255,22 +255,22 @@ export function ExportModal({
 						<>
 							{/* Preview */}
 							<div className="mb-3 flex items-center justify-between">
-								<h3 className="font-medium text-slate-700 text-sm">Preview</h3>
+								<h3 className="text-sm font-medium text-slate-700">Preview</h3>
 								<button
-									className="text-blue-600 text-sm hover:text-blue-700"
+									className="text-sm text-blue-600 hover:text-blue-700"
 									onClick={handleBackToFormats}
 									type="button"
 								>
 									Back to formats
 								</button>
 							</div>
-							<pre className="max-h-80 overflow-auto rounded-lg bg-slate-900 p-4 font-mono text-slate-100 text-xs">
+							<pre className="max-h-80 overflow-auto rounded-lg bg-slate-900 p-4 font-mono text-xs text-slate-100">
 								{preview}
 							</pre>
 						</>
 					) : (
 						<>
-							<p className="mb-4 text-slate-600 text-sm">
+							<p className="mb-4 text-sm text-slate-600">
 								Choose an export format for your transcript
 							</p>
 
@@ -288,14 +288,14 @@ export function ExportModal({
 
 							{/* Stats */}
 							<div className="mt-4 rounded-lg bg-slate-50 p-3">
-								<div className="text-slate-600 text-sm">
+								<div className="text-sm text-slate-600">
 									<span className="font-medium">{segments.length}</span> segments from{" "}
 									<span className="font-medium">{speakers.length}</span> speakers
 								</div>
 							</div>
 
 							<div className="mt-5 rounded-lg border border-slate-200">
-								<div className="flex items-center gap-2 border-slate-200 border-b px-3 py-2 font-medium text-slate-700 text-sm">
+								<div className="flex items-center gap-2 border-b border-slate-200 px-3 py-2 text-sm font-medium text-slate-700">
 									<AudioLines className="h-4 w-4 text-slate-400" />
 									Audio
 								</div>
@@ -317,17 +317,17 @@ export function ExportModal({
 									/>
 								</div>
 								{audioUrl ? null : (
-									<div className="border-slate-100 border-t px-3 py-2 text-slate-500 text-xs">
+									<div className="border-t border-slate-100 px-3 py-2 text-xs text-slate-500">
 										Load media to export audio slices.
 									</div>
 								)}
 								{audioExportMode ? (
-									<div className="border-slate-100 border-t px-3 py-2 text-slate-500 text-xs">
+									<div className="border-t border-slate-100 px-3 py-2 text-xs text-slate-500">
 										Exporting {audioExportMode === "speaker" ? "speaker" : "turn"} audio...
 									</div>
 								) : null}
 								{audioExportError ? (
-									<div className="border-red-100 border-t bg-red-50 px-3 py-2 text-red-700 text-xs">
+									<div className="border-t border-red-100 bg-red-50 px-3 py-2 text-xs text-red-700">
 										{audioExportError}
 									</div>
 								) : null}
@@ -337,9 +337,9 @@ export function ExportModal({
 				</div>
 
 				{/* Footer */}
-				<div className="flex items-center justify-between rounded-b-lg border-slate-200 border-t bg-slate-50 px-6 py-4">
+				<div className="flex items-center justify-between rounded-b-lg border-t border-slate-200 bg-slate-50 px-6 py-4">
 					<button
-						className="px-4 py-2 text-slate-700 text-sm transition-colors hover:text-slate-900"
+						className="px-4 py-2 text-sm text-slate-700 transition-colors hover:text-slate-900"
 						onClick={handlePreview}
 						type="button"
 					>
@@ -347,14 +347,14 @@ export function ExportModal({
 					</button>
 					<div className="flex gap-2">
 						<button
-							className="px-4 py-2 text-slate-600 text-sm transition-colors hover:text-slate-800"
+							className="px-4 py-2 text-sm text-slate-600 transition-colors hover:text-slate-800"
 							onClick={onClose}
 							type="button"
 						>
 							Cancel
 						</button>
 						<button
-							className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-blue-700"
+							className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
 							onClick={handleExport}
 							type="button"
 						>

@@ -73,8 +73,8 @@ export function SettingsModal({
 				type="button"
 			/>
 			<div className="relative mx-4 w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-xl">
-				<div className="flex items-center justify-between border-slate-200 border-b px-5 py-4">
-					<h2 className="font-semibold text-lg text-slate-900">Settings</h2>
+				<div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+					<h2 className="text-lg font-semibold text-slate-900">Settings</h2>
 					<button
 						className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
 						onClick={onClose}
@@ -86,7 +86,7 @@ export function SettingsModal({
 
 				<div className="space-y-5 px-5 py-5">
 					<section>
-						<div className="mb-2 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+						<div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 							<SplitSquareHorizontal size={14} />
 							Mode
 						</div>
@@ -94,7 +94,7 @@ export function SettingsModal({
 							{MODE_OPTIONS.map((item) => (
 								<button
 									className={cn(
-										"h-9 rounded-md font-medium text-sm transition",
+										"h-9 rounded-md text-sm font-medium transition",
 										mode === item.value
 											? "bg-white text-slate-950 shadow-sm"
 											: "text-slate-500 hover:text-slate-800"
@@ -111,12 +111,12 @@ export function SettingsModal({
 					</section>
 
 					<section className="space-y-2">
-						<div className="flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+						<div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 							<Eye size={14} />
 							Review Display
 						</div>
 						<label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2.5">
-							<span className="font-medium text-slate-700 text-sm">Turn timestamps</span>
+							<span className="text-sm font-medium text-slate-700">Turn timestamps</span>
 							<input
 								checked={showReviewTimestamps}
 								className="h-4 w-4"
@@ -127,12 +127,12 @@ export function SettingsModal({
 					</section>
 
 					<section className="space-y-2">
-						<div className="flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+						<div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 							<PanelRight size={14} />
 							Panels
 						</div>
 						<button
-							className="flex w-full items-center justify-between rounded-md border border-slate-200 px-3 py-2.5 font-medium text-slate-700 text-sm transition hover:bg-slate-50"
+							className="flex w-full items-center justify-between rounded-md border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
 							onClick={onToggleRightPanel}
 							type="button"
 						>
@@ -140,12 +140,12 @@ export function SettingsModal({
 								<PanelRight size={15} />
 								Right panel
 							</span>
-							<span className="text-slate-400 text-xs">
+							<span className="text-xs text-slate-400">
 								{rightPanelCollapsed ? "Hidden" : "Visible"}
 							</span>
 						</button>
 						<button
-							className="flex w-full items-center justify-between rounded-md border border-slate-200 px-3 py-2.5 font-medium text-slate-700 text-sm transition hover:bg-slate-50"
+							className="flex w-full items-center justify-between rounded-md border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
 							onClick={onToggleTimeline}
 							type="button"
 						>
@@ -153,7 +153,7 @@ export function SettingsModal({
 								<PanelBottom size={15} />
 								Timeline
 							</span>
-							<span className="text-slate-400 text-xs">
+							<span className="text-xs text-slate-400">
 								{timelineCollapsed ? "Hidden" : "Visible"}
 							</span>
 						</button>
@@ -161,12 +161,12 @@ export function SettingsModal({
 
 					<section>
 						<label className="space-y-2">
-							<span className="flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+							<span className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 								<Gauge size={14} />
 								Playback Speed
 							</span>
 							<select
-								className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 font-medium text-slate-800 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+								className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								onChange={handlePlaybackSpeedChange}
 								value={playbackSpeed}
 							>

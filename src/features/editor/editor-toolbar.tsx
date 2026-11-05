@@ -93,7 +93,7 @@ export function EditorToolbar({
 	);
 
 	return (
-		<header className="z-20 flex h-14 shrink-0 items-center justify-between border-slate-200 border-b bg-white px-4">
+		<header className="z-20 flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4">
 			<div className="flex items-center gap-4">
 				<div className="flex items-center gap-1 text-slate-400">
 					<button
@@ -120,7 +120,7 @@ export function EditorToolbar({
 					</button>
 				</div>
 				<div className="mx-2 h-4 w-px bg-slate-200" />
-				<div className="flex items-center gap-1.5 text-slate-500 text-xs">
+				<div className="flex items-center gap-1.5 text-xs text-slate-500">
 					<span
 						className={cn(
 							"h-1.5 w-1.5 rounded-full",
@@ -135,7 +135,7 @@ export function EditorToolbar({
 				{MODE_OPTIONS.map((item) => (
 					<button
 						className={cn(
-							"h-8 rounded-md px-4 font-medium text-sm transition-colors",
+							"h-8 rounded-md px-4 text-sm font-medium transition-colors",
 							mode === item.value
 								? "bg-white text-slate-950 shadow-sm"
 								: "text-slate-500 hover:text-slate-800"
@@ -152,7 +152,7 @@ export function EditorToolbar({
 
 			<div className="flex items-center gap-3">
 				<button
-					className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 font-medium text-slate-600 text-sm transition-colors hover:bg-slate-100"
+					className="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
 					onClick={onFind}
 					type="button"
 				>
@@ -185,7 +185,7 @@ export function EditorToolbar({
 					<Settings size={17} />
 				</button>
 				<button
-					className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-1.5 font-medium text-sm text-white shadow-sm transition-colors hover:bg-slate-800"
+					className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-1.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800"
 					onClick={onExport}
 					type="button"
 				>

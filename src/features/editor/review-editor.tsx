@@ -121,16 +121,16 @@ function ReviewTurnCard({
 					type="button"
 				>
 					<div
-						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
+						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
 						style={{ backgroundColor: speaker?.color }}
 					>
 						{speaker ? speaker.name.charAt(0) : "?"}
 					</div>
 					<div className="min-w-0">
-						<div className="truncate font-semibold text-slate-800 text-sm">
+						<div className="truncate text-sm font-semibold text-slate-800">
 							{speaker?.name ?? turn.speakerId}
 						</div>
-						<div className="mt-0.5 flex flex-wrap items-center gap-2 text-slate-400 text-xs">
+						<div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
 							{showTimestamps || isSelected || isActive ? (
 								<span className="inline-flex items-center gap-1 font-mono">
 									<Clock size={12} />
@@ -153,7 +153,7 @@ function ReviewTurnCard({
 				{turnMatchCount > 0 ? (
 					<div
 						className={cn(
-							"rounded-full px-2 py-1 font-medium text-xs",
+							"rounded-full px-2 py-1 text-xs font-medium",
 							hasCurrentMatch ? "bg-orange-100 text-orange-700" : "bg-yellow-100 text-yellow-700"
 						)}
 					>
@@ -163,7 +163,7 @@ function ReviewTurnCard({
 			</div>
 
 			<textarea
-				className="relative z-10 block w-full resize-none overflow-hidden border-none bg-transparent p-0 font-serif text-lg text-slate-800 leading-8 outline-none focus:ring-0"
+				className="relative z-10 block w-full resize-none overflow-hidden border-none bg-transparent p-0 font-serif text-lg leading-8 text-slate-800 outline-none focus:ring-0"
 				onBlur={handleBlur}
 				onChange={handleChange}
 				onClick={handleTextareaClick}
@@ -357,7 +357,7 @@ export function ReviewEditor({
 
 	if (turns.length === 0) {
 		return (
-			<div className="min-h-full py-24 text-center text-slate-400 text-sm">
+			<div className="min-h-full py-24 text-center text-sm text-slate-400">
 				No transcript loaded.
 			</div>
 		);

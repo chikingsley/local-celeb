@@ -59,7 +59,7 @@ function WordTimingRow({ word, index, isCurrent, onSeek, onWordUpdate }: WordTim
 			)}
 		>
 			<button
-				className={cn("truncate text-left font-medium text-sm", wordClassName)}
+				className={cn("truncate text-left text-sm font-medium", wordClassName)}
 				onClick={handleSeek}
 				type="button"
 			>
@@ -193,7 +193,7 @@ export function CleanupWords({
 
 	if (!selectedSegment) {
 		return (
-			<div className="flex min-h-full items-center justify-center py-24 text-slate-400 text-sm">
+			<div className="flex min-h-full items-center justify-center py-24 text-sm text-slate-400">
 				No transcript loaded.
 			</div>
 		);
@@ -203,15 +203,15 @@ export function CleanupWords({
 		<div className="min-h-full pb-32">
 			<div className="mx-auto max-w-5xl px-8 py-8">
 				<section className="rounded-lg border border-slate-200 bg-white shadow-sm">
-					<div className="flex flex-wrap items-start justify-between gap-3 border-slate-100 border-b px-4 py-4">
+					<div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 px-4 py-4">
 						<div className="min-w-0">
-							<div className="mb-2 flex items-center gap-2 font-semibold text-slate-500 text-xs uppercase tracking-wider">
+							<div className="mb-2 flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
 								<Type size={14} />
 								Words
 							</div>
 							<div className="flex flex-wrap items-center gap-2">
 								<select
-									className="max-w-xl rounded-md border border-slate-200 bg-white px-2.5 py-2 font-medium text-slate-800 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+									className="max-w-xl rounded-md border border-slate-200 bg-white px-2.5 py-2 text-sm font-medium text-slate-800 transition outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 									onChange={handleSegmentSelectChange}
 									value={selectedSegment.id}
 								>
@@ -223,7 +223,7 @@ export function CleanupWords({
 								</select>
 								<span
 									className={cn(
-										"inline-flex items-center gap-1 rounded-full px-2 py-1 font-medium text-xs",
+										"inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium",
 										wordTimingDisplay.tone === "emerald" && "bg-emerald-50 text-emerald-700",
 										wordTimingDisplay.tone === "blue" && "bg-blue-50 text-blue-700",
 										wordTimingDisplay.tone === "amber" && "bg-amber-50 text-amber-700",
@@ -235,7 +235,7 @@ export function CleanupWords({
 									{wordTimingDisplay.label}
 								</span>
 							</div>
-							<div className="mt-2 flex flex-wrap items-center gap-3 text-slate-400 text-xs">
+							<div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-400">
 								<span>{speaker?.name ?? selectedSegment.speakerId}</span>
 								<span className="font-mono">
 									{selectedSegment.startTime} - {selectedSegment.endTime}
@@ -245,7 +245,7 @@ export function CleanupWords({
 						</div>
 						<button
 							className={cn(
-								"inline-flex items-center gap-2 rounded-md border px-3 py-2 font-medium text-sm transition",
+								"inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition",
 								words.length === 0
 									? "border-slate-200 bg-slate-50 text-slate-400"
 									: "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"

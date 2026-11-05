@@ -343,7 +343,7 @@ function SpeakerMergeTargetButton({
 
 	return (
 		<button
-			className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 text-sm hover:bg-blue-50 hover:text-blue-600"
+			className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-600"
 			onClick={handleClick}
 			type="button"
 		>
@@ -497,7 +497,7 @@ function SpeakerRow({
 		<li
 			aria-grabbed={draggedSpeakerIndex === index}
 			className={cn(
-				"group relative flex h-24 items-center gap-2 border-slate-200 border-b pr-4 pl-2 transition-colors hover:bg-slate-50",
+				"group relative flex h-24 items-center gap-2 border-b border-slate-200 pr-4 pl-2 transition-colors hover:bg-slate-50",
 				draggedSpeakerIndex === index && "bg-slate-100 opacity-50"
 			)}
 			draggable
@@ -511,14 +511,14 @@ function SpeakerRow({
 
 			<div className="relative">
 				<div
-					className="flex h-8 w-8 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
+					className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
 					style={{ backgroundColor: speaker.color }}
 				>
 					{speaker.name.charAt(0)}
 				</div>
 				<button
 					aria-label={`Change ${speaker.name} color`}
-					className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-white text-slate-500 opacity-0 shadow-sm transition-opacity hover:text-slate-900 group-hover:opacity-100"
+					className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-white text-slate-500 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:text-slate-900"
 					onClick={handleColorClick}
 					title="Change color"
 					type="button"
@@ -539,7 +539,7 @@ function SpeakerRow({
 					/>
 				) : (
 					<button
-						className="w-full cursor-text truncate text-left font-medium text-slate-700 text-sm hover:text-blue-600"
+						className="w-full cursor-text truncate text-left text-sm font-medium text-slate-700 hover:text-blue-600"
 						onClick={handleEditClick}
 						title="Click to rename"
 						type="button"
@@ -552,7 +552,7 @@ function SpeakerRow({
 
 			<div className="relative">
 				<button
-					className="rounded p-1.5 text-slate-400 opacity-0 transition-opacity hover:bg-slate-200 hover:text-slate-600 group-hover:opacity-100"
+					className="rounded p-1.5 text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-slate-200 hover:text-slate-600"
 					onClick={handleMenuClick}
 					type="button"
 				>
@@ -567,7 +567,7 @@ function SpeakerRow({
 						role="menu"
 					>
 						<button
-							className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-slate-700 text-sm hover:bg-slate-50"
+							className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"
 							onClick={handleRenameMenuClick}
 							type="button"
 						>
@@ -575,7 +575,7 @@ function SpeakerRow({
 						</button>
 						<div className="group/move relative">
 							<button
-								className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-slate-700 text-sm hover:bg-slate-50"
+								className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50"
 								type="button"
 							>
 								<ArrowRightLeft className="text-slate-400" size={14} />
@@ -594,14 +594,14 @@ function SpeakerRow({
 										/>
 									))
 								) : (
-									<div className="px-3 py-2 text-slate-400 text-xs italic">No other speakers</div>
+									<div className="px-3 py-2 text-xs text-slate-400 italic">No other speakers</div>
 								)}
 							</div>
 						</div>
 						<div className="my-1 h-px bg-slate-100" />
 						<button
 							className={cn(
-								"flex w-full items-center gap-2 px-4 py-2.5 text-left text-red-600 text-sm hover:bg-red-50",
+								"flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50",
 								isConfirmingDelete && "bg-red-50 font-medium"
 							)}
 							onClick={handleDeleteClick}
@@ -760,7 +760,7 @@ function TimelineSegmentBlock({
 			)}
 
 			{showTextPreview ? (
-				<div className="pointer-events-none relative select-none truncate px-3 font-medium text-[10px] text-slate-600">
+				<div className="pointer-events-none relative truncate px-3 text-[10px] font-medium text-slate-600 select-none">
 					{segment.text}
 				</div>
 			) : null}
@@ -801,7 +801,7 @@ function SegmentContextSpeakerButton({
 
 	return (
 		<button
-			className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 text-sm hover:bg-slate-50"
+			className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
 			onClick={handleClick}
 			type="button"
 		>
@@ -899,7 +899,7 @@ function SegmentContextMenu({
 		>
 			{assignSpeakerMenuOpen ? (
 				<>
-					<div className="border-slate-100 border-b px-3 py-2 font-semibold text-slate-500 text-xs">
+					<div className="border-b border-slate-100 px-3 py-2 text-xs font-semibold text-slate-500">
 						Assign to speaker
 					</div>
 					<div className="max-h-48 overflow-y-auto">
@@ -912,7 +912,7 @@ function SegmentContextMenu({
 						))}
 					</div>
 					<button
-						className="w-full border-slate-100 border-t px-3 py-2 text-left text-slate-500 text-xs hover:bg-slate-100"
+						className="w-full border-t border-slate-100 px-3 py-2 text-left text-xs text-slate-500 hover:bg-slate-100"
 						onClick={closeAssignSpeakerMenu}
 						type="button"
 					>
@@ -922,7 +922,7 @@ function SegmentContextMenu({
 			) : (
 				<>
 					<button
-						className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 text-sm hover:bg-slate-50"
+						className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
 						onClick={openAssignSpeakerMenu}
 						type="button"
 					>
@@ -930,7 +930,7 @@ function SegmentContextMenu({
 						Assign speaker
 					</button>
 					<button
-						className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 text-sm hover:bg-slate-50"
+						className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
 						onClick={handleSplitAtCenter}
 						type="button"
 					>
@@ -938,7 +938,7 @@ function SegmentContextMenu({
 						Split at center
 					</button>
 					<button
-						className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 text-sm hover:bg-slate-50"
+						className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50"
 						onClick={handleCopyText}
 						type="button"
 					>
@@ -947,7 +947,7 @@ function SegmentContextMenu({
 					</button>
 					<div className="my-1 h-px bg-slate-100" />
 					<button
-						className="flex w-full items-center gap-2 px-3 py-2 text-left text-red-600 text-sm hover:bg-red-50"
+						className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
 						onClick={handleDeleteSegment}
 						type="button"
 					>
@@ -1540,15 +1540,15 @@ export function Timeline({
 	}, []);
 
 	return (
-		<div className="flex h-full select-none flex-col bg-white">
+		<div className="flex h-full flex-col bg-white select-none">
 			{/* Timeline Controls Toolbar */}
-			<div className="z-20 flex h-12 shrink-0 items-center justify-between gap-4 border-slate-200 border-b bg-white px-4">
+			<div className="z-20 flex h-12 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4">
 				{/* Left: Snap Controls */}
 				<div className="flex shrink-0 items-center gap-2">
 					{/* Grid Snap Toggle */}
 					<button
 						className={cn(
-							"flex items-center gap-1.5 rounded p-1.5 font-medium text-xs transition-colors",
+							"flex items-center gap-1.5 rounded p-1.5 text-xs font-medium transition-colors",
 							gridSnap
 								? "bg-blue-100 text-blue-700 hover:bg-blue-200"
 								: "text-slate-500 hover:bg-slate-100"
@@ -1564,7 +1564,7 @@ export function Timeline({
 					{/* Edge Snap Toggle */}
 					<button
 						className={cn(
-							"flex items-center gap-1.5 rounded p-1.5 font-medium text-xs transition-colors",
+							"flex items-center gap-1.5 rounded p-1.5 text-xs font-medium transition-colors",
 							dragLineSnap
 								? "bg-purple-100 text-purple-700 hover:bg-purple-200"
 								: "text-slate-500 hover:bg-slate-100"
@@ -1587,7 +1587,7 @@ export function Timeline({
 
 					<button
 						className={cn(
-							"inline-flex items-center gap-1.5 rounded px-2 py-1 font-medium text-xs transition-colors",
+							"inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs font-medium transition-colors",
 							closeableGapCount > 0
 								? "bg-slate-900 text-white hover:bg-slate-800"
 								: "cursor-not-allowed bg-slate-100 text-slate-400"
@@ -1606,7 +1606,7 @@ export function Timeline({
 					</button>
 
 					<span
-						className="hidden rounded bg-slate-50 px-2 py-1 font-medium text-slate-500 text-xs lg:inline-flex"
+						className="hidden rounded bg-slate-50 px-2 py-1 text-xs font-medium text-slate-500 lg:inline-flex"
 						title="Detected transcript gaps where no segment occupies the timeline."
 					>
 						{silenceGaps.length === 0
@@ -1643,7 +1643,7 @@ export function Timeline({
 						)}
 					</button>
 					<button
-						className="whitespace-nowrap font-medium text-blue-600 text-xs hover:text-blue-700 hover:underline"
+						className="text-xs font-medium whitespace-nowrap text-blue-600 hover:text-blue-700 hover:underline"
 						onClick={handleAddSegmentAtCurrentTime}
 						type="button"
 					>
@@ -1674,9 +1674,9 @@ export function Timeline({
 			{/* Tracks Area */}
 			<div className="flex flex-1 flex-col overflow-hidden">
 				{/* Fixed Headers Row */}
-				<div className="flex h-8 shrink-0 border-slate-200 border-b">
+				<div className="flex h-8 shrink-0 border-b border-slate-200">
 					{/* Speakers Header */}
-					<div className="z-10 flex w-64 shrink-0 items-center border-slate-200 border-r bg-slate-50 px-4 font-semibold text-slate-500 text-xs">
+					<div className="z-10 flex w-64 shrink-0 items-center border-r border-slate-200 bg-slate-50 px-4 text-xs font-semibold text-slate-500">
 						<div className="flex-1">Speakers</div>
 						<Plus className="cursor-pointer hover:text-blue-600" size={14} />
 					</div>
@@ -1697,7 +1697,7 @@ export function Timeline({
 						<div className="relative h-full" style={{ width: `${timelineWidth}px` }}>
 							{rulerMarkers.map((time) => (
 								<div
-									className="pointer-events-none absolute top-0 bottom-0 flex select-none items-end border-slate-300 border-l pb-1 pl-1 font-mono text-[10px] text-slate-400"
+									className="pointer-events-none absolute top-0 bottom-0 flex items-end border-l border-slate-300 pb-1 pl-1 font-mono text-[10px] text-slate-400 select-none"
 									key={time}
 									style={{ left: `${time * zoomLevel}px` }}
 								>
@@ -1711,7 +1711,7 @@ export function Timeline({
 									className="pointer-events-none absolute top-0 bottom-0"
 									style={{ transform: `translateX(${hoverTime * zoomLevel}px)` }}
 								>
-									<div className="-ml-[5px] h-0 w-0 border-t-[6px] border-t-red-300 border-r-[5px] border-r-transparent border-l-[5px] border-l-transparent" />
+									<div className="-ml-[5px] h-0 w-0 border-t-[6px] border-r-[5px] border-l-[5px] border-t-red-300 border-r-transparent border-l-transparent" />
 									<div className="-mt-[6px] h-full w-px bg-red-300" />
 								</div>
 							)}
@@ -1721,7 +1721,7 @@ export function Timeline({
 								className="pointer-events-none absolute top-0 bottom-0"
 								style={{ transform: `translateX(${currentTime * zoomLevel}px)` }}
 							>
-								<div className="-ml-[5px] h-0 w-0 border-t-[6px] border-t-red-500 border-r-[5px] border-r-transparent border-l-[5px] border-l-transparent" />
+								<div className="-ml-[5px] h-0 w-0 border-t-[6px] border-r-[5px] border-l-[5px] border-t-red-500 border-r-transparent border-l-transparent" />
 								<div className="-mt-[6px] h-full w-px bg-red-500" />
 							</div>
 						</div>
@@ -1735,7 +1735,7 @@ export function Timeline({
 					ref={scrollContainerRef}
 				>
 					{/* Speakers Column */}
-					<ul className="z-10 w-64 shrink-0 border-slate-200 border-r bg-white shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
+					<ul className="z-10 w-64 shrink-0 border-r border-slate-200 bg-white shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
 						{speakers.map((speaker, index) => (
 							<SpeakerRow
 								activeMenuSpeakerId={activeMenuSpeakerId}
@@ -1823,7 +1823,7 @@ export function Timeline({
 								const width = Math.max(1, gap.duration * zoomLevel);
 								return (
 									<div
-										className="pointer-events-none absolute top-0 bottom-0 border-slate-300/70 border-x bg-white/55"
+										className="pointer-events-none absolute top-0 bottom-0 border-x border-slate-300/70 bg-white/55"
 										key={gap.id}
 										style={{
 											left: `${gap.start * zoomLevel}px`,
@@ -1832,7 +1832,7 @@ export function Timeline({
 										title={`${formatGapDuration(gap.duration)} silence gap`}
 									>
 										{width > 46 && (
-											<div className="sticky top-1 ml-1 inline-flex rounded bg-white/90 px-1.5 py-0.5 font-medium text-[10px] text-slate-500 shadow-sm">
+											<div className="sticky top-1 ml-1 inline-flex rounded bg-white/90 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 shadow-sm">
 												{formatGapDuration(gap.duration)}
 											</div>
 										)}
@@ -1849,7 +1849,7 @@ export function Timeline({
 									}}
 								>
 									<div className="-mt-[1px] -ml-[3px] h-2 w-2 rounded-full bg-red-300" />
-									<div className="absolute top-1 left-2 whitespace-nowrap rounded bg-slate-800/80 px-1 py-0.5 font-mono text-[9px] text-white">
+									<div className="absolute top-1 left-2 rounded bg-slate-800/80 px-1 py-0.5 font-mono text-[9px] whitespace-nowrap text-white">
 										{formatTime(hoverTime)}
 									</div>
 								</div>
@@ -1887,7 +1887,7 @@ export function Timeline({
 									const speakerSegments = segments.filter((s) => s.speakerId === speaker.id);
 									return (
 										<div
-											className="group/track relative h-24 border-slate-200 border-b transition-colors hover:bg-slate-100/30"
+											className="group/track relative h-24 border-b border-slate-200 transition-colors hover:bg-slate-100/30"
 											key={speaker.id}
 										>
 											{speakerSegments.map((segment) => (

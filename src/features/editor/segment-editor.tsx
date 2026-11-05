@@ -164,7 +164,7 @@ function SpeakerOptionButton({ speaker, isCurrent, onAssignSpeaker }: SpeakerOpt
 		>
 			<div className="flex items-center gap-3">
 				<div
-					className="flex h-6 w-6 items-center justify-center rounded-full font-bold text-[10px] text-white"
+					className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
 					style={{ backgroundColor: speaker.color }}
 				>
 					{speaker.name.charAt(0)}
@@ -292,13 +292,13 @@ function SegmentEditorRow({
 					type="button"
 				>
 					<div
-						className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-bold text-white text-xs shadow-sm"
+						className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm"
 						style={{ backgroundColor: currentSpeaker?.color }}
 					>
 						{currentSpeaker ? currentSpeaker.name.charAt(0) : "?"}
 					</div>
 					<span
-						className="max-w-[90px] truncate font-semibold text-slate-700 text-sm"
+						className="max-w-[90px] truncate text-sm font-semibold text-slate-700"
 						title={currentSpeaker?.name}
 					>
 						{currentSpeaker?.name ?? segment.speakerId}
@@ -312,7 +312,7 @@ function SegmentEditorRow({
 						onKeyDown={handleDropdownKeyDown}
 						role="menu"
 					>
-						<div className="border-slate-100 border-b bg-slate-50 px-3 py-2 font-semibold text-slate-500 text-xs">
+						<div className="border-b border-slate-100 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
 							Assign Speaker
 						</div>
 						<div className="max-h-64 overflow-y-auto">
@@ -328,14 +328,14 @@ function SegmentEditorRow({
 					</div>
 				) : null}
 
-				<div className="pl-11 font-mono text-slate-400 text-xs">{segment.startTime}</div>
+				<div className="pl-11 font-mono text-xs text-slate-400">{segment.startTime}</div>
 			</div>
 
 			<div className="relative flex-grow overflow-hidden">
 				{hasHighlights ? (
 					<div
 						aria-hidden="true"
-						className="pointer-events-none absolute inset-0 select-none font-serif text-lg text-transparent leading-relaxed"
+						className="pointer-events-none absolute inset-0 font-serif text-lg leading-relaxed text-transparent select-none"
 					>
 						<HighlightedText
 							allMatches={searchMatches}
@@ -352,7 +352,7 @@ function SegmentEditorRow({
 					</div>
 				) : null}
 				<textarea
-					className="relative z-10 w-full resize-none overflow-hidden break-words border-none bg-transparent p-0 font-serif text-lg text-slate-800 leading-relaxed placeholder-slate-300 caret-slate-800 outline-none focus:ring-0"
+					className="relative z-10 w-full resize-none overflow-hidden border-none bg-transparent p-0 font-serif text-lg leading-relaxed break-words text-slate-800 placeholder-slate-300 caret-slate-800 outline-none focus:ring-0"
 					onChange={handleTextChange}
 					onClick={handleTextareaClick}
 					placeholder="Type here..."

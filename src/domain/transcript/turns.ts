@@ -1,7 +1,7 @@
 import type { Segment } from "@/domain/transcript/types";
 
-const TOKEN_WITH_TRAILING_SPACE_PATTERN = /\S+\s*/g;
-const WORD_SPLIT_PATTERN = /\s+/;
+const TOKEN_WITH_TRAILING_SPACE_PATTERN = /\S+\s*/gu;
+const WORD_SPLIT_PATTERN = /\s+/u;
 
 export interface TurnSegmentRange {
 	end: number;

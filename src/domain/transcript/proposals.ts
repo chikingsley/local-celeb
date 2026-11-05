@@ -44,7 +44,7 @@ const SPELLING_PAIRS: SpellingPair[] = [
 ];
 
 function escapeRegExp(value: string): string {
-	return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return value.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
 }
 
 function preserveCase(source: string, replacement: string): string {
@@ -97,7 +97,7 @@ function spellingProposals(
 		const after = englishVariant === "en-US" ? pair.us : pair.gb;
 		const occurrences = collectRegexOccurrences(
 			segments,
-			new RegExp(`\\b${escapeRegExp(before)}\\b`, "gi"),
+			new RegExp(`\\b${escapeRegExp(before)}\\b`, "giu"),
 			(match) => preserveCase(match, after)
 		);
 		if (occurrences.length === 0) {
@@ -118,10 +118,10 @@ function spellingProposals(
 }
 
 function mechanicalProposals(segments: Segment[]): TranscriptProposal[] {
-	const repeatedSpaces = collectRegexOccurrences(segments, /[ \t]{2,}/g, () => " ");
+	const repeatedSpaces = collectRegexOccurrences(segments, /[ \t]{2,}/gu, () => " ");
 	const spacesBeforePunctuation = collectRegexOccurrences(
 		segments,
-		/[ \t]+([,.;!?])/g,
+		/[ \t]+(?<punctuation>[,.;!?])/gu,
 		(_match, groups) => groups[0] ?? ""
 	);
 
@@ -158,8 +158,8 @@ function serialCommaProposal(
 	const shortItem = "[A-Za-z][A-Za-z'’-]*(?: [A-Za-z][A-Za-z'’-]*){0,2}";
 	const pattern =
 		preference === "prefer"
-			? new RegExp(`\\b(${shortItem}), (${shortItem}) and (${shortItem})\\b`, "g")
-			: new RegExp(`\\b(${shortItem}), (${shortItem}), and (${shortItem})\\b`, "g");
+			? new RegExp(`\\b(${shortItem}), (${shortItem}) and (${shortItem})\\b`, "gu")
+			: new RegExp(`\\b(${shortItem}), (${shortItem}), and (${shortItem})\\b`, "gu");
 	const occurrences = collectRegexOccurrences(segments, pattern, (_match, groups) => {
 		const [first = "", second = "", third = ""] = groups;
 		return preference === "prefer"

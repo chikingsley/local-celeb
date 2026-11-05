@@ -59,8 +59,8 @@ const EDITOR_GRANULARITY_OPTIONS = [
 		value: CleanupGranularity.WORDS,
 	},
 ];
-const SPEAKER_NAME_SLUG_PATTERN = /[^a-z0-9]+/g;
-const UNKNOWN_SPEAKER_PATTERN = /unknown|unnamed|unidentified/i;
+const SPEAKER_NAME_SLUG_PATTERN = /[^a-z0-9]+/gu;
+const UNKNOWN_SPEAKER_PATTERN = /unknown|unnamed|unidentified/iu;
 
 function buildSegmentStatsBySpeaker(segments: Segment[]) {
 	const stats = new Map<string, { count: number; duration: number }>();
@@ -163,7 +163,7 @@ function TimingBadge({ display, status, withIcon = false }: TimingBadgeProps) {
 	return (
 		<span
 			className={cn(
-				"flex items-center gap-1 rounded px-2 py-0.5 font-medium text-[10px] normal-case",
+				"flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-medium normal-case",
 				display.tone === "emerald" && "bg-emerald-100 text-emerald-700",
 				display.tone === "blue" && "bg-blue-100 text-blue-700",
 				display.tone === "amber" && "bg-amber-100 text-amber-700",
@@ -203,7 +203,7 @@ function GranularityOptionButton({
 			onClick={handleClick}
 			type="button"
 		>
-			<span className="block truncate font-medium text-sm">{option.label}</span>
+			<span className="block truncate text-sm font-medium">{option.label}</span>
 		</button>
 	);
 }
@@ -281,7 +281,7 @@ function PropertyWordRow({
 				type="number"
 				value={word.start.toFixed(2)}
 			/>
-			<span className="text-slate-300 text-xs">→</span>
+			<span className="text-xs text-slate-300">→</span>
 			<input
 				className="w-16 rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 				onChange={handleEndChange}
@@ -326,9 +326,9 @@ function GlobalPropertiesSection({
 	onNameKeyDown,
 }: GlobalPropertiesSectionProps) {
 	return (
-		<div className="flex-shrink-0 border-slate-200 border-b">
+		<div className="flex-shrink-0 border-b border-slate-200">
 			<button
-				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wider transition-colors hover:bg-slate-200"
+				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 text-xs font-semibold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
 				onClick={onToggle}
 				type="button"
 			>
@@ -348,7 +348,7 @@ function GlobalPropertiesSection({
 					<div className="space-y-1">
 						{isEditingName ? (
 							<input
-								className="w-full rounded border border-blue-500 bg-slate-50 px-2 py-1 font-medium text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+								className="w-full rounded border border-blue-500 bg-slate-50 px-2 py-1 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-blue-500/50 focus:outline-none"
 								onBlur={onNameBlur}
 								onChange={onEditedNameChange}
 								onKeyDown={onNameKeyDown}
@@ -358,7 +358,7 @@ function GlobalPropertiesSection({
 							/>
 						) : (
 							<button
-								className="-mx-2 block w-full cursor-pointer break-words rounded px-2 py-1 text-left font-medium text-slate-900 text-sm leading-snug transition-colors hover:bg-slate-100"
+								className="-mx-2 block w-full cursor-pointer rounded px-2 py-1 text-left text-sm leading-snug font-medium break-words text-slate-900 transition-colors hover:bg-slate-100"
 								onClick={onNameClick}
 								title="Click to edit"
 								type="button"
@@ -366,17 +366,17 @@ function GlobalPropertiesSection({
 								{meta.name}
 							</button>
 						)}
-						<p className="text-slate-400 text-xs">Audio Source</p>
+						<p className="text-xs text-slate-400">Audio Source</p>
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<span className="mb-1.5 block text-slate-500 text-xs">Language</span>
-							<div className="font-medium text-slate-800 text-sm">{meta.language}</div>
+							<span className="mb-1.5 block text-xs text-slate-500">Language</span>
+							<div className="text-sm font-medium text-slate-800">{meta.language}</div>
 						</div>
 						<div>
-							<span className="mb-1.5 block text-slate-500 text-xs">Duration</span>
-							<div className="font-medium font-mono text-slate-800 text-sm">
+							<span className="mb-1.5 block text-xs text-slate-500">Duration</span>
+							<div className="font-mono text-sm font-medium text-slate-800">
 								{formatTime(meta.duration)}
 							</div>
 						</div>
@@ -405,9 +405,9 @@ function EditorViewsSection({
 	}
 
 	return (
-		<div className="flex-shrink-0 border-slate-200 border-b">
+		<div className="flex-shrink-0 border-b border-slate-200">
 			<button
-				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wider transition-colors hover:bg-slate-200"
+				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 text-xs font-semibold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
 				onClick={onToggle}
 				type="button"
 			>
@@ -458,9 +458,9 @@ function AssistedCleanupSection({
 	}
 
 	return (
-		<div className="flex-shrink-0 border-slate-200 border-b">
+		<div className="flex-shrink-0 border-b border-slate-200">
 			<button
-				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wider transition-colors hover:bg-slate-200"
+				className="flex w-full items-center justify-between bg-slate-100 px-4 py-3 text-xs font-semibold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
 				onClick={onToggle}
 				type="button"
 			>
@@ -469,7 +469,7 @@ function AssistedCleanupSection({
 					Assisted Cleanup
 				</span>
 				{speakerWarnings.length > 0 ? (
-					<span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-[10px] text-amber-700 normal-case">
+					<span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 normal-case">
 						{speakerWarnings.length}
 					</span>
 				) : null}
@@ -483,19 +483,19 @@ function AssistedCleanupSection({
 			>
 				<div className="space-y-4 bg-white px-4 py-4">
 					<div className="space-y-2">
-						<div className="flex items-center gap-2 font-medium text-slate-500 text-xs">
+						<div className="flex items-center gap-2 text-xs font-medium text-slate-500">
 							<Info size={13} />
 							Consistency warnings
 						</div>
 						{speakerWarnings.length === 0 ? (
-							<div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-emerald-700 text-xs">
+							<div className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
 								No speaker consistency warnings.
 							</div>
 						) : (
 							<div className="space-y-2">
 								{speakerWarnings.map((warning) => (
 									<div
-										className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800 text-xs leading-5"
+										className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800"
 										key={warning.id}
 									>
 										{warning.text}
@@ -540,7 +540,7 @@ function EmptySegmentPanel() {
 			<div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-200">
 				<AlignLeft className="text-slate-400" size={20} />
 			</div>
-			<p className="text-slate-500 text-sm">Select a segment to edit its properties</p>
+			<p className="text-sm text-slate-500">Select a segment to edit its properties</p>
 		</div>
 	);
 }
@@ -570,7 +570,7 @@ function SelectedSegmentPanel({
 	return (
 		<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 			<button
-				className="flex w-full flex-shrink-0 items-center justify-between bg-slate-100 px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wider transition-colors hover:bg-slate-200"
+				className="flex w-full flex-shrink-0 items-center justify-between bg-slate-100 px-4 py-3 text-xs font-semibold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
 				onClick={onToggleSegmentCollapsed}
 				type="button"
 			>
@@ -592,33 +592,33 @@ function SelectedSegmentPanel({
 				<div className="space-y-4 bg-white px-4 py-4">
 					<div className="grid grid-cols-3 gap-3">
 						<label className="space-y-1.5">
-							<span className="flex items-center gap-1 font-medium text-slate-500 text-xs">
+							<span className="flex items-center gap-1 text-xs font-medium text-slate-500">
 								<Timer size={11} /> Duration
 							</span>
 							<input
-								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								onChange={onDurationChange}
 								type="text"
 								value={calculateDuration(segment)}
 							/>
 						</label>
 						<label className="space-y-1.5">
-							<span className="flex items-center gap-1 font-medium text-slate-500 text-xs">
+							<span className="flex items-center gap-1 text-xs font-medium text-slate-500">
 								<Clock size={11} /> Start
 							</span>
 							<input
-								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								onChange={onStartTimeChange}
 								type="text"
 								value={segment.startTime}
 							/>
 						</label>
 						<label className="space-y-1.5">
-							<span className="flex items-center gap-1 font-medium text-slate-500 text-xs">
+							<span className="flex items-center gap-1 text-xs font-medium text-slate-500">
 								<Clock size={11} /> End
 							</span>
 							<input
-								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 font-mono text-sm transition-all outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								onChange={onEndTimeChange}
 								type="text"
 								value={segment.endTime}
@@ -628,7 +628,7 @@ function SelectedSegmentPanel({
 
 					<div className="flex gap-3 pt-2">
 						<button
-							className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 font-medium text-slate-600 text-sm transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+							className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-600"
 							onClick={onDeleteSegment}
 							type="button"
 						>
@@ -636,7 +636,7 @@ function SelectedSegmentPanel({
 						</button>
 						<button
 							className={cn(
-								"flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium text-sm transition-all",
+								"flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all",
 								selectedDisplayWords.length === 0
 									? "bg-slate-100 text-slate-300"
 									: "bg-slate-900 text-white hover:bg-slate-800"
@@ -652,9 +652,9 @@ function SelectedSegmentPanel({
 				</div>
 			</div>
 
-			<div className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 border-t">
+			<div className="flex min-h-0 flex-1 flex-col overflow-hidden border-t border-slate-200">
 				<button
-					className="flex w-full flex-shrink-0 items-center justify-between bg-slate-100 px-4 py-3 font-semibold text-slate-600 text-xs uppercase tracking-wider transition-colors hover:bg-slate-200"
+					className="flex w-full flex-shrink-0 items-center justify-between bg-slate-100 px-4 py-3 text-xs font-semibold tracking-wider text-slate-600 uppercase transition-colors hover:bg-slate-200"
 					onClick={onToggleWordsCollapsed}
 					type="button"
 				>
@@ -897,7 +897,7 @@ export function PropertiesPanel({
 	}, [onDeleteSegment, selectedSegment]);
 
 	return (
-		<div className="flex h-full w-full flex-col overflow-hidden border-slate-200 border-l bg-slate-50">
+		<div className="flex h-full w-full flex-col overflow-hidden border-l border-slate-200 bg-slate-50">
 			<GlobalPropertiesSection
 				collapsed={globalCollapsed}
 				editedName={editedName}
